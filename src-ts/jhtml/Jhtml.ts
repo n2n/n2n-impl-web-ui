@@ -1,6 +1,6 @@
 namespace Jhtml {
 	export function ready(callback: ReadyCallback, document?: Document) {
-		 return getOrCreateContext().onReady(callback);
+		 return getOrCreateContext(document).onReady(callback);
 	}
 	
 	let browser: Browser = null;

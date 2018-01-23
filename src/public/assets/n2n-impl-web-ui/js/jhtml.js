@@ -1,7 +1,7 @@
 var Jhtml;
 (function (Jhtml) {
     function ready(callback, document) {
-        return getOrCreateContext().onReady(callback);
+        return getOrCreateContext(document).onReady(callback);
     }
     Jhtml.ready = ready;
     let browser = null;
