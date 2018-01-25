@@ -31,8 +31,21 @@ namespace Jhtml {
 	
 	export function lookupModel(url: Url|string): Promise<Model> {
 		getOrCreateBrowser();
-		return monitor.lookupModel(Url.create(url))
+		if (monitor) {
+			return monitor.lookupModel(Url.create(url))
+		}
+		
+		return new Promise(resolve => {
+			getOrCreateContext().requestor.exec("GET", Url.create(url)).send().then((response: Response) => {
+				resolve(response.model);
+			});
+		});
 	}
+	
+	export function request(method: Requestor.Method, url: Url|string): Request {
+		return getOrCreateContext().requestor.exec(method, Url.create(url));
+	}
+	
 	
 	window.document.addEventListener("DOMContentLoaded", () => {
 		getOrCreateBrowser();

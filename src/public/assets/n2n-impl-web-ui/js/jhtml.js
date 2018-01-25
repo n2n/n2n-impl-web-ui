@@ -29,9 +29,20 @@ var Jhtml;
     Jhtml.getOrCreateContext = getOrCreateContext;
     function lookupModel(url) {
         getOrCreateBrowser();
-        return monitor.lookupModel(Jhtml.Url.create(url));
+        if (monitor) {
+            return monitor.lookupModel(Jhtml.Url.create(url));
+        }
+        return new Promise(resolve => {
+            getOrCreateContext().requestor.exec("GET", Jhtml.Url.create(url)).send().then((response) => {
+                resolve(response.model);
+            });
+        });
     }
     Jhtml.lookupModel = lookupModel;
+    function request(method, url) {
+        return getOrCreateContext().requestor.exec(method, Jhtml.Url.create(url));
+    }
+    Jhtml.request = request;
     window.document.addEventListener("DOMContentLoaded", () => {
         getOrCreateBrowser();
     }, false);

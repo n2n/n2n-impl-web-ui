@@ -19,9 +19,9 @@
  * Thomas Günther.......: Developer, Hangar
  */
 interface Dispatch {
-	analyze(response: Object);
-	registerCallback(callback: () => void);
-	update(); 	
+	analyze(response: Object): void;
+	registerCallback(callback: () => void): void;
+	update(): void; 	
 }
 interface N2n {
 	dispatch: Dispatch;

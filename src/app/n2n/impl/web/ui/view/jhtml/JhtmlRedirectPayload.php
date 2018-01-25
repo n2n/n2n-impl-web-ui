@@ -21,31 +21,23 @@
  */
 namespace n2n\impl\web\ui\view\jhtml;
 
-use n2n\impl\web\ui\view\json\JsonResponse;
 use n2n\web\http\payload\BufferedPayload;
 use n2n\web\http\Response;
 use n2n\web\http\payload\impl\Redirect;
 
-class JhtmlRedirect extends BufferedPayload {
-	private $httpLocation;
+class JhtmlRedirectPayload extends BufferedPayload {
 	private $directive;
+	private $httpLocation;
+	private $jhtmlExec;
 	private $additionalAttrs;
 	
-	private $responseObject = null;
+	private $payload = null;
 	
-	const ATTR_DIRECTIVE_KEY = 'directive';
-	const ATTR_LOCATION_KEY = 'location';
-	const ATTR_CONFIG_KEY = 'config';
-	const ATTR_ADDITIONAL_KEY = 'additional';
 	
-	const DIRECTIVE_REDIRECT = 'redirect';
-	const DIRECTIVE_REDIRECT_BACK = 'redirectBack';
-	const DIRECTIVE_REDIRECT_TO_REFERER = 'redirectToReferer';
-	
-	public function __construct(string $httpLocation, string $directive = null, JhtmlExec $jhtmlExec = null,
+	public function __construct(string $directive, string $httpLocation, JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array())  {
-		$this->httpLocation = $httpLocation;
 		$this->directive = $directive;
+		$this->httpLocation = $httpLocation;
 		$this->jhtmlExec = $jhtmlExec;
 		$this->setAdditionalAttrs($additionalAttrs);
 	}
@@ -58,7 +50,7 @@ class JhtmlRedirect extends BufferedPayload {
 	 * @see \n2n\web\http\payload\BufferedPayload::getBufferedContents()
 	 */
 	public function getBufferedContents(): string {
-	    return $this->responseObject->getBufferedContents();
+	    return $this->payload->getBufferedContents();
 	}
 	/* (non-PHPdoc)
 	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
@@ -66,17 +58,14 @@ class JhtmlRedirect extends BufferedPayload {
 	public function prepareForResponse(Response $response) {
 		if ('application/json' == $response->getRequest()->getAcceptRange()
 	               ->bestMatch(['text/html', 'application/json'])) {
-	        $this->responseObject = new JsonResponse(array(
-	        		self::ATTR_DIRECTIVE_KEY => $this->directive,
-	        		self::ATTR_LOCATION_KEY => $this->httpLocation,
-	        		self::ATTR_CONFIG_KEY => $this->jhtmlExec === null ? null : $this->jhtmlExec->toAttrs(),
-	        		self::ATTR_ADDITIONAL_KEY => $this->additionalAttrs));
-	        $this->responseObject->prepareForResponse($response);
+            	$this->payload = new JhtmlJsonPayload($this->additionalAttrs);
+               	$this->payload->applyRedirect($this->directive, $this->httpLocation, $this->jhtmlExec);
+			$this->payload->prepareForResponse($response);
 	        return;
 	    } 
 	    
-		$this->responseObject = new Redirect($this->httpLocation);
-		$this->responseObject->prepareForResponse($response);
+		$this->payload = new Redirect($this->httpLocation);
+		$this->payload->prepareForResponse($response);
 	}
 	/* (non-PHPdoc)
 	 * @see \n2n\web\http\payload\Payload::toKownPayloadString()
@@ -93,7 +82,7 @@ class JhtmlRedirect extends BufferedPayload {
 	 */
 	public static function back(string $httpLocation, JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array()) {
-		return new JhtmlRedirect($httpLocation, self::DIRECTIVE_REDIRECT_BACK, $jhtmlExec, $additionalAttrs);
+		return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT_BACK, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	
 	/**
@@ -103,12 +92,18 @@ class JhtmlRedirect extends BufferedPayload {
 	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirect
 	 */
 	public static function referer(string $httpLocation, JhtmlExec $jhtmlExec = null,
-	    array $additionalAttrs = array()) {
-	        return new JhtmlRedirect($httpLocation, self::DIRECTIVE_REDIRECT_TO_REFERER, $jhtmlExec, $additionalAttrs);
+	    	array $additionalAttrs = array()) {
+	    return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT_TO_REFERER, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	
+	/**
+	 * @param string $httpLocation
+	 * @param JhtmlExec $jhtmlExec
+	 * @param array $additionalAttrs
+	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
+	 */
 	public static function redirect(string $httpLocation, JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array()) {
-		return new JhtmlRedirect($httpLocation, self::DIRECTIVE_REDIRECT, $jhtmlExec, $additionalAttrs);
+		return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 }

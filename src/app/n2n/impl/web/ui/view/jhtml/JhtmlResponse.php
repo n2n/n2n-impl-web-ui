@@ -21,60 +21,65 @@
  */
 namespace n2n\impl\web\ui\view\jhtml;
 
-use n2n\web\http\payload\BufferedPayload;
-use n2n\web\http\Response;
 use n2n\impl\web\ui\view\html\HtmlView;
+use n2n\web\ui\UiComponent;
 
-class JhtmlResponse extends BufferedPayload {
-	private $htmlView;
-	private $additionalAttrs;
-	
-	private $ajahResponse = null;
-	
-	public function __construct(HtmlView $htmlView, array $additionalAttrs = array())  {
-		$this->htmlView = $htmlView;
-		$this->setAdditionalAttrs($additionalAttrs);
-	}
-		
-	public function setAdditionalAttrs(array $additionalAttrs) {
-		$this->additionalAttrs = $additionalAttrs;
-	}
-	
-	/* (non-PHPdoc)
-	 * @see \n2n\web\http\payload\BufferedPayload::getBufferedContents()
+class JhtmlResponse {
+	/**
+	 * @param string $httpLocation
+	 * @param JhtmlExec $jhtmlExec
+	 * @param array $additionalAttrs
+	 * @return \n2n\web\http\payload\Payload
 	 */
-	public function getBufferedContents(): string {
-	    if ($this->ajahResponse === null) {
-	        return $this->htmlView->getBufferedContents();
-	    }
-	    
-	    return $this->ajahResponse->getBufferedContents();
-	}
-	/* (non-PHPdoc)
-	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
-	 */
-	public function prepareForResponse(Response $response) {
-	    if ('application/json' == $response->getRequest()->getAcceptRange()
-	               ->bestMatch(['text/html', 'application/json'])) {
-	        $this->ajahResponse = new JhtmlJsonResponse($this->htmlView);
-	        $this->ajahResponse->prepareForResponse($response);
-	        return;
-	    }
-	    
-	    $this->ajahResponse = null;
-	    $this->htmlView->prepareForResponse($response);
-	}
-	/* (non-PHPdoc)
-	 * @see \n2n\web\http\payload\Payload::toKownPayloadString()
-	 */
-	public function toKownPayloadString(): string {
-		return 'Jhtml Response';
+	public static function redirect(string $httpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+		return JhtmlRedirectPayload::redirect($httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	
-// 	public static function creataFromHtmlView(HtmlView $view, array $additionalData = null) {
-// 		if (null !== $additionalData) {
-// 			$data = $additionalData;
-// 		}
-// 		return new AjahResponse(array_merge(self::extractJsonableArray($view), $additionalData));
-// 	}
+	/**
+	 * @param string $fallbackHttpLocation
+	 * @param JhtmlExec $jhtmlExec
+	 * @param array $additionalAttrs
+	 * @return \n2n\web\http\payload\Payload
+	 */
+	public static function redirectBack(string $fallbackHttpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+		return JhtmlRedirectPayload::back($fallbackHttpLocation, $jhtmlExec, $additionalAttrs);
+	}
+	
+	/**
+	 * @param string $httpLocation
+	 * @param JhtmlExec $jhtmlExec
+	 * @param array $additionalAttrs
+	 * @return \n2n\web\http\payload\Payload
+	 */
+	public static function redirectToReferer(string $httpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+		return JhtmlRedirectPayload::referer($httpLocation, $jhtmlExec, $additionalAttrs);
+	}
+	
+	/**
+	 * @param HtmlView $htmlView
+	 * @param array $additionalData
+	 * @return \n2n\web\http\payload\Payload
+	 */
+	public static function view(HtmlView $htmlView, array $additionalData = array()) {
+		return new JhtmlViewPayload($htmlView, $additionalData);
+	}
+	
+	/**
+	 * @param UiComponent $uiComponent
+	 * @param array $additionalData
+	 * @return \n2n\web\http\payload\Payload
+	 */
+	public static function uiComponent(UiComponent $uiComponent, array $additionalData = array()) {
+		$payload = new JhtmlJsonPayload($additionalData);
+		$payload->applyUiComponent($uiComponent);
+		return $payload;
+	}	
+	
+	/**
+	 * @param array $additionalData
+	 * @return \n2n\web\http\payload\Payload
+	 */
+	public static function data(array $additionalData = array()) {
+		return new JhtmlJsonPayload($additionalData);
+	}
 }

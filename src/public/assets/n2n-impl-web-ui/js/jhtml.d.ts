@@ -4,6 +4,7 @@ declare namespace Jhtml {
     function getOrCreateMonitor(): Monitor;
     function getOrCreateContext(document?: Document): Context;
     function lookupModel(url: Url | string): Promise<Model>;
+    function request(method: Requestor.Method, url: Url | string): Request;
 }
 declare namespace Jhtml {
     class Browser {
