@@ -28,20 +28,43 @@ class JhtmlJsonPayload extends BufferedPayload {
 	private $data = array();
 	private $jsonPayload;
 	
+	/**
+	 * @param array $additionalAttrs
+	 */
 	public function __construct(array $additionalAttrs = array()) {
 		$this->applyAdditionalAttrs($additionalAttrs);		
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
+	 */
 	public function prepareForResponse(Response $response) {
 		$this->jsonPayload = new JsonPayload($this->data);
 		$this->jsonPayload->prepareForResponse($response);
 	}
 	
+	/**
+	 * @return array
+	 */
+	public function getData() {
+		return $this->data;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \n2n\web\http\payload\Payload::getBufferedContents()
+	 */
 	public function getBufferedContents(): string {
 		IllegalStateException::assertTrue($this->jsonPayload !== null, 'JhtmlJsonPayload was never prepared for Response.');
 		return $this->jsonPayload->getBufferedContents();
 	}
 	
+	/**
+	 * @param string $directive
+	 * @param string $httpLocation
+	 * @param JhtmlExec $jhtmlExec
+	 */
 	public function applyRedirect(string $directive, string $httpLocation, JhtmlExec $jhtmlExec = null) {
 		$this->data[self::ATTR_DIRECTIVE_KEY] = $directive;
 		$this->data[self::ATTR_LOCATION_KEY] = $httpLocation;
@@ -50,6 +73,9 @@ class JhtmlJsonPayload extends BufferedPayload {
 		}
 	}
 	
+	/**
+	 * @param HtmlView $view
+	 */
 	public function applyView(HtmlView $view) {
 		if (!$view->isInitialized()) {
 			$view->initialize();
@@ -80,11 +106,17 @@ class JhtmlJsonPayload extends BufferedPayload {
 		$this->data[self::ATTR_BODY_END_KEY] = array_values($this->data[self::ATTR_BODY_END_KEY]);
 	}
 	
+	/**
+	 * @param UiComponent $uiComponent
+	 */
 	public function applyUiComponent(UiComponent $uiComponent) {
 		$this->data[self::ATTR_CONTENT_KEY] = $uiComponent->build(new SimpleBuildContext());
 	}
 	
-	public function applyAdditionalAttrs($additionalAttrs) {
+	/**
+	 * @param array $additionalAttrs
+	 */
+	public function applyAdditionalAttrs(array $additionalAttrs) {
 		$this->data[self::ATTR_ADDITIONAL_KEY] = $additionalAttrs;
 	}
 	
