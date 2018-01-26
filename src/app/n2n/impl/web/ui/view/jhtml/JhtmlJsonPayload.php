@@ -38,7 +38,7 @@ class JhtmlJsonPayload extends BufferedPayload {
 	}
 	
 	public function getBufferedContents(): string {
-		IllegalStateException::assertTrue($this->jsonPayload !== null);
+		IllegalStateException::assertTrue($this->jsonPayload !== null, 'JhtmlJsonPayload was never prepared for Response.');
 		return $this->jsonPayload->getBufferedContents();
 	}
 	
