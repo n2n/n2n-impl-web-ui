@@ -29,16 +29,26 @@ namespace Jhtml {
 			return this.getModelState(false) ? true : false;
 		}
 		
+		isBrowsable(): boolean {
+			if (!this.isJhtml()) return false;
+			
+			return this.getModelState(false).metaState.browsable;
+		}
+		
 		private getModelState(required: boolean): ModelState {
-			if (!this.modelState) {
-				try {
-					this.modelState = ModelFactory.createStateFromDocument(this.document);
+			if (this.modelState) {
+				return this.modelState;
+			}
+			
+			try {
+				this.modelState = ModelFactory.createStateFromDocument(this.document);
+				if (this.modelState.metaState.browsable) {
 					Ui.Scanner.scan(this.document.documentElement);
-				} catch (e) { 
-					if (e instanceof ParseError) return null;
-					
-					throw e;
 				}
+			} catch (e) { 
+				if (e instanceof ParseError) return null;
+				
+				throw e;
 			}
 			
 			if (!this.modelState && required) {

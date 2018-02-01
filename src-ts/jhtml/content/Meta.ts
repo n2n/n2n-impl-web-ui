@@ -8,11 +8,19 @@ namespace Jhtml {
 	}
 	
     export class MetaState {
-    
+    	private _browsable: boolean = false;
+    	
     	constructor(private rootElem: Element, private headElem: Element, private bodyElem: Element,
     			private containerElem: Element) {
     		this.markAsUsed(this.headElements);
     		this.markAsUsed(this.bodyElements);
+    		
+    		let reader = new Util.ElemConfigReader(containerElem);
+    		this._browsable = reader.readBoolean("browsable", false);
+    	}
+    	
+    	get browsable(): boolean {
+    		return this._browsable;
     	}
     	
     	private markAsUsed(elements: Element[]) {

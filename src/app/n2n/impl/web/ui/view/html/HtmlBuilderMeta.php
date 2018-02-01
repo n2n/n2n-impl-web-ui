@@ -118,7 +118,7 @@ class HtmlBuilderMeta {
 	
 	public function addAsyncJsUrl($src, $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_SCRIPT_KEY, 'type:javascript:src:' . $src,
-				new HtmlElement('script', array('type' => 'text/javascript'),
+				new HtmlElement('script', array(/*'type' => 'text/javascript'*/),
 						"\r\n" . '//<![CDATA[' . "\r\n" . '(function() {var b=document.createElement("script");b.type="text/javascript";b.async=true;b.src="' .
 						addslashes($src) . '";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(b,a)})();' . "\r\n" . '//]]>' . "\r\n"),
 				$prepend);
@@ -147,7 +147,7 @@ class HtmlBuilderMeta {
 		}
 		
 		$htmlElement = new HtmlElement('script', HtmlUtils::mergeAttrs(
-				array('type' => 'text/javascript', 'src' => (string) $src), $attrs), '');
+				array(/*'type' => 'text/javascript', */'src' => (string) $src), $attrs), '');
 		
 		$this->htmlProperties->add($target, 'type:javascript:src:' . $src, $htmlElement, $prepend);
 	}
@@ -206,7 +206,7 @@ class HtmlBuilderMeta {
 			$target = self::HEAD_SCRIPT_KEY;
 		}
 		
-		$attrs = array('type' => 'text/javascript');
+		$attrs = array(/*'type' => 'text/javascript'*/);
 		if ($defer) {
 			$attrs['defer'] = 'defer';
 		}

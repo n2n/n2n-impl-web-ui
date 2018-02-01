@@ -11,7 +11,7 @@ namespace Jhtml {
 		
 		let context: Context = getOrCreateContext();
 	
-		if (!context.isJhtml()) return null;
+		if (!context.isBrowsable()) return null;
 		
 		let history = new History();
 		browser = new Browser(window, history);

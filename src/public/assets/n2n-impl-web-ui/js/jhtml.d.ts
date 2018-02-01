@@ -99,6 +99,7 @@ declare namespace Jhtml {
         readonly requestor: Requestor;
         readonly document: Document;
         isJhtml(): boolean;
+        isBrowsable(): boolean;
         private getModelState(required);
         replaceModel(newModel: Model, montiorCompHandlers?: {
             [compName: string]: CompHandler;
@@ -178,7 +179,9 @@ declare namespace Jhtml {
         private headElem;
         private bodyElem;
         private containerElem;
+        private _browsable;
         constructor(rootElem: Element, headElem: Element, bodyElem: Element, containerElem: Element);
+        readonly browsable: boolean;
         private markAsUsed(elements);
         readonly headElements: Array<Element>;
         readonly bodyElements: Array<Element>;
@@ -358,7 +361,7 @@ declare namespace Jhtml {
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
     }
-    class RedirectDirective {
+    class RedirectDirective implements Directive {
         srcUrl: Url;
         back: RedirectDirective.Type;
         targetUrl: Url;
@@ -374,6 +377,20 @@ declare namespace Jhtml {
             REFERER = 1,
             BACK = 2,
         }
+    }
+    class SnippetDirective implements Directive {
+        srcUrl: Url;
+        model: Model;
+        constructor(srcUrl: Url, model: Model);
+        getAdditionalData(): any;
+        exec(monitor: Monitor): void;
+    }
+    class DataDirective implements Directive {
+        srcUrl: Url;
+        additionalData: any;
+        constructor(srcUrl: Url, additionalData: any);
+        getAdditionalData(): any;
+        exec(monitor: Monitor): void;
     }
 }
 declare namespace Jhtml {

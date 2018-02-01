@@ -80,7 +80,7 @@ namespace Jhtml {
             var urlStr = <string> urlExpression;
             
             if (!/^(?:\/|[a-z]+:\/\/)/.test(urlStr)) {
-                return window.location.toString().replace(/\/+$/, "") + "/" + urlStr;
+            	return window.location.toString().replace(/(\/+)?((\?|#).*)?$/, "") + "/" + urlStr;
             } 
             
             if (!/^(?:[a-z]+:)?\/\//.test(urlStr)) {

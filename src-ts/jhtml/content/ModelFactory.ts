@@ -47,8 +47,8 @@ namespace Jhtml {
     	public static createStateFromDocument(document: Document): ModelState {
     		let metaState = new MetaState(document.documentElement, document.head, document.body,
     				ModelFactory.extractContainerElem(document.body, true));
-    		let container = ModelFactory.compileContainer(metaState.containerElement, null)
-    		let comps = ModelFactory.compileComps(container, metaState.containerElement, null)
+    		let container = ModelFactory.compileContainer(metaState.containerElement, null);
+    		let comps = ModelFactory.compileComps(container, metaState.containerElement, null);
     		
     		return new ModelState(metaState, container, comps);
     	}
