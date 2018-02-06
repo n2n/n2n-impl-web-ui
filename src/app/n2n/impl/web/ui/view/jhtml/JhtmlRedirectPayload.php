@@ -78,7 +78,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	 * @param string $httpLocation
 	 * @param JhtmlExec $jhtmlExec
 	 * @param array $additionalAttrs
-	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirect
+	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
 	 */
 	public static function back(string $httpLocation, JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array()) {
@@ -89,7 +89,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	 * @param string $httpLocation
 	 * @param JhtmlExec $jhtmlExec
 	 * @param array $additionalAttrs
-	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirect
+	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
 	 */
 	public static function referer(string $httpLocation, JhtmlExec $jhtmlExec = null,
 	    	array $additionalAttrs = array()) {
