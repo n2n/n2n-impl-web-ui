@@ -29,11 +29,19 @@ use n2n\web\http\nav\Murl;
 use n2n\l10n\MessageContainer;
 use n2n\l10n\N2nLocale;
 use n2n\core\config\GeneralConfig;
+use n2n\web\http\ServerPushDirective;
+use n2n\web\ui\UiComponent;
 
+/**
+ * Accessible through <code>$html-&#x3E;meta()</code> in every html view
+ */
 class HtmlBuilderMeta {
 	private $view;
 	private $htmlProperties;
 	
+	/**
+	 * @param HtmlView $view
+	 */
 	public function __construct(HtmlView $view) {
 		$this->view = $view;
 		$this->htmlProperties = $view->getHtmlProperties();
@@ -78,45 +86,76 @@ class HtmlBuilderMeta {
 	 * HTML HEAD UTILS
 	 */
 	
+	/**
+	 * @param string $title
+	 * @param bool $includePageName
+	 */
 	public function setTitle(string $title, bool $includePageName = false) {
 		$this->htmlProperties->set(self::HEAD_TITLE_KEY, new HtmlElement('title', null, $title
 				. ($includePageName ?  ' - ' . $this->getPageName() : '')));
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getPageName() {
 		return $this->view->getN2nContext()->lookup(GeneralConfig::class)->getPageName();
 	}
 	
-	public function addCss($relativeUrl, $media = null, $module = null, $prepend = false,
+	/**
+	 * @param Url|string $relativeUrl
+	 * @param string $media
+	 * @param string $moduleNamespace
+	 * @param boolean $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addCss($relativeUrl, string $media = null, string $moduleNamespace = null, bool $prepend = false,
 			array $attrs = null, $target = self::TARGET_HEAD) {
-				if ($module === null) {
-					$module = $this->view->getModuleNamespace();
-				}
-				
-				$this->addCssUrl($this->view->getHttpContext()->getAssetsUrl($module)->ext($relativeUrl),
-						$media, $prepend, $attrs, $target);
-	}
-	
-	public function addCssUrl($href, $media = null, $prepend = false, array $attrs = null,
-			$target = self::TARGET_HEAD) {
-				if ($target == self::TARGET_HEAD) {
-					$target = self::HEAD_SCRIPT_KEY;
-				}
-				
-				$this->htmlProperties->add($target, 'rel:stylesheet:' . (string) $href . ':' . (string) $media,
-						new HtmlElement('link', array('rel' => 'stylesheet', 'type' => 'text/css', 'media' => $media, 'href' => $href)),
-						$prepend);
-	}
-	
-	public function addAsyncJs($relativeUrl, $module = null, $prepend = false) {
-		if (is_null($module)) {
-			$module = $this->view->getModuleNamespace();
+		if ($moduleNamespace === null) {
+			$moduleNamespace = $this->view->getModuleNamespace();
 		}
 		
-		$this->addAsyncJsUrl($this->view->getHttpContext()->getAssetsUrl($module)->ext($relativeUrl), (boolean) $prepend);
+		$this->addCssUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl),
+				$media, $prepend, $attrs, $target);
 	}
 	
-	public function addAsyncJsUrl($src, $prepend = false) {
+	/**
+	 * @param string $href
+	 * @param string|null $media
+	 * @param boolean $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addCssUrl(string $href, string $media = null, bool $prepend = false, array $attrs = null,
+			$target = self::TARGET_HEAD) {
+		if ($target == self::TARGET_HEAD) {
+			$target = self::HEAD_SCRIPT_KEY;
+		}
+		
+		$this->htmlProperties->add($target, 'rel:stylesheet:' . (string) $href . ':' . (string) $media,
+				new HtmlElement('link', array('rel' => 'stylesheet', 'type' => 'text/css', 'media' => $media, 'href' => $href)),
+				$prepend);
+	}
+	
+	/**
+	 * @param Url|string $relativeUrl
+	 * @param string $moduleNamespace
+	 * @param boolean $prepend
+	 */
+	public function addAsyncJs($relativeUrl, string $moduleNamespace = null, $prepend = false) {
+		if ($moduleNamespace === null) {
+			$moduleNamespace = $this->view->getModuleNamespace();
+		}
+		
+		$this->addAsyncJsUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl), (boolean) $prepend);
+	}
+	
+	/**
+	 * @param string $src
+	 * @param bool $prepend
+	 */
+	public function addAsyncJsUrl(string $src, bool $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_SCRIPT_KEY, 'type:javascript:src:' . $src,
 				new HtmlElement('script', array(/*'type' => 'text/javascript'*/),
 						"\r\n" . '//<![CDATA[' . "\r\n" . '(function() {var b=document.createElement("script");b.type="text/javascript";b.async=true;b.src="' .
@@ -124,17 +163,33 @@ class HtmlBuilderMeta {
 				$prepend);
 	}
 	
-	public function addJs($relativeUrl, $moduleNamespace = null, bool $defer = false, bool $prepend = false,
+	/**
+	 * @param Url|string $relativeUrl
+	 * @param string $moduleNamespace
+	 * @param bool $defer
+	 * @param bool $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addJs($relativeUrl, string $moduleNamespace = null, bool $defer = false, bool $prepend = false,
 			array $attrs = null, $target = self::TARGET_HEAD) {
-				if (null === $moduleNamespace) {
-					$moduleNamespace = $this->view->getModuleNamespace();
-				}
+		if (null === $moduleNamespace) {
+			$moduleNamespace = $this->view->getModuleNamespace();
+		}
 				
-				$this->addJsUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl), $defer,
-						$prepend, $attrs, $target);
+		$this->addJsUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl), $defer,
+				$prepend, $attrs, $target);
 	}
 	
-	public function addJsUrl($src, bool $defer = false, bool $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
+	/**
+	 * @param string $src
+	 * @param bool $defer
+	 * @param bool $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addJsUrl(string $src, bool $defer = false, bool $prepend = false, array $attrs = null, 
+			$target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
 		
 		if ($target == self::TARGET_HEAD) {
@@ -147,11 +202,17 @@ class HtmlBuilderMeta {
 		}
 		
 		$htmlElement = new HtmlElement('script', HtmlUtils::mergeAttrs(
-				array(/*'type' => 'text/javascript', */'src' => (string) $src), $attrs), '');
+				array(/*'type' => 'text/javascript', */'src' => $src), $attrs), '');
 		
 		$this->htmlProperties->add($target, 'type:javascript:src:' . $src, $htmlElement, $prepend);
 	}
 	
+	/**
+	 * @param array $attrs
+	 * @param string $uniqueAttrName
+	 * @throws \InvalidArgumentException
+	 * @return string
+	 */
 	private function buildKey(array $attrs, string $uniqueAttrName = null) {
 		if ($uniqueAttrName === null) {
 			return 'type:attrs:' . serialize($attrs);
@@ -166,14 +227,24 @@ class HtmlBuilderMeta {
 		
 	}
 	
-	public function addMeta(array $attrs, string $uniqueAttrName = null) {
+	/**
+	 * @param array $attrs
+	 * @param string $uniqueAttrName
+	 * @param bool $prepend
+	 */
+	public function addMeta(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_META_KEY, $this->buildKey($attrs, $uniqueAttrName),
-				new HtmlElement('meta', $attrs));
+				new HtmlElement('meta', $attrs), $prepend);
 	}
 	
-	public function addLink(array $attrs, $uniqueAttrName = null) {
+	/**
+	 * @param array $attrs
+	 * @param string $uniqueAttrName
+	 * @param bool $prepend
+	 */
+	public function addLink(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_LINK_KEY, $this->buildKey($attrs, $uniqueAttrName),
-				new HtmlElement('link', $attrs));
+				new HtmlElement('link', $attrs), $prepend);
 	}
 	
 	const HEAD_TITLE_KEY = 'head.title';
@@ -181,6 +252,9 @@ class HtmlBuilderMeta {
 	const HEAD_LINK_KEY = 'head.link';
 	const HEAD_META_KEY = 'head.meta';
 	
+	/**
+	 * @return string[]
+	 */
 	public static function getHeadKeys() {
 		return array(self::HEAD_TITLE_KEY, self::HEAD_SCRIPT_KEY, self::HEAD_LINK_KEY, self::HEAD_META_KEY);
 	}
@@ -189,18 +263,30 @@ class HtmlBuilderMeta {
 	const TARGET_BODY_START = 'body.start';
 	const TARGET_BODY_END = 'body.end';
 	
+	/**
+	 * @return string[]
+	 */
 	public static function getTargets() {
 		return array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END);
 	}
 	
+	/**
+	 * @return string[]
+	 */
 	public static function getKeys() {
 		return array(self::HEAD_TITLE_KEY, self::HEAD_SCRIPT_KEY, self::HEAD_LINK_KEY, self::HEAD_META_KEY,
 				self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END);
 	}
 	
-	public function addJsCode($code, bool $defer = false, $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
+	/**
+	 * @param string $code
+	 * @param bool $defer
+	 * @param boolean $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addJsCode(string $code, bool $defer = false, $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
-		$code = (string) $code;
 		
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_SCRIPT_KEY;
@@ -216,9 +302,14 @@ class HtmlBuilderMeta {
 				$prepend);
 	}
 	
-	public function addCssCode($code, $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
-		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
-		$code = (string) $code;
+	/**
+	 * @param string $code
+	 * @param boolean $prepend
+	 * @param array $attrs
+	 * @param string $target Any of {self::getTargets()}
+	 */
+	public function addCssCode(string $code, bool $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
+		ArgUtils::valEnum($target, self::getTargets());
 		
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_SCRIPT_KEY;
@@ -229,18 +320,37 @@ class HtmlBuilderMeta {
 				$prepend);
 	}
 	
+	/**
+	 * @param string|UiComponent $html
+	 * @param bool $prepend
+	 * @param string $target
+	 */
 	public function addHtml($html, bool $prepend = false, $target = self::TARGET_BODY_START) {
 		ArgUtils::valEnum($target, array(self::TARGET_BODY_START, self::TARGET_BODY_END, self::TARGET_HEAD));
 		
-		$this->htmlProperties->push($target, new Raw((string) $html), $prepend);
+		$this->htmlProperties->push($target, new Raw($this->view->getOut($contents)), $prepend);
 	}
 	
+	/**
+	 * @param Library $library
+	 */
 	public function addLibrary(Library $library) {
 		if (!$this->view->getHtmlProperties()->registerLibrary($library)) {
 			return;
 		}
 		
 		$library->apply($this->view, $this);
+	}
+		
+	/**
+	 * Will create a {@see ServerPushDirective} pass it automatically to {@see Response::serverPush()} when this view 
+	 * will be send.
+	 *  
+	 * @param Url|string $url;
+	 * @param string $as Any of {@see ServerPushDirective::getAses()}
+	 */
+	public function serverPush($url, string $as) {
+		$this->view->getHtmlProperties()->addServerPushDirective(new ServerPushDirective($url, $as));
 	}
 	
 	public function getMessages($groupName = null, $severity = null, $translate = true) {
@@ -327,16 +437,30 @@ class HtmlBuilderMeta {
 
 class HeadBuilderMeta extends BodyBuilderMeta {
 	
+	/**
+	 * @param string $title
+	 * @param bool $includePageName
+	 */
 	public function setTitle(string $title, bool $includePageName = false) {
 		$this->meta->setTitle($title, $includePageName);
 	}
 	
-	public function addMeta(array $attrs) {
-		$this->meta->addMeta($attrs);
+	/**
+	 * @param array $attrs
+	 * @param string $uniqueAttrName
+	 * @param bool $prepend
+	 */
+	public function addMeta(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+		$this->meta->addMeta($attrs, $uniqueAttrName, $prepend);
 	}
 	
-	public function addLink(array $attrs) {
-		$this->meta->addLink($attrs);
+	/**
+	 * @param array $attrs
+	 * @param string $uniqueAttrName
+	 * @param bool $prepend
+	 */
+	public function addLink(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+		$this->meta->addLink($attrs, $uniqueAttrName, $prepend);
 	}
 }
 
@@ -344,13 +468,25 @@ class BodyBuilderMeta {
 	protected $target;
 	protected $meta;
 	
+	/**
+	 * @param HtmlBuilderMeta $htmlBuilderMeta
+	 * @param string $target
+	 */
 	public function __construct(HtmlBuilderMeta $htmlBuilderMeta, string $target) {
 		$this->target = $target;
 		$this->meta = $htmlBuilderMeta;
 	}
 	
-	public function addCss($relativeUrl, string $media = null, $module = null, bool $prepend = false, array $attrs = null) {
-		$this->meta->addCss($relativeUrl, $media, $module, $prepend, $attrs, $this->target);
+	/**
+	 * @see HtmlBuilderMeta::addCss()
+	 * @param Url|string $relativeUrl
+	 * @param string $media
+	 * @param string $moduleNamespace
+	 * @param bool $prepend
+	 * @param array $attrs
+	 */
+	public function addCss($relativeUrl, string $media = null, string $moduleNamespace = null, bool $prepend = false, array $attrs = null) {
+		$this->meta->addCss($relativeUrl, $media, $moduleNamespace, $prepend, $attrs, $this->target);
 	}
 	
 	public function addCssUrl($href, string $media = null, bool $prepend = false, array $attrs = null) {

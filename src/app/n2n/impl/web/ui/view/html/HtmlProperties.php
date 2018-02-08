@@ -28,11 +28,13 @@ use n2n\web\ui\ViewStuffFailedException;
 use n2n\impl\web\dispatch\ui\Form;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
+use n2n\web\http\ServerPushDirective;
 
 class HtmlProperties {	
 	protected $prependedAttributes;
 	protected $attributes;
 	protected $contentHtmlProperties;
+	protected $serverPushDirectives = array();
 	
 	private $buildContext;
 	private $form;
@@ -45,15 +47,26 @@ class HtmlProperties {
 		$this->buildContext = new SimpleBuildContext();
 	}
 	
-	public function setContentHtmlProperties(HtmlProperties $contentHtmlProperties = null) {
+	/**
+	 * @param HtmlProperties|null $contentHtmlProperties
+	 */
+	public function setContentHtmlProperties(?HtmlProperties $contentHtmlProperties) {
 		$this->contentHtmlProperties = $contentHtmlProperties;
 	}
 	
+	/**
+	 * @return \n2n\impl\web\ui\view\html\HtmlProperties|null
+	 */
 	public function getContentHtmlProperties() {
 		return $this->contentHtmlProperties;
 	}
 	
-	public function set($name, UiComponent $value, $prepend = false) {
+	/**
+	 * @param string $name
+	 * @param UiComponent $value
+	 * @param bool $prepend
+	 */
+	public function set(string $name, UiComponent $value, bool $prepend = false) {
 		if ($prepend) {
 			if ($this->prependedAttributes->contains($name)) return;
 			$this->prependedAttributes->set($name, $value);
@@ -68,7 +81,12 @@ class HtmlProperties {
 		}
 	}
 	
-	public function push($name, UiComponent $value, $prepend = false) {
+	/**
+	 * @param string $name
+	 * @param UiComponent $value
+	 * @param bool $prepend
+	 */
+	public function push(string $name, UiComponent $value, bool $prepend = false) {
 		if ($prepend) {
 			$this->prependedAttributes->push($name, $value);
 		} else {
@@ -80,8 +98,7 @@ class HtmlProperties {
 // 		}
 	}
 	
-	public function add($name, $key, UiComponent $value, $prepend = false) {
-		
+	public function add(string $name, string $key, UiComponent $value, bool $prepend = false) {
 		if ($prepend) {
 			if ($this->prependedAttributes->hasKey($name, $key)) return;
 			$this->prependedAttributes->add($name, $key, $value);
@@ -96,7 +113,10 @@ class HtmlProperties {
 		}
 	}
 	
-	public function remove($name) {
+	/**
+	 * @param string $name
+	 */
+	public function remove(string $name) {
 		$this->prependedAttributes->remove($name);
 		$this->attributes->remove($name);
 		
@@ -114,7 +134,11 @@ class HtmlProperties {
 		}
 	}
 	
-	public function containsName($name) {
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function containsName(string $name) {
 		return ($this->prependedAttributes->contains($name) || $this->attributes->contains($name))
 				|| ($this->contentHtmlProperties !== null && $this->contentHtmlProperties->containsName($name));
 	}
@@ -124,6 +148,9 @@ class HtmlProperties {
 				|| ($this->contentHtmlProperties !== null && $this->contentHtmlProperties->hasKey($name, $key));
 	}
 	
+	/**
+	 * @return \n2n\util\config\Attributes[]
+	 */
 	public function getAttributesCollection() {
 		$collection = array($this->prependedAttributes, $this->attributes);
 		if ($this->contentHtmlProperties !== null) {
@@ -132,6 +159,10 @@ class HtmlProperties {
 		return $collection;
 	}
 	
+	/**
+	 * @param string[] $keys
+	 * @return array
+	 */
 	public function fetchUiComponentHtmlSnipplets(array $keys) {
 		$contents = array_fill_keys($keys, array());
 		
@@ -221,6 +252,21 @@ class HtmlProperties {
 		return true;
 	}
 	
+	/**
+	 * Usually called by {@see HtmlBuilderMeta::serverPush()}.
+	 * @param ServerPushDirective $serverPushDirective
+	 */
+	public function addServerPushDirective(ServerPushDirective $serverPushDirective) {
+		$this->serverPushDirectives[$serverPushDirective->toHeader()->getHeaderStr()] = $serverPushDirective;
+	}
+	
+	/**
+	 * @return ServerPushDirective[]
+	 */
+	public function getServerPushDirectives() {
+		return $this->serverPushDirectives;
+	}
+	
 	public function registerId($id) {
 		if (in_array($id, $this->ids)) {
 			return false;
@@ -244,5 +290,6 @@ class HtmlProperties {
 	public function merge(HtmlProperties $htmlProperties) {
 		$this->prependedAttributes->append($htmlProperties->prependedAttributes);
 		$this->attributes->append($htmlProperties->attributes);
+		$this->serverPushDirectives += $htmlProperties->serverPushDirectives;
 	}
 }

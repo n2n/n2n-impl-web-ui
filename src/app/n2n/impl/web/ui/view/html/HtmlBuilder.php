@@ -75,12 +75,12 @@ class HtmlBuilder {
 					N2N::getAppConfig()->general()->getPageName()));
 		}
 		
-		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_META_KEY)) {
-			$this->contentBuffer->breakPoint(HtmlBuilderMeta::HEAD_META_KEY);
-		}
-		
 		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_TITLE_KEY)) {
 			$this->contentBuffer->breakPoint(HtmlBuilderMeta::HEAD_TITLE_KEY);
+		}
+		
+		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_META_KEY)) {
+			$this->contentBuffer->breakPoint(HtmlBuilderMeta::HEAD_META_KEY);
 		}
 		
 		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_LINK_KEY)) {
