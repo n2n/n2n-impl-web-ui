@@ -26,11 +26,13 @@ use n2n\reflection\ArgUtils;
 use n2n\web\ui\Raw;
 use n2n\util\uri\Url;
 use n2n\web\http\nav\Murl;
+use n2n\l10n\DynamicTextCollection;
 use n2n\l10n\MessageContainer;
 use n2n\l10n\N2nLocale;
 use n2n\core\config\GeneralConfig;
 use n2n\web\http\ServerPushDirective;
 use n2n\web\ui\UiComponent;
+use n2n\web\ui\SimpleBuildContext;
 
 /**
  * Accessible through <code>$html-&#x3E;meta()</code> in every html view
@@ -432,6 +434,25 @@ class HtmlBuilderMeta {
 		}
 		
 		return str_replace(array('http://', 'https://', 'mailto:', 'tel:'), '', $url);
+	}
+	
+	/**
+	 * @param string $textHtml
+	 * @param array $replacements
+	 * @param HtmlView $view
+	 * @return string
+	 */
+	public static function replace(string $textHtml, array $replacements = null, HtmlView $view = null) {
+		if (empty($replacements)) return $textHtml;
+		
+		$buildContext = $view !== null ? $view->getContentsBuildContext() : new SimpleBuildContext();
+		
+		foreach ((array) $replacements as $key => $replacement) {
+			$textHtml = str_replace(DynamicTextCollection::REPLACEMENT_PREFIX . $key . DynamicTextCollection::REPLACEMENT_SUFFIX,
+					HtmlUtils::contentsToHtml($replacement, $buildContext), $textHtml);
+		}
+		
+		return $textHtml;
 	}
 }
 

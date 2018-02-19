@@ -21,18 +21,17 @@
  */
 namespace n2n\impl\web\ui\view\html;
 
-use n2n\io\managed\File;
 use n2n\core\N2N;
-use n2n\web\ui\UiComponent;
-use n2n\web\ui\Raw;
-use n2n\io\ob\OutputBuffer;
-use n2n\web\ui\UiException;
 use n2n\impl\web\ui\view\html\img\ImgComposer;
-use n2n\reflection\ArgUtils;
-use n2n\io\managed\img\ThumbStrategy;
 use n2n\impl\web\ui\view\html\img\UiComponentFactory;
+use n2n\io\managed\File;
+use n2n\io\managed\img\ThumbStrategy;
+use n2n\io\ob\OutputBuffer;
+use n2n\reflection\ArgUtils;
 use n2n\web\ui\CouldNotRenderUiComponentException;
-use n2n\l10n\DynamicTextCollection;
+use n2n\web\ui\Raw;
+use n2n\web\ui\UiComponent;
+use n2n\web\ui\UiException;
 
 class HtmlBuilder {
 	private $view;
@@ -489,11 +488,13 @@ class HtmlBuilder {
 		$textRaw = $this->getEsc($this->view->getL10nText($key, $args, $num, null, $module));
 		if (empty($replacements)) return $textRaw;
 		
-		$textHtml = (string) $textRaw;
-		foreach ($replacements as $key => $replacement) {
-			$textHtml = str_replace(DynamicTextCollection::REPLACEMENT_PREFIX . $key . DynamicTextCollection::REPLACEMENT_SUFFIX, 
-					HtmlUtils::contentsToHtml($replacement, $this->view->getContentsBuildContext()), $textHtml);
-		}
+// 		$textHtml = (string) $textRaw;
+// 		foreach ($replacements as $key => $replacement) {
+// 			$textHtml = str_replace(DynamicTextCollection::REPLACEMENT_PREFIX . $key . DynamicTextCollection::REPLACEMENT_SUFFIX, 
+// 					HtmlUtils::contentsToHtml($replacement, $this->view->getContentsBuildContext()), $textHtml);
+// 		}
+
+		$textHtml = HtmlBuilderMeta::replace((string) $textRaw, $replacements, $this->view);
 		return new Raw($textHtml);
 	}
 	
