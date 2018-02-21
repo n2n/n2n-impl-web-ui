@@ -1,7 +1,7 @@
 declare namespace Jhtml {
     function ready(callback: ReadyCallback, document?: Document): void;
-    function getOrCreateBrowser(): Browser;
-    function getOrCreateMonitor(): Monitor;
+    function getOrCreateBrowser(): Browser | null;
+    function getOrCreateMonitor(): Monitor | null;
     function getOrCreateContext(document?: Document): Context;
     function lookupModel(url: Url | string): Promise<Model>;
     function request(method: Requestor.Method, url: Url | string): Request;
@@ -27,10 +27,10 @@ declare namespace Jhtml {
         private changedCbr;
         private pushCbr;
         readonly currentIndex: number;
-        readonly currentEntry: History.Entry;
-        readonly currentPage: Page;
-        getEntryByIndex(index: number): History.Entry;
-        getPageByUrl(url: Url): Page;
+        readonly currentEntry: History.Entry | null;
+        readonly currentPage: Page | null;
+        getEntryByIndex(index: number): History.Entry | null;
+        getPageByUrl(url: Url): Page | null;
         onChange(callback: (evt: ChangeEvent) => any): void;
         offChange(callback: (evt: ChangeEvent) => any): void;
         onChanged(callback: (evt: ChangeEvent) => any): void;
@@ -365,9 +365,9 @@ declare namespace Jhtml {
         srcUrl: Url;
         back: RedirectDirective.Type;
         targetUrl: Url;
-        requestConfig: RequestConfig;
+        requestConfig: RequestConfig | undefined;
         additionalData: any;
-        constructor(srcUrl: Url, back: RedirectDirective.Type, targetUrl: Url, requestConfig?: RequestConfig, additionalData?: any);
+        constructor(srcUrl: Url, back: RedirectDirective.Type, targetUrl: Url, requestConfig?: RequestConfig | undefined, additionalData?: any);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
     }
@@ -555,9 +555,9 @@ declare namespace Jhtml.Util {
     class CallbackRegistry<C> {
         private callbacks;
         on(callback: C): void;
-        onType(type: string, callback: C): void;
+        onType(type: string | undefined, callback: C): void;
         off(callback: C): void;
-        offType(type: string, callback: C): void;
+        offType(type: string | undefined, callback: C): void;
         fire(...args: Array<any>): void;
         fireType(type: string, ...args: Array<any>): void;
         clear(): void;

@@ -1,7 +1,7 @@
 namespace Jhtml {
     
     export class History {
-        private _currentIndex: number = null;
+        private _currentIndex: number;
         private _entries: Array<History.Entry> = [];
         private changeCbr = new Util.CallbackRegistry<(evt: ChangeEvent) => any>();
         private changedCbr = new Util.CallbackRegistry<(evt: ChangeEvent) => any>();
@@ -11,7 +11,7 @@ namespace Jhtml {
         	return this._currentIndex;
         }
         
-        get currentEntry(): History.Entry {
+        get currentEntry(): History.Entry|null {
         	if (this._entries[this._currentIndex]) {
         		return this._entries[this._currentIndex];
         	}
@@ -19,7 +19,7 @@ namespace Jhtml {
         	return null;
         }
         
-        get currentPage(): Page {
+        get currentPage(): Page|null {
         	let entry;
         	if (entry = this.currentEntry) {
         		return entry.page;
@@ -28,7 +28,7 @@ namespace Jhtml {
         	return null;
         }
         
-        getEntryByIndex(index: number): History.Entry {
+        getEntryByIndex(index: number): History.Entry|null {
         	if (this._entries[index]) {
         		return this._entries[index];
         	}
@@ -36,7 +36,7 @@ namespace Jhtml {
         	return null;
         }
         
-        getPageByUrl(url: Url): Page {
+        getPageByUrl(url: Url): Page|null {
         	for (let entry of this._entries) {
         		if (!entry.page.url.equals(url)) continue;
         		

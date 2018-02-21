@@ -3,10 +3,10 @@ namespace Jhtml {
 		 return getOrCreateContext(document).onReady(callback);
 	}
 	
-	let browser: Browser = null;
-	let monitor: Monitor = null;
+	let browser: Browser|null = null;
+	let monitor: Monitor|null = null;
 	
-	export function getOrCreateBrowser(): Browser {
+	export function getOrCreateBrowser(): Browser|null {
 		if (browser) return browser;
 		
 		let context: Context = getOrCreateContext();
@@ -20,7 +20,7 @@ namespace Jhtml {
 		return browser;
 	}
 	
-	export function getOrCreateMonitor(): Monitor {
+	export function getOrCreateMonitor(): Monitor|null {
 		getOrCreateBrowser();
 		return monitor;
 	}

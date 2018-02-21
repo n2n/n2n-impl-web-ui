@@ -121,7 +121,6 @@ var Jhtml;
 (function (Jhtml) {
     var History = (function () {
         function History() {
-            this._currentIndex = null;
             this._entries = [];
             this.changeCbr = new Jhtml.Util.CallbackRegistry();
             this.changedCbr = new Jhtml.Util.CallbackRegistry();
