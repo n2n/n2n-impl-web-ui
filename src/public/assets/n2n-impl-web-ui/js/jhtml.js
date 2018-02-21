@@ -1,18 +1,28 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Jhtml;
 (function (Jhtml) {
     function ready(callback, document) {
         return getOrCreateContext(document).onReady(callback);
     }
     Jhtml.ready = ready;
-    let browser = null;
-    let monitor = null;
+    var browser = null;
+    var monitor = null;
     function getOrCreateBrowser() {
         if (browser)
             return browser;
-        let context = getOrCreateContext();
+        var context = getOrCreateContext();
         if (!context.isBrowsable())
             return null;
-        let history = new Jhtml.History();
+        var history = new Jhtml.History();
         browser = new Jhtml.Browser(window, history);
         monitor = Jhtml.Monitor.create(context.document.documentElement, history, false);
         return browser;
@@ -32,8 +42,8 @@ var Jhtml;
         if (monitor) {
             return monitor.lookupModel(Jhtml.Url.create(url));
         }
-        return new Promise(resolve => {
-            getOrCreateContext().requestor.exec("GET", Jhtml.Url.create(url)).send().then((response) => {
+        return new Promise(function (resolve) {
+            getOrCreateContext().requestor.exec("GET", Jhtml.Url.create(url)).send().then(function (response) {
                 resolve(response.model);
             });
         });
@@ -43,35 +53,40 @@ var Jhtml;
         return getOrCreateContext().requestor.exec(method, Jhtml.Url.create(url));
     }
     Jhtml.request = request;
-    window.document.addEventListener("DOMContentLoaded", () => {
+    window.document.addEventListener("DOMContentLoaded", function () {
         getOrCreateBrowser();
     }, false);
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Browser {
-        constructor(window, _history) {
+    var Browser = (function () {
+        function Browser(window, _history) {
+            var _this = this;
             this.window = window;
             this._history = _history;
             this.poping = false;
-            let entry = _history.push(new Jhtml.Page(Jhtml.Url.create(window.location.href), null));
-            _history.onPush((entry) => {
-                this.onPush(entry);
+            var entry = _history.push(new Jhtml.Page(Jhtml.Url.create(window.location.href), null));
+            _history.onPush(function (entry) {
+                _this.onPush(entry);
             });
-            _history.onChanged((evt) => {
-                this.onChanged(evt);
+            _history.onChanged(function (evt) {
+                _this.onChanged(evt);
             });
             this.window.history.replaceState(this.buildStateObj(entry), "Page", entry.page.url.toString());
-            this.window.onpopstate = (evt) => {
-                this.onPopstate(evt);
+            this.window.onpopstate = function (evt) {
+                _this.onPopstate(evt);
             };
         }
-        get history() {
-            return this._history;
-        }
-        onPopstate(evt) {
-            let url = Jhtml.Url.create(this.window.location.toString());
-            let index = 0;
+        Object.defineProperty(Browser.prototype, "history", {
+            get: function () {
+                return this._history;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Browser.prototype.onPopstate = function (evt) {
+            var url = Jhtml.Url.create(this.window.location.toString());
+            var index = 0;
             if (evt.state && evt.state.jhtmlHistoryIndex !== undefined) {
                 index = evt.state.jhtmlHistoryIndex;
             }
@@ -83,83 +98,97 @@ var Jhtml;
             catch (e) {
                 this.window.location.href = url.toString();
             }
-        }
-        onChanged(evt) {
+        };
+        Browser.prototype.onChanged = function (evt) {
             if (this.poping || evt.pushed)
                 return;
             this.window.history.go(evt.indexDelta);
-        }
-        onPush(entry) {
+        };
+        Browser.prototype.onPush = function (entry) {
             this.window.history.pushState(this.buildStateObj(entry), "Page", entry.page.url.toString());
-        }
-        buildStateObj(entry) {
+        };
+        Browser.prototype.buildStateObj = function (entry) {
             return {
                 "jhtmlUrl": entry.page.url.toString(),
                 "jhtmlHistoryIndex": entry.index
             };
-        }
-    }
+        };
+        return Browser;
+    }());
     Jhtml.Browser = Browser;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class History {
-        constructor() {
+    var History = (function () {
+        function History() {
             this._currentIndex = null;
             this._entries = [];
             this.changeCbr = new Jhtml.Util.CallbackRegistry();
             this.changedCbr = new Jhtml.Util.CallbackRegistry();
             this.pushCbr = new Jhtml.Util.CallbackRegistry();
         }
-        get currentIndex() {
-            return this._currentIndex;
-        }
-        get currentEntry() {
-            if (this._entries[this._currentIndex]) {
-                return this._entries[this._currentIndex];
-            }
-            return null;
-        }
-        get currentPage() {
-            let entry;
-            if (entry = this.currentEntry) {
-                return entry.page;
-            }
-            return null;
-        }
-        getEntryByIndex(index) {
+        Object.defineProperty(History.prototype, "currentIndex", {
+            get: function () {
+                return this._currentIndex;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(History.prototype, "currentEntry", {
+            get: function () {
+                if (this._entries[this._currentIndex]) {
+                    return this._entries[this._currentIndex];
+                }
+                return null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(History.prototype, "currentPage", {
+            get: function () {
+                var entry;
+                if (entry = this.currentEntry) {
+                    return entry.page;
+                }
+                return null;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        History.prototype.getEntryByIndex = function (index) {
             if (this._entries[index]) {
                 return this._entries[index];
             }
             return null;
-        }
-        getPageByUrl(url) {
-            for (let entry of this._entries) {
+        };
+        History.prototype.getPageByUrl = function (url) {
+            for (var _i = 0, _a = this._entries; _i < _a.length; _i++) {
+                var entry = _a[_i];
                 if (!entry.page.url.equals(url))
                     continue;
                 return entry.page;
             }
             return null;
-        }
-        onChange(callback) {
+        };
+        History.prototype.onChange = function (callback) {
             this.changeCbr.on(callback);
-        }
-        offChange(callback) {
+        };
+        History.prototype.offChange = function (callback) {
             this.changeCbr.off(callback);
-        }
-        onChanged(callback) {
+        };
+        History.prototype.onChanged = function (callback) {
             this.changedCbr.on(callback);
-        }
-        offChanged(callback) {
+        };
+        History.prototype.offChanged = function (callback) {
             this.changedCbr.off(callback);
-        }
-        onPush(callback) {
+        };
+        History.prototype.onPush = function (callback) {
             this.pushCbr.on(callback);
-        }
-        offPush(callback) {
+        };
+        History.prototype.offPush = function (callback) {
             this.pushCbr.off(callback);
-        }
-        go(index, checkUrl) {
+        };
+        History.prototype.go = function (index, checkUrl) {
             if (!this._entries[index]) {
                 throw new Error("Unknown history entry index " + index + ". Check url: " + checkUrl);
             }
@@ -169,61 +198,71 @@ var Jhtml;
             }
             if (this._currentIndex == index)
                 return;
-            let evt = { pushed: false, indexDelta: (index - this._currentIndex) };
+            var evt = { pushed: false, indexDelta: (index - this._currentIndex) };
             this.changeCbr.fire(evt);
             this._currentIndex = index;
             this.changedCbr.fire(evt);
-        }
-        getFirstIndexOfPage(page) {
-            return this._entries.findIndex((entry) => {
+        };
+        History.prototype.getFirstIndexOfPage = function (page) {
+            return this._entries.findIndex(function (entry) {
                 return entry.page === page;
             });
-        }
-        push(page) {
-            let sPage = this.getPageByUrl(page.url);
+        };
+        History.prototype.push = function (page) {
+            var sPage = this.getPageByUrl(page.url);
             if (sPage && sPage !== page) {
                 throw new Error("Page with same url already registered.");
             }
-            let evt = { pushed: true, indexDelta: 1 };
+            var evt = { pushed: true, indexDelta: 1 };
             this.changeCbr.fire(evt);
-            let nextI = (this._currentIndex === null ? 0 : this._currentIndex + 1);
-            for (let i = nextI; i < this._entries.length; i++) {
-                let iPage = this._entries[i].page;
+            var nextI = (this._currentIndex === null ? 0 : this._currentIndex + 1);
+            for (var i = nextI; i < this._entries.length; i++) {
+                var iPage = this._entries[i].page;
                 if (nextI >= this.getFirstIndexOfPage(iPage))
                     continue;
                 iPage.dispose();
             }
             this._entries.splice(nextI);
             this._currentIndex = nextI;
-            let entry = new History.Entry(this._currentIndex, page);
+            var entry = new History.Entry(this._currentIndex, page);
             this._entries.push(entry);
             this.pushCbr.fire(entry);
             this.changedCbr.fire(evt);
             return entry;
-        }
-    }
+        };
+        return History;
+    }());
     Jhtml.History = History;
     (function (History) {
-        class Entry {
-            constructor(_index, _page) {
+        var Entry = (function () {
+            function Entry(_index, _page) {
                 this._index = _index;
                 this._page = _page;
                 this.scrollPos = 0;
             }
-            get index() {
-                return this._index;
-            }
-            get page() {
-                return this._page;
-            }
-        }
+            Object.defineProperty(Entry.prototype, "index", {
+                get: function () {
+                    return this._index;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Entry.prototype, "page", {
+                get: function () {
+                    return this._page;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            return Entry;
+        }());
         History.Entry = Entry;
     })(History = Jhtml.History || (Jhtml.History = {}));
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Page {
-        constructor(_url, promise) {
+    var Page = (function () {
+        function Page(_url, promise) {
             this._url = _url;
             this._promise = null;
             this._loaded = false;
@@ -232,89 +271,121 @@ var Jhtml;
             this.loadUrl = null;
             this.promise = promise;
         }
-        get config() {
-            return this._config;
-        }
-        get loaded() {
-            return this._loaded;
-        }
-        get url() {
-            return this._url;
-        }
-        dispose() {
+        Object.defineProperty(Page.prototype, "config", {
+            get: function () {
+                return this._config;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Page.prototype, "loaded", {
+            get: function () {
+                return this._loaded;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Page.prototype, "url", {
+            get: function () {
+                return this._url;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Page.prototype.dispose = function () {
             this.promise = null;
-        }
-        fire(eventType) {
+        };
+        Page.prototype.fire = function (eventType) {
             this.cbr.fireType(eventType);
-        }
-        on(eventType, callback) {
+        };
+        Page.prototype.on = function (eventType, callback) {
             this.cbr.onType(eventType, callback);
-        }
-        off(eventType, callback) {
+        };
+        Page.prototype.off = function (eventType, callback) {
             this.cbr.offType(eventType, callback);
-        }
-        get promise() {
-            return this._promise;
-        }
-        set promise(promise) {
-            if (this._promise === promise)
-                return;
-            this._promise = promise;
-            if (!promise) {
-                this.fire("disposed");
-                return;
-            }
-            this._loaded = false;
-            promise.then(() => {
-                this._loaded = true;
-            });
-            this.fire("promiseAssigned");
-        }
-        get disposed() {
-            return this.promise ? false : true;
-        }
-    }
+        };
+        Object.defineProperty(Page.prototype, "promise", {
+            get: function () {
+                return this._promise;
+            },
+            set: function (promise) {
+                var _this = this;
+                if (this._promise === promise)
+                    return;
+                this._promise = promise;
+                if (!promise) {
+                    this.fire("disposed");
+                    return;
+                }
+                this._loaded = false;
+                promise.then(function () {
+                    _this._loaded = true;
+                });
+                this.fire("promiseAssigned");
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Page.prototype, "disposed", {
+            get: function () {
+                return this.promise ? false : true;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Page;
+    }());
     Jhtml.Page = Page;
     (function (Page) {
-        class Config {
-            constructor() {
+        var Config = (function () {
+            function Config() {
                 this.frozen = false;
                 this.keep = false;
                 this.scrollPos = 0;
             }
-        }
+            return Config;
+        }());
         Page.Config = Config;
     })(Page = Jhtml.Page || (Jhtml.Page = {}));
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Context {
-        constructor(_document) {
+    var Context = (function () {
+        function Context(_document) {
+            var _this = this;
             this._document = _document;
             this.compHandlers = {};
             this.readyCbr = new Jhtml.Util.CallbackRegistry();
             this.readyBound = false;
             this.loadObservers = [];
             this._requestor = new Jhtml.Requestor(this);
-            this._document.addEventListener("DOMContentLoaded", () => {
-                this.readyCbr.fire([this.document.documentElement], {});
+            this._document.addEventListener("DOMContentLoaded", function () {
+                _this.readyCbr.fire([_this.document.documentElement], {});
             }, false);
         }
-        get requestor() {
-            return this._requestor;
-        }
-        get document() {
-            return this._document;
-        }
-        isJhtml() {
+        Object.defineProperty(Context.prototype, "requestor", {
+            get: function () {
+                return this._requestor;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Context.prototype, "document", {
+            get: function () {
+                return this._document;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Context.prototype.isJhtml = function () {
             return this.getModelState(false) ? true : false;
-        }
-        isBrowsable() {
+        };
+        Context.prototype.isBrowsable = function () {
             if (!this.isJhtml())
                 return false;
             return this.getModelState(false).metaState.browsable;
-        }
-        getModelState(required) {
+        };
+        Context.prototype.getModelState = function (required) {
             if (this.modelState) {
                 return this.modelState;
             }
@@ -333,128 +404,136 @@ var Jhtml;
                 throw new Error("No jhtml context");
             }
             return this.modelState || null;
-        }
-        replaceModel(newModel, montiorCompHandlers = {}) {
-            let boundModelState = this.getModelState(true);
-            for (let name in boundModelState.comps) {
-                let comp = boundModelState.comps[name];
-                if (!(montiorCompHandlers[name] && montiorCompHandlers[name].detachComp(comp))
-                    && !(this.compHandlers[name] && this.compHandlers[name].detachComp(comp))) {
+        };
+        Context.prototype.replaceModel = function (newModel, montiorCompHandlers) {
+            if (montiorCompHandlers === void 0) { montiorCompHandlers = {}; }
+            var boundModelState = this.getModelState(true);
+            for (var name_1 in boundModelState.comps) {
+                var comp = boundModelState.comps[name_1];
+                if (!(montiorCompHandlers[name_1] && montiorCompHandlers[name_1].detachComp(comp))
+                    && !(this.compHandlers[name_1] && this.compHandlers[name_1].detachComp(comp))) {
                     comp.detach();
                 }
             }
             boundModelState.container.detach();
-            let loadObserver = boundModelState.metaState.replaceWith(newModel.meta);
+            var loadObserver = boundModelState.metaState.replaceWith(newModel.meta);
             this.registerLoadObserver(loadObserver);
             if (!boundModelState.container.matches(newModel.container)) {
                 boundModelState.container = newModel.container;
             }
             boundModelState.container.attachTo(boundModelState.metaState.containerElement, loadObserver);
-            for (let name in newModel.comps) {
-                let comp = boundModelState.comps[name] = newModel.comps[name];
-                if (!(montiorCompHandlers[name] && montiorCompHandlers[name].attachComp(comp, loadObserver))
-                    && !(this.compHandlers[name] && this.compHandlers[name].attachComp(comp, loadObserver))) {
-                    comp.attachTo(boundModelState.container.compElements[name], loadObserver);
+            for (var name_2 in newModel.comps) {
+                var comp = boundModelState.comps[name_2] = newModel.comps[name_2];
+                if (!(montiorCompHandlers[name_2] && montiorCompHandlers[name_2].attachComp(comp, loadObserver))
+                    && !(this.compHandlers[name_2] && this.compHandlers[name_2].attachComp(comp, loadObserver))) {
+                    comp.attachTo(boundModelState.container.compElements[name_2], loadObserver);
                 }
             }
             return loadObserver;
-        }
-        importMeta(meta) {
-            let boundModelState = this.getModelState(true);
-            let loadObserver = boundModelState.metaState.import(meta, true);
+        };
+        Context.prototype.importMeta = function (meta) {
+            var boundModelState = this.getModelState(true);
+            var loadObserver = boundModelState.metaState.import(meta, true);
             this.registerLoadObserver(loadObserver);
             return loadObserver;
-        }
-        registerLoadObserver(loadObserver) {
+        };
+        Context.prototype.registerLoadObserver = function (loadObserver) {
+            var _this = this;
             this.loadObservers.push(loadObserver);
-            loadObserver.whenLoaded(() => {
-                this.loadObservers.splice(this.loadObservers.indexOf(loadObserver), 1);
+            loadObserver.whenLoaded(function () {
+                _this.loadObservers.splice(_this.loadObservers.indexOf(loadObserver), 1);
             });
-        }
-        registerNewModel(model) {
-            let container = model.container;
+        };
+        Context.prototype.registerNewModel = function (model) {
+            var _this = this;
+            var container = model.container;
             if (container) {
-                let containerReadyCallback = () => {
-                    container.off("attached", containerReadyCallback);
-                    container.loadObserver.whenLoaded(() => {
-                        this.readyCbr.fire(container.elements, { container: container });
-                        this.triggerAndScan(container.elements);
+                var containerReadyCallback_1 = function () {
+                    container.off("attached", containerReadyCallback_1);
+                    container.loadObserver.whenLoaded(function () {
+                        _this.readyCbr.fire(container.elements, { container: container });
+                        _this.triggerAndScan(container.elements);
                     });
                 };
-                container.on("attached", containerReadyCallback);
+                container.on("attached", containerReadyCallback_1);
             }
-            for (let comp of Object.values(model.comps)) {
-                let compReadyCallback = () => {
+            var _loop_1 = function (comp) {
+                var compReadyCallback = function () {
                     comp.off("attached", compReadyCallback);
-                    comp.loadObserver.whenLoaded(() => {
-                        this.readyCbr.fire(comp.elements, { comp: Jhtml.Comp });
-                        this.triggerAndScan(comp.elements);
+                    comp.loadObserver.whenLoaded(function () {
+                        _this.readyCbr.fire(comp.elements, { comp: Jhtml.Comp });
+                        _this.triggerAndScan(comp.elements);
                     });
                 };
                 comp.on("attached", compReadyCallback);
+            };
+            for (var _i = 0, _a = Object.values(model.comps); _i < _a.length; _i++) {
+                var comp = _a[_i];
+                _loop_1(comp);
             }
-            let snippet = model.snippet;
+            var snippet = model.snippet;
             if (snippet) {
-                let snippetReadyCallback = () => {
-                    snippet.off("attached", snippetReadyCallback);
-                    this.importMeta(model.meta).whenLoaded(() => {
-                        this.readyCbr.fire(snippet.elements, { snippet: snippet });
-                        this.triggerAndScan(snippet.elements);
+                var snippetReadyCallback_1 = function () {
+                    snippet.off("attached", snippetReadyCallback_1);
+                    _this.importMeta(model.meta).whenLoaded(function () {
+                        _this.readyCbr.fire(snippet.elements, { snippet: snippet });
+                        _this.triggerAndScan(snippet.elements);
                     });
                 };
-                snippet.on("attached", snippetReadyCallback);
+                snippet.on("attached", snippetReadyCallback_1);
             }
-        }
-        triggerAndScan(elements) {
-            let w = window;
+        };
+        Context.prototype.triggerAndScan = function (elements) {
+            var w = window;
             if (w.n2n && w.n2n.dispatch) {
                 w.n2n.dispatch.update();
             }
             Jhtml.Ui.Scanner.scanArray(elements);
-        }
-        replace(text, mimeType, replace) {
+        };
+        Context.prototype.replace = function (text, mimeType, replace) {
             this.document.open(mimeType, replace ? "replace" : null);
             this.document.write(text);
             this.document.close();
-        }
-        registerCompHandler(compName, compHandler) {
+        };
+        Context.prototype.registerCompHandler = function (compName, compHandler) {
             this.compHandlers[compName] = compHandler;
-        }
-        unregisterCompHandler(compName) {
+        };
+        Context.prototype.unregisterCompHandler = function (compName) {
             delete this.compHandlers[compName];
-        }
-        onReady(readyCallback) {
+        };
+        Context.prototype.onReady = function (readyCallback) {
             this.readyCbr.on(readyCallback);
             if ((this._document.readyState === "complete" || this._document.readyState === "interactive")
                 && this.loadObservers.length == 0) {
                 readyCallback([this.document.documentElement], {});
             }
-        }
-        offReady(readyCallback) {
+        };
+        Context.prototype.offReady = function (readyCallback) {
             this.readyCbr.off(readyCallback);
-        }
-        static test(document) {
-            let context = Jhtml.Util.getElemData(document.documentElement, Context.KEY);
+        };
+        Context.test = function (document) {
+            var context = Jhtml.Util.getElemData(document.documentElement, Context.KEY);
             if (context instanceof Context) {
                 return context;
             }
             return null;
-        }
-        static from(document) {
-            let context = Context.test(document);
+        };
+        Context.from = function (document) {
+            var context = Context.test(document);
             if (context)
                 return context;
             Jhtml.Util.bindElemData(document.documentElement, Context.KEY, context = new Context(document));
             return context;
-        }
-    }
-    Context.KEY = "data-jhtml-context";
+        };
+        Context.KEY = "data-jhtml-context";
+        return Context;
+    }());
     Jhtml.Context = Context;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Merger {
-        constructor(rootElem, headElem, bodyElem, currentContainerElem, newContainerElem) {
+    var Merger = (function () {
+        function Merger(rootElem, headElem, bodyElem, currentContainerElem, newContainerElem) {
             this.rootElem = rootElem;
             this.headElem = headElem;
             this.bodyElem = bodyElem;
@@ -466,47 +545,60 @@ var Jhtml;
             this.removableElements = [];
             this.removableAttrs = [];
         }
-        get loadObserver() {
-            return this._loadObserver;
-        }
-        get processedElements() {
-            return this._processedElements;
-        }
-        get remainingElements() {
-            return this.removableElements.filter(removableElement => !this.containsProcessed(removableElement));
-        }
-        importInto(newElems, parentElem, target) {
-            let importedElems = [];
-            let curElems = Jhtml.Util.array(parentElem.children);
-            for (let i in newElems) {
-                let newElem = newElems[i];
-                let importedElem = this.mergeElem(curElems, newElem, target);
+        Object.defineProperty(Merger.prototype, "loadObserver", {
+            get: function () {
+                return this._loadObserver;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Merger.prototype, "processedElements", {
+            get: function () {
+                return this._processedElements;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Merger.prototype, "remainingElements", {
+            get: function () {
+                var _this = this;
+                return this.removableElements.filter(function (removableElement) { return !_this.containsProcessed(removableElement); });
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Merger.prototype.importInto = function (newElems, parentElem, target) {
+            var importedElems = [];
+            var curElems = Jhtml.Util.array(parentElem.children);
+            for (var i in newElems) {
+                var newElem = newElems[i];
+                var importedElem = this.mergeElem(curElems, newElem, target);
                 if (importedElem === this.currentContainerElem)
                     continue;
                 this.importInto(Jhtml.Util.array(newElem.children), importedElem, target);
                 importedElems.push(importedElem);
             }
-            for (let i = 0; i < importedElems.length; i++) {
-                let importedElem = importedElems[i];
+            for (var i = 0; i < importedElems.length; i++) {
+                var importedElem = importedElems[i];
                 if (-1 < curElems.indexOf(importedElem)) {
                     continue;
                 }
                 this.loadObserver.addElement(importedElem);
                 parentElem.appendChild(importedElem);
             }
-        }
-        mergeInto(newElems, parentElem, target) {
-            let mergedElems = [];
-            let curElems = Jhtml.Util.array(parentElem.children);
-            for (let i in newElems) {
-                let newElem = newElems[i];
-                let mergedElem = this.mergeElem(curElems, newElem, target);
+        };
+        Merger.prototype.mergeInto = function (newElems, parentElem, target) {
+            var mergedElems = [];
+            var curElems = Jhtml.Util.array(parentElem.children);
+            for (var i in newElems) {
+                var newElem = newElems[i];
+                var mergedElem = this.mergeElem(curElems, newElem, target);
                 if (mergedElem === this.currentContainerElem)
                     continue;
                 this.mergeInto(Jhtml.Util.array(newElem.children), mergedElem, target);
                 mergedElems.push(mergedElem);
             }
-            for (let i = 0; i < curElems.length; i++) {
+            for (var i = 0; i < curElems.length; i++) {
                 if (-1 < mergedElems.indexOf(curElems[i]))
                     continue;
                 if (!Merger.checkIfUnremovable(curElems[i])) {
@@ -515,9 +607,9 @@ var Jhtml;
                 curElems.splice(i, 1);
                 i--;
             }
-            let curElem = curElems.shift();
-            for (let i = 0; i < mergedElems.length; i++) {
-                let mergedElem = mergedElems[i];
+            var curElem = curElems.shift();
+            for (var i = 0; i < mergedElems.length; i++) {
+                var mergedElem = mergedElems[i];
                 if (mergedElem === curElem) {
                     curElem = curElems.shift();
                     continue;
@@ -528,31 +620,31 @@ var Jhtml;
                     continue;
                 }
                 parentElem.insertBefore(mergedElem, curElem);
-                let j;
+                var j = void 0;
                 if (-1 < (j = curElems.indexOf(mergedElem))) {
                     curElems.splice(j, 1);
                 }
             }
-        }
-        mergeElem(preferedElems, newElem, target) {
+        };
+        Merger.prototype.mergeElem = function (preferedElems, newElem, target) {
             if (newElem === this.newContainerElem) {
                 if (!this.compareExact(this.currentContainerElem, newElem, false)) {
-                    let mergedElem = newElem.cloneNode(false);
-                    this.processedElements.push(mergedElem);
-                    return mergedElem;
+                    var mergedElem_1 = newElem.cloneNode(false);
+                    this.processedElements.push(mergedElem_1);
+                    return mergedElem_1;
                 }
                 this.processedElements.push(this.currentContainerElem);
                 return this.currentContainerElem;
             }
             if (this.newContainerElem && newElem.contains(this.newContainerElem)) {
-                let mergedElem;
-                if (mergedElem = this.filterExact(preferedElems, newElem, false)) {
-                    this.processedElements.push(mergedElem);
-                    return mergedElem;
+                var mergedElem_2;
+                if (mergedElem_2 = this.filterExact(preferedElems, newElem, false)) {
+                    this.processedElements.push(mergedElem_2);
+                    return mergedElem_2;
                 }
                 return this.cloneNewElem(newElem, false);
             }
-            let mergedElem;
+            var mergedElem;
             switch (newElem.tagName) {
                 case "SCRIPT":
                     if ((mergedElem = this.filter(preferedElems, newElem, ["src", "type"], true, false))
@@ -577,34 +669,37 @@ var Jhtml;
                     }
                     return this.cloneNewElem(newElem, false);
             }
-        }
-        static checkIfUnremovable(elem) {
+        };
+        Merger.checkIfUnremovable = function (elem) {
             return elem.tagName == "SCRIPT";
-        }
-        cloneNewElem(newElem, deep) {
-            let mergedElem = this.rootElem.ownerDocument.createElement(newElem.tagName);
-            for (let name of this.attrNames(newElem)) {
-                mergedElem.setAttribute(name, newElem.getAttribute(name));
+        };
+        Merger.prototype.cloneNewElem = function (newElem, deep) {
+            var mergedElem = this.rootElem.ownerDocument.createElement(newElem.tagName);
+            for (var _i = 0, _a = this.attrNames(newElem); _i < _a.length; _i++) {
+                var name_3 = _a[_i];
+                mergedElem.setAttribute(name_3, newElem.getAttribute(name_3));
             }
             if (deep) {
                 mergedElem.innerHTML = newElem.innerHTML;
             }
             this.processedElements.push(mergedElem);
             return mergedElem;
-        }
-        attrNames(elem) {
-            let attrNames = [];
-            let attrs = elem.attributes;
-            for (let i = 0; i < attrs.length; i++) {
+        };
+        Merger.prototype.attrNames = function (elem) {
+            var attrNames = [];
+            var attrs = elem.attributes;
+            for (var i = 0; i < attrs.length; i++) {
                 attrNames.push(attrs[i].nodeName);
             }
             return attrNames;
-        }
-        findExact(matchingElem, checkInner, target = Jhtml.Meta.Target.HEAD | Jhtml.Meta.Target.BODY) {
+        };
+        Merger.prototype.findExact = function (matchingElem, checkInner, target) {
+            if (target === void 0) { target = Jhtml.Meta.Target.HEAD | Jhtml.Meta.Target.BODY; }
             return this.find(matchingElem, this.attrNames(matchingElem), checkInner, true, target);
-        }
-        find(matchingElem, matchingAttrNames, checkInner, checkAttrNum, target = Jhtml.Meta.Target.HEAD | Jhtml.Meta.Target.BODY) {
-            let foundElem = null;
+        };
+        Merger.prototype.find = function (matchingElem, matchingAttrNames, checkInner, checkAttrNum, target) {
+            if (target === void 0) { target = Jhtml.Meta.Target.HEAD | Jhtml.Meta.Target.BODY; }
+            var foundElem = null;
             if ((target & Jhtml.Meta.Target.HEAD)
                 && (foundElem = this.findIn(this.headElem, matchingElem, matchingAttrNames, checkInner, checkAttrNum))) {
                 return foundElem;
@@ -614,9 +709,10 @@ var Jhtml;
                 return foundElem;
             }
             return null;
-        }
-        findIn(nodeSelector, matchingElem, matchingAttrNames, checkInner, chekAttrNum) {
-            for (let tagElem of Jhtml.Util.find(nodeSelector, matchingElem.tagName)) {
+        };
+        Merger.prototype.findIn = function (nodeSelector, matchingElem, matchingAttrNames, checkInner, chekAttrNum) {
+            for (var _i = 0, _a = Jhtml.Util.find(nodeSelector, matchingElem.tagName); _i < _a.length; _i++) {
+                var tagElem = _a[_i];
                 if (tagElem === this.currentContainerElem || tagElem.contains(this.currentContainerElem)
                     || this.currentContainerElem.contains(tagElem) || this.containsProcessed(tagElem)) {
                     continue;
@@ -626,28 +722,30 @@ var Jhtml;
                 }
             }
             return null;
-        }
-        filterExact(elems, matchingElem, checkInner) {
+        };
+        Merger.prototype.filterExact = function (elems, matchingElem, checkInner) {
             return this.filter(elems, matchingElem, this.attrNames(matchingElem), checkInner, true);
-        }
-        containsProcessed(elem) {
+        };
+        Merger.prototype.containsProcessed = function (elem) {
             return -1 < this.processedElements.indexOf(elem);
-        }
-        filter(elems, matchingElem, attrNames, checkInner, checkAttrNum) {
-            for (let elem of elems) {
+        };
+        Merger.prototype.filter = function (elems, matchingElem, attrNames, checkInner, checkAttrNum) {
+            for (var _i = 0, elems_1 = elems; _i < elems_1.length; _i++) {
+                var elem = elems_1[_i];
                 if (!this.containsProcessed(elem)
                     && this.compare(elem, matchingElem, attrNames, checkInner, checkAttrNum)) {
                     return elem;
                 }
             }
-        }
-        compareExact(elem1, elem2, checkInner) {
+        };
+        Merger.prototype.compareExact = function (elem1, elem2, checkInner) {
             return this.compare(elem1, elem2, this.attrNames(elem1), checkInner, true);
-        }
-        compare(elem1, elem2, attrNames, checkInner, checkAttrNum) {
+        };
+        Merger.prototype.compare = function (elem1, elem2, attrNames, checkInner, checkAttrNum) {
             if (elem1.tagName !== elem2.tagName)
                 return false;
-            for (let attrName of attrNames) {
+            for (var _i = 0, attrNames_1 = attrNames; _i < attrNames_1.length; _i++) {
+                var attrName = attrNames_1[_i];
                 if (elem1.getAttribute(attrName) !== elem2.getAttribute(attrName)) {
                     return false;
                 }
@@ -659,25 +757,27 @@ var Jhtml;
                 return false;
             }
             return true;
-        }
-        mergeAttrsInto(newElem, elem) {
-        }
-    }
+        };
+        Merger.prototype.mergeAttrsInto = function (newElem, elem) {
+        };
+        return Merger;
+    }());
     Jhtml.Merger = Merger;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Meta {
-        constructor() {
+    var Meta = (function () {
+        function Meta() {
             this.headElements = [];
             this.bodyElements = [];
             this.bodyElement = null;
             this.containerElement = null;
         }
-    }
+        return Meta;
+    }());
     Jhtml.Meta = Meta;
-    class MetaState {
-        constructor(rootElem, headElem, bodyElem, containerElem) {
+    var MetaState = (function () {
+        function MetaState(rootElem, headElem, bodyElem, containerElem) {
             this.rootElem = rootElem;
             this.headElem = headElem;
             this.bodyElem = bodyElem;
@@ -688,51 +788,70 @@ var Jhtml;
             this.blockedElements = [];
             this.markAsUsed(this.headElements);
             this.markAsUsed(this.bodyElements);
-            let reader = new Jhtml.Util.ElemConfigReader(containerElem);
+            var reader = new Jhtml.Util.ElemConfigReader(containerElem);
             this._browsable = reader.readBoolean("browsable", false);
         }
-        get browsable() {
-            return this._browsable;
-        }
-        markAsUsed(elements) {
-            for (let element of elements) {
+        Object.defineProperty(MetaState.prototype, "browsable", {
+            get: function () {
+                return this._browsable;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MetaState.prototype.markAsUsed = function (elements) {
+            for (var _i = 0, elements_1 = elements; _i < elements_1.length; _i++) {
+                var element = elements_1[_i];
                 if (element === this.containerElement)
                     continue;
                 this.usedElements.push(element);
                 this.markAsUsed(Jhtml.Util.array(element.children));
             }
-        }
-        get headElements() {
-            return Jhtml.Util.array(this.headElem.children);
-        }
-        get bodyElements() {
-            return Jhtml.Util.array(this.bodyElem.children);
-        }
-        get containerElement() {
-            return this.containerElem;
-        }
-        import(newMeta, curModelDependent) {
-            let merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
+        };
+        Object.defineProperty(MetaState.prototype, "headElements", {
+            get: function () {
+                return Jhtml.Util.array(this.headElem.children);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MetaState.prototype, "bodyElements", {
+            get: function () {
+                return Jhtml.Util.array(this.bodyElem.children);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MetaState.prototype, "containerElement", {
+            get: function () {
+                return this.containerElem;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MetaState.prototype.import = function (newMeta, curModelDependent) {
+            var merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
             merger.importInto(newMeta.headElements, this.headElem, Meta.Target.HEAD);
             merger.importInto(newMeta.bodyElements, this.bodyElem, Meta.Target.BODY);
             if (!curModelDependent) {
                 return merger.loadObserver;
             }
-            for (let element of merger.processedElements) {
+            for (var _i = 0, _a = merger.processedElements; _i < _a.length; _i++) {
+                var element = _a[_i];
                 this.usedElements.push(element);
             }
             return merger.loadObserver;
-        }
-        replaceWith(newMeta) {
-            let merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
+        };
+        MetaState.prototype.replaceWith = function (newMeta) {
+            var _this = this;
+            var merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
             merger.mergeInto(newMeta.headElements, this.headElem, Meta.Target.HEAD);
             merger.mergeInto(newMeta.bodyElements, this.bodyElem, Meta.Target.BODY);
             if (newMeta.bodyElement) {
                 merger.mergeAttrsInto(newMeta.bodyElement, this.bodyElem);
             }
-            let removableElements = new Array();
-            let remainingElements = merger.remainingElements;
-            let remainingElement;
+            var removableElements = new Array();
+            var remainingElements = merger.remainingElements;
+            var remainingElement;
             while (remainingElement = remainingElements.pop()) {
                 if (this.containsBlocked(remainingElement))
                     continue;
@@ -744,110 +863,120 @@ var Jhtml;
                 removableElements.push(remainingElement);
             }
             this.usedElements = merger.processedElements;
-            for (let removableElement of removableElements) {
+            for (var _i = 0, removableElements_1 = removableElements; _i < removableElements_1.length; _i++) {
+                var removableElement = removableElements_1[_i];
                 if (-1 == this.pendingRemoveElements.indexOf(removableElement)) {
                     this.pendingRemoveElements.push(removableElement);
                 }
             }
-            merger.loadObserver.whenLoaded(() => {
-                for (let removableElement of removableElements) {
-                    let i = this.pendingRemoveElements.indexOf(removableElement);
+            merger.loadObserver.whenLoaded(function () {
+                for (var _i = 0, removableElements_2 = removableElements; _i < removableElements_2.length; _i++) {
+                    var removableElement = removableElements_2[_i];
+                    var i = _this.pendingRemoveElements.indexOf(removableElement);
                     if (-1 == i)
                         continue;
                     removableElement.remove();
-                    this.pendingRemoveElements.splice(i, 1);
+                    _this.pendingRemoveElements.splice(i, 1);
                 }
             });
             return merger.loadObserver;
-        }
-        containsBlocked(element) {
+        };
+        MetaState.prototype.containsBlocked = function (element) {
             return -1 < this.blockedElements.indexOf(element);
-        }
-    }
+        };
+        return MetaState;
+    }());
     Jhtml.MetaState = MetaState;
     (function (Meta) {
-        let Target;
+        var Target;
         (function (Target) {
             Target[Target["HEAD"] = 1] = "HEAD";
             Target[Target["BODY"] = 2] = "BODY";
         })(Target = Meta.Target || (Meta.Target = {}));
     })(Meta = Jhtml.Meta || (Jhtml.Meta = {}));
-    class LoadObserver {
-        constructor() {
+    var LoadObserver = (function () {
+        function LoadObserver() {
             this.loadCallbacks = [];
             this.readyCallback = [];
         }
-        addElement(elem) {
-            let tn;
-            let loadCallback = () => {
+        LoadObserver.prototype.addElement = function (elem) {
+            var _this = this;
+            var tn;
+            var loadCallback = function () {
                 elem.removeEventListener("load", loadCallback);
                 clearTimeout(tn);
-                this.unregisterLoadCallback(loadCallback);
+                _this.unregisterLoadCallback(loadCallback);
             };
             this.loadCallbacks.push(loadCallback);
             elem.addEventListener("load", loadCallback, false);
             tn = setTimeout(loadCallback, 5000);
-        }
-        unregisterLoadCallback(callback) {
+        };
+        LoadObserver.prototype.unregisterLoadCallback = function (callback) {
             this.loadCallbacks.splice(this.loadCallbacks.indexOf(callback), 1);
             this.checkFire();
-        }
-        whenLoaded(callback) {
+        };
+        LoadObserver.prototype.whenLoaded = function (callback) {
             this.readyCallback.push(callback);
             this.checkFire();
-        }
-        checkFire() {
+        };
+        LoadObserver.prototype.checkFire = function () {
             if (this.loadCallbacks.length > 0)
                 return;
-            let callback;
+            var callback;
             while (callback = this.readyCallback.shift()) {
                 callback();
             }
-        }
-    }
+        };
+        return LoadObserver;
+    }());
     Jhtml.LoadObserver = LoadObserver;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Model {
-        constructor(meta) {
+    var Model = (function () {
+        function Model(meta) {
             this.meta = meta;
             this.comps = {};
             this.additionalData = {};
         }
-        isFull() {
+        Model.prototype.isFull = function () {
             return !!this.container;
-        }
-    }
+        };
+        return Model;
+    }());
     Jhtml.Model = Model;
-    class ModelState {
-        constructor(metaState, container, comps) {
+    var ModelState = (function () {
+        function ModelState(metaState, container, comps) {
             this.metaState = metaState;
             this.container = container;
             this.comps = comps;
         }
-    }
+        return ModelState;
+    }());
     Jhtml.ModelState = ModelState;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class ModelFactory {
-        static createFromJsonObj(jsonObj) {
+    var ModelFactory = (function () {
+        function ModelFactory() {
+        }
+        ModelFactory.createFromJsonObj = function (jsonObj) {
             if (typeof jsonObj.content != "string") {
                 throw new Jhtml.ParseError("Missing or invalid property 'content'.");
             }
-            let rootElem = document.createElement("html");
+            var rootElem = document.createElement("html");
             rootElem.innerHTML = jsonObj.content;
-            let meta = ModelFactory.buildMeta(rootElem, false);
+            var meta = ModelFactory.buildMeta(rootElem, false);
             ModelFactory.compileMetaElements(meta.headElements, "head", jsonObj);
             ModelFactory.compileMetaElements(meta.bodyElements, "bodyStart", jsonObj);
             ModelFactory.compileMetaElements(meta.bodyElements, "bodyEnd", jsonObj);
-            let model = new Jhtml.Model(meta);
+            var model = new Jhtml.Model(meta);
             if (meta.containerElement) {
                 model.container = ModelFactory.compileContainer(meta.containerElement, model);
                 model.comps = ModelFactory.compileComps(model.container, meta.containerElement, model);
                 model.container.detach();
-                for (let comp of Object.values(model.comps)) {
+                for (var _i = 0, _a = Object.values(model.comps); _i < _a.length; _i++) {
+                    var comp = _a[_i];
                     comp.detach();
                 }
             }
@@ -860,42 +989,43 @@ var Jhtml;
                 model.additionalData = jsonObj.additional;
             }
             return model;
-        }
-        static createStateFromDocument(document) {
-            let metaState = new Jhtml.MetaState(document.documentElement, document.head, document.body, ModelFactory.extractContainerElem(document.body, true));
-            let container = ModelFactory.compileContainer(metaState.containerElement, null);
-            let comps = ModelFactory.compileComps(container, metaState.containerElement, null);
+        };
+        ModelFactory.createStateFromDocument = function (document) {
+            var metaState = new Jhtml.MetaState(document.documentElement, document.head, document.body, ModelFactory.extractContainerElem(document.body, true));
+            var container = ModelFactory.compileContainer(metaState.containerElement, null);
+            var comps = ModelFactory.compileComps(container, metaState.containerElement, null);
             return new Jhtml.ModelState(metaState, container, comps);
-        }
-        static createFromHtml(htmlStr, full) {
-            let templateElem = document.createElement("html");
+        };
+        ModelFactory.createFromHtml = function (htmlStr, full) {
+            var templateElem = document.createElement("html");
             templateElem.innerHTML = htmlStr;
-            let model = new Jhtml.Model(ModelFactory.buildMeta(templateElem, true));
+            var model = new Jhtml.Model(ModelFactory.buildMeta(templateElem, true));
             model.container = ModelFactory.compileContainer(model.meta.containerElement, model);
             model.comps = ModelFactory.compileComps(model.container, templateElem, model);
             model.container.detach();
-            for (let comp of Object.values(model.comps)) {
+            for (var _i = 0, _a = Object.values(model.comps); _i < _a.length; _i++) {
+                var comp = _a[_i];
                 comp.detach();
             }
             return model;
-        }
-        static extractHeadElem(rootElem, required) {
-            let headElem = rootElem.querySelector("head");
+        };
+        ModelFactory.extractHeadElem = function (rootElem, required) {
+            var headElem = rootElem.querySelector("head");
             if (headElem || !required) {
                 return headElem;
             }
             throw new Jhtml.ParseError("head element missing.");
-        }
-        static extractBodyElem(rootElem, required) {
-            let bodyElem = rootElem.querySelector("body");
+        };
+        ModelFactory.extractBodyElem = function (rootElem, required) {
+            var bodyElem = rootElem.querySelector("body");
             if (bodyElem || !required) {
                 return bodyElem;
             }
             throw new Jhtml.ParseError("body element missing.");
-        }
-        static buildMeta(rootElem, full) {
-            let meta = new Jhtml.Meta();
-            let elem;
+        };
+        ModelFactory.buildMeta = function (rootElem, full) {
+            var meta = new Jhtml.Meta();
+            var elem;
             if ((elem = ModelFactory.extractContainerElem(rootElem, full))) {
                 meta.containerElement = elem;
             }
@@ -909,9 +1039,9 @@ var Jhtml;
                 meta.headElements = Jhtml.Util.array(elem.children);
             }
             return meta;
-        }
-        static extractContainerElem(rootElem, required) {
-            let containerList = Jhtml.Util.find(rootElem, ModelFactory.CONTAINER_SELECTOR);
+        };
+        ModelFactory.extractContainerElem = function (rootElem, required) {
+            var containerList = Jhtml.Util.find(rootElem, ModelFactory.CONTAINER_SELECTOR);
             if (containerList.length == 0) {
                 if (!required)
                     return null;
@@ -923,46 +1053,50 @@ var Jhtml;
                 throw new Jhtml.ParseError("Multiple jhtml container detected.");
             }
             return containerList[0];
-        }
-        static compileContainer(containerElem, model) {
+        };
+        ModelFactory.compileContainer = function (containerElem, model) {
             return new Jhtml.Container(containerElem.getAttribute(ModelFactory.CONTAINER_ATTR), containerElem, model);
-        }
-        static compileComps(container, containerElem, model) {
-            let comps = {};
-            for (let compElem of Jhtml.Util.find(containerElem, ModelFactory.COMP_SELECTOR)) {
-                let name = compElem.getAttribute(ModelFactory.COMP_ATTR);
-                if (comps[name]) {
-                    throw new Jhtml.ParseError("Duplicated comp name: " + name);
+        };
+        ModelFactory.compileComps = function (container, containerElem, model) {
+            var comps = {};
+            for (var _i = 0, _a = Jhtml.Util.find(containerElem, ModelFactory.COMP_SELECTOR); _i < _a.length; _i++) {
+                var compElem = _a[_i];
+                var name_4 = compElem.getAttribute(ModelFactory.COMP_ATTR);
+                if (comps[name_4]) {
+                    throw new Jhtml.ParseError("Duplicated comp name: " + name_4);
                 }
-                container.compElements[name] = compElem;
-                comps[name] = new Jhtml.Comp(name, compElem, model);
+                container.compElements[name_4] = compElem;
+                comps[name_4] = new Jhtml.Comp(name_4, compElem, model);
             }
             return comps;
-        }
-        static compileMetaElements(elements, name, jsonObj) {
+        };
+        ModelFactory.compileMetaElements = function (elements, name, jsonObj) {
             if (!(jsonObj[name] instanceof Array)) {
                 throw new Jhtml.ParseError("Missing or invalid property '" + name + "'.");
             }
-            for (let elemHtml of jsonObj[name]) {
+            for (var _i = 0, _a = jsonObj[name]; _i < _a.length; _i++) {
+                var elemHtml = _a[_i];
                 elements.push(ModelFactory.createElement(elemHtml));
             }
-        }
-        static createElement(elemHtml) {
-            let templateElem = document.createElement("template");
+        };
+        ModelFactory.createElement = function (elemHtml) {
+            var templateElem = document.createElement("template");
             templateElem.innerHTML = elemHtml;
             return templateElem.content.firstChild;
-        }
-    }
-    ModelFactory.CONTAINER_ATTR = "data-jhtml-container";
-    ModelFactory.COMP_ATTR = "data-jhtml-comp";
-    ModelFactory.CONTAINER_SELECTOR = "[" + ModelFactory.CONTAINER_ATTR + "]";
-    ModelFactory.COMP_SELECTOR = "[" + ModelFactory.COMP_ATTR + "]";
+        };
+        ModelFactory.CONTAINER_ATTR = "data-jhtml-container";
+        ModelFactory.COMP_ATTR = "data-jhtml-comp";
+        ModelFactory.CONTAINER_SELECTOR = "[" + ModelFactory.CONTAINER_ATTR + "]";
+        ModelFactory.COMP_SELECTOR = "[" + ModelFactory.COMP_ATTR + "]";
+        return ModelFactory;
+    }());
     Jhtml.ModelFactory = ModelFactory;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Monitor {
-        constructor(container, history, _pseudo) {
+    var Monitor = (function () {
+        function Monitor(container, history, _pseudo) {
+            var _this = this;
             this.container = container;
             this._pseudo = _pseudo;
             this.active = true;
@@ -973,29 +1107,38 @@ var Jhtml;
             this.pendingPromise = null;
             this.context = Jhtml.Context.from(container.ownerDocument);
             this.history = history;
-            this.history.onChanged(() => {
-                this.historyChanged();
+            this.history.onChanged(function () {
+                _this.historyChanged();
             });
         }
-        get compHandlerReg() {
-            return this.compHandlers;
-        }
-        get pseudo() {
-            return this._pseudo;
-        }
-        registerCompHandler(compName, compHandler) {
+        Object.defineProperty(Monitor.prototype, "compHandlerReg", {
+            get: function () {
+                return this.compHandlers;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Monitor.prototype, "pseudo", {
+            get: function () {
+                return this._pseudo;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Monitor.prototype.registerCompHandler = function (compName, compHandler) {
             this.compHandlers[compName] = compHandler;
-        }
-        unregisterCompHandler(compName) {
+        };
+        Monitor.prototype.unregisterCompHandler = function (compName) {
             delete this.compHandlers[compName];
-        }
-        exec(urlExpr, requestConfig) {
+        };
+        Monitor.prototype.exec = function (urlExpr, requestConfig) {
+            var _this = this;
             if (this.history.currentEntry) {
                 this.history.currentEntry.scrollPos = this.history.currentPage.config.scrollPos = window.pageYOffset;
             }
-            let url = Jhtml.Url.create(urlExpr);
-            let config = Jhtml.FullRequestConfig.from(requestConfig);
-            let page = this.history.getPageByUrl(url);
+            var url = Jhtml.Url.create(urlExpr);
+            var config = Jhtml.FullRequestConfig.from(requestConfig);
+            var page = this.history.getPageByUrl(url);
             if (!page) {
                 page = new Jhtml.Page(url, this.context.requestor.lookupDirective(url));
             }
@@ -1007,20 +1150,22 @@ var Jhtml;
             else if (page.disposed || config.forceReload || !page.config.keep) {
                 page.promise = this.context.requestor.lookupDirective(page.loadUrl || url);
             }
-            let promise = this.pendingPromise = page.promise;
+            var promise = this.pendingPromise = page.promise;
             if (config.pushToHistory && page !== this.history.currentPage) {
                 this.pushing = true;
                 this.history.push(page);
                 this.pushing = false;
             }
-            promise.then((directive) => {
-                if (promise !== this.pendingPromise)
+            promise.then(function (directive) {
+                if (promise !== _this.pendingPromise)
                     return;
-                this.handleDirective(directive, true, config.usePageScrollPos);
+                _this.handleDirective(directive, true, config.usePageScrollPos);
             });
             return promise;
-        }
-        handleDirective(directive, fresh = true, usePageScrollPos = false) {
+        };
+        Monitor.prototype.handleDirective = function (directive, fresh, usePageScrollPos) {
+            if (fresh === void 0) { fresh = true; }
+            if (usePageScrollPos === void 0) { usePageScrollPos = false; }
             this.triggerDirectiveCallbacks({ directive: directive, new: fresh });
             directive.exec(this);
             if (this.history.currentEntry) {
@@ -1028,49 +1173,52 @@ var Jhtml;
                     : this.history.currentEntry.scrollPos));
             }
             this.triggerDirectiveExecutedCallbacks({ directive: directive, new: fresh });
-        }
-        triggerDirectiveCallbacks(evt) {
+        };
+        Monitor.prototype.triggerDirectiveCallbacks = function (evt) {
             this.directiveCbr.fire(evt);
-        }
-        onDirective(callback) {
+        };
+        Monitor.prototype.onDirective = function (callback) {
             this.directiveCbr.on(callback);
-        }
-        offDirective(callback) {
+        };
+        Monitor.prototype.offDirective = function (callback) {
             this.directiveCbr.off(callback);
-        }
-        triggerDirectiveExecutedCallbacks(evt) {
+        };
+        Monitor.prototype.triggerDirectiveExecutedCallbacks = function (evt) {
             this.directiveExecutedCbr.fire(evt);
-        }
-        onDirectiveExecuted(callback) {
+        };
+        Monitor.prototype.onDirectiveExecuted = function (callback) {
             this.directiveExecutedCbr.on(callback);
-        }
-        offDirectiveExecuted(callback) {
+        };
+        Monitor.prototype.offDirectiveExecuted = function (callback) {
             this.directiveExecutedCbr.off(callback);
-        }
-        lookupModel(url) {
-            return new Promise(resolve => {
-                this.context.requestor.exec("GET", url).send().then((response) => {
+        };
+        Monitor.prototype.lookupModel = function (url) {
+            var _this = this;
+            return new Promise(function (resolve) {
+                _this.context.requestor.exec("GET", url).send().then(function (response) {
                     if (response.model) {
                         resolve(response.model);
                     }
                     else {
-                        this.handleDirective(response.directive);
+                        _this.handleDirective(response.directive);
                     }
                 });
             });
-        }
-        historyChanged() {
+        };
+        Monitor.prototype.historyChanged = function () {
+            var _this = this;
             if (this.pushing || !this.active)
                 return;
-            let currentPage = this.history.currentPage;
+            var currentPage = this.history.currentPage;
             if (!currentPage.promise) {
                 currentPage.promise = this.context.requestor.lookupDirective(currentPage.url);
             }
-            currentPage.promise.then(directive => {
-                this.handleDirective(directive);
+            currentPage.promise.then(function (directive) {
+                _this.handleDirective(directive);
             });
-        }
-        static of(element, selfIncluded = true) {
+        };
+        Monitor.of = function (element, selfIncluded) {
+            if (selfIncluded === void 0) { selfIncluded = true; }
             if (selfIncluded && element.matches("." + Monitor.CSS_CLASS)) {
                 return Monitor.test(element);
             }
@@ -1078,16 +1226,16 @@ var Jhtml;
                 return Monitor.test(element);
             }
             return null;
-        }
-        static test(element) {
-            let monitor = Jhtml.Util.getElemData(element, Monitor.KEY);
+        };
+        Monitor.test = function (element) {
+            var monitor = Jhtml.Util.getElemData(element, Monitor.KEY);
             if (element.classList.contains(Monitor.CSS_CLASS) && monitor instanceof Monitor) {
                 return monitor;
             }
             return null;
-        }
-        static create(container, history, pseudo) {
-            let monitor = Monitor.test(container);
+        };
+        Monitor.create = function (container, history, pseudo) {
+            var monitor = Monitor.test(container);
             if (monitor) {
                 throw new Error("Element is already monitored.");
             }
@@ -1095,60 +1243,71 @@ var Jhtml;
             monitor = new Monitor(container, history, pseudo);
             Jhtml.Util.bindElemData(container, Monitor.KEY, monitor);
             return monitor;
-        }
-    }
-    Monitor.KEY = "jhtml-monitor";
-    Monitor.CSS_CLASS = "jhtml-selfmonitored";
+        };
+        Monitor.KEY = "jhtml-monitor";
+        Monitor.CSS_CLASS = "jhtml-selfmonitored";
+        return Monitor;
+    }());
     Jhtml.Monitor = Monitor;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Content {
-        constructor(elements, _model, detachedElem) {
+    var Content = (function () {
+        function Content(elements, _model, detachedElem) {
             this.elements = elements;
             this._model = _model;
             this.detachedElem = detachedElem;
             this.cbr = new Jhtml.Util.CallbackRegistry();
             this.attached = false;
         }
-        get model() {
-            return this._model;
-        }
-        fire(eventType) {
+        Object.defineProperty(Content.prototype, "model", {
+            get: function () {
+                return this._model;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Content.prototype.fire = function (eventType) {
             this.cbr.fireType(eventType);
-        }
-        on(eventType, callback) {
+        };
+        Content.prototype.on = function (eventType, callback) {
             this.cbr.onType(eventType, callback);
-        }
-        off(eventType, callback) {
+        };
+        Content.prototype.off = function (eventType, callback) {
             this.cbr.offType(eventType, callback);
-        }
-        get isAttached() {
-            return this.attached;
-        }
-        ensureDetached() {
+        };
+        Object.defineProperty(Content.prototype, "isAttached", {
+            get: function () {
+                return this.attached;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Content.prototype.ensureDetached = function () {
             if (this.attached) {
                 throw new Error("Element already attached.");
             }
-        }
-        attach(element) {
+        };
+        Content.prototype.attach = function (element) {
             this.ensureDetached();
-            for (let childElem of this.elements) {
+            for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
+                var childElem = _a[_i];
                 element.appendChild(childElem);
             }
             this.attached = true;
             this.fire("attached");
-        }
-        detach() {
+        };
+        Content.prototype.detach = function () {
             if (!this.attached)
                 return;
             this.cbr.fireType("detach");
-            for (let childElem of this.elements) {
+            for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
+                var childElem = _a[_i];
                 this.detachedElem.appendChild(childElem);
             }
             this.attached = false;
-        }
-        dispose() {
+        };
+        Content.prototype.dispose = function () {
             if (this.attached) {
                 this.detach();
             }
@@ -1156,122 +1315,157 @@ var Jhtml;
             this.cbr = null;
             this.detachedElem.remove();
             this.detachedElem = null;
-        }
-    }
+        };
+        return Content;
+    }());
     Jhtml.Content = Content;
-    class Panel extends Content {
-        constructor(_name, attachedElem, model) {
-            super(Jhtml.Util.array(attachedElem.children), model, attachedElem.ownerDocument.createElement("template"));
-            this._name = _name;
-            this.attached = true;
+    var Panel = (function (_super) {
+        __extends(Panel, _super);
+        function Panel(_name, attachedElem, model) {
+            var _this = _super.call(this, Jhtml.Util.array(attachedElem.children), model, attachedElem.ownerDocument.createElement("template")) || this;
+            _this._name = _name;
+            _this.attached = true;
+            return _this;
         }
-        get name() {
-            return this._name;
-        }
-        get loadObserver() {
-            return this._loadObserver;
-        }
-        attachTo(element, loadObserver) {
+        Object.defineProperty(Panel.prototype, "name", {
+            get: function () {
+                return this._name;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Panel.prototype, "loadObserver", {
+            get: function () {
+                return this._loadObserver;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Panel.prototype.attachTo = function (element, loadObserver) {
             this._loadObserver = loadObserver;
             this.attach(element);
-        }
-        detach() {
+        };
+        Panel.prototype.detach = function () {
             this._loadObserver = null;
-            super.detach();
-        }
-    }
+            _super.prototype.detach.call(this);
+        };
+        return Panel;
+    }(Content));
     Jhtml.Panel = Panel;
-    class Container extends Panel {
-        constructor() {
-            super(...arguments);
-            this.compElements = {};
+    var Container = (function (_super) {
+        __extends(Container, _super);
+        function Container() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.compElements = {};
+            return _this;
         }
-        matches(container) {
+        Container.prototype.matches = function (container) {
             return this.name == container.name
                 && JSON.stringify(Object.keys(this.compElements)) == JSON.stringify(Object.keys(container.compElements));
-        }
-    }
+        };
+        return Container;
+    }(Panel));
     Jhtml.Container = Container;
-    class Comp extends Panel {
-    }
+    var Comp = (function (_super) {
+        __extends(Comp, _super);
+        function Comp() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Comp;
+    }(Panel));
     Jhtml.Comp = Comp;
-    class Snippet extends Content {
-        markAttached() {
+    var Snippet = (function (_super) {
+        __extends(Snippet, _super);
+        function Snippet() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Snippet.prototype.markAttached = function () {
             this.ensureDetached();
             this.attached = true;
             this.cbr.fireType("attached");
-        }
-        attachTo(element) {
+        };
+        Snippet.prototype.attachTo = function (element) {
             this.attach(element);
-        }
-    }
+        };
+        return Snippet;
+    }(Content));
     Jhtml.Snippet = Snippet;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class ParseError extends Error {
-    }
+    var ParseError = (function (_super) {
+        __extends(ParseError, _super);
+        function ParseError() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return ParseError;
+    }(Error));
     Jhtml.ParseError = ParseError;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class DocumentManager {
-    }
+    var DocumentManager = (function () {
+        function DocumentManager() {
+        }
+        return DocumentManager;
+    }());
     Jhtml.DocumentManager = DocumentManager;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class FullModelDirective {
-        constructor(model) {
+    var FullModelDirective = (function () {
+        function FullModelDirective(model) {
             this.model = model;
             if (!model.isFull()) {
                 throw new Error("Invalid argument. Full model required.");
             }
         }
-        getAdditionalData() {
+        FullModelDirective.prototype.getAdditionalData = function () {
             return this.model.additionalData;
-        }
-        exec(monitor) {
+        };
+        FullModelDirective.prototype.exec = function (monitor) {
             if (!monitor.pseudo) {
                 monitor.context.replaceModel(this.model, monitor.compHandlerReg);
                 return;
             }
-            let loadObserver = monitor.context.importMeta(this.model.meta);
-            for (let name in this.model.comps) {
-                if (!monitor.compHandlerReg[name])
+            var loadObserver = monitor.context.importMeta(this.model.meta);
+            for (var name_5 in this.model.comps) {
+                if (!monitor.compHandlerReg[name_5])
                     continue;
-                monitor.compHandlerReg[name].attachComp(this.model.comps[name], loadObserver);
+                monitor.compHandlerReg[name_5].attachComp(this.model.comps[name_5], loadObserver);
             }
-        }
-    }
+        };
+        return FullModelDirective;
+    }());
     Jhtml.FullModelDirective = FullModelDirective;
-    class ReplaceDirective {
-        constructor(status, responseText, mimeType, url) {
+    var ReplaceDirective = (function () {
+        function ReplaceDirective(status, responseText, mimeType, url) {
             this.status = status;
             this.responseText = responseText;
             this.mimeType = mimeType;
             this.url = url;
         }
-        getAdditionalData() {
+        ReplaceDirective.prototype.getAdditionalData = function () {
             return null;
-        }
-        exec(monitor) {
+        };
+        ReplaceDirective.prototype.exec = function (monitor) {
             monitor.context.replace(this.responseText, this.mimeType, monitor.history.currentPage.url.equals(this.url));
-        }
-    }
+        };
+        return ReplaceDirective;
+    }());
     Jhtml.ReplaceDirective = ReplaceDirective;
-    class RedirectDirective {
-        constructor(srcUrl, back, targetUrl, requestConfig, additionalData) {
+    var RedirectDirective = (function () {
+        function RedirectDirective(srcUrl, back, targetUrl, requestConfig, additionalData) {
             this.srcUrl = srcUrl;
             this.back = back;
             this.targetUrl = targetUrl;
             this.requestConfig = requestConfig;
             this.additionalData = additionalData;
         }
-        getAdditionalData() {
+        RedirectDirective.prototype.getAdditionalData = function () {
             return this.additionalData;
-        }
-        exec(monitor) {
+        };
+        RedirectDirective.prototype.exec = function (monitor) {
             switch (this.back) {
                 case RedirectDirective.Type.REFERER:
                     if (!monitor.history.currentPage.url.equals(this.srcUrl)) {
@@ -1279,7 +1473,7 @@ var Jhtml;
                     }
                 case RedirectDirective.Type.BACK:
                     if (monitor.history.currentEntry.index > 0) {
-                        let entry = monitor.history.getEntryByIndex(monitor.history.currentEntry.index - 1);
+                        var entry = monitor.history.getEntryByIndex(monitor.history.currentEntry.index - 1);
                         monitor.exec(entry.page.url, this.requestConfig);
                         monitor.history.currentEntry.scrollPos = entry.scrollPos;
                         return;
@@ -1287,111 +1481,123 @@ var Jhtml;
                 default:
                     monitor.exec(this.targetUrl, this.requestConfig);
             }
-        }
-    }
+        };
+        return RedirectDirective;
+    }());
     Jhtml.RedirectDirective = RedirectDirective;
     (function (RedirectDirective) {
-        let Type;
+        var Type;
         (function (Type) {
             Type[Type["TARGET"] = 0] = "TARGET";
             Type[Type["REFERER"] = 1] = "REFERER";
             Type[Type["BACK"] = 2] = "BACK";
         })(Type = RedirectDirective.Type || (RedirectDirective.Type = {}));
     })(RedirectDirective = Jhtml.RedirectDirective || (Jhtml.RedirectDirective = {}));
-    class SnippetDirective {
-        constructor(srcUrl, model) {
+    var SnippetDirective = (function () {
+        function SnippetDirective(srcUrl, model) {
             this.srcUrl = srcUrl;
             this.model = model;
         }
-        getAdditionalData() {
+        SnippetDirective.prototype.getAdditionalData = function () {
             return this.model.additionalData;
-        }
-        exec(monitor) {
+        };
+        SnippetDirective.prototype.exec = function (monitor) {
             throw new Error(this.srcUrl + "; can not exec snippet only directive.");
-        }
-    }
+        };
+        return SnippetDirective;
+    }());
     Jhtml.SnippetDirective = SnippetDirective;
-    class DataDirective {
-        constructor(srcUrl, additionalData) {
+    var DataDirective = (function () {
+        function DataDirective(srcUrl, additionalData) {
             this.srcUrl = srcUrl;
             this.additionalData = additionalData;
         }
-        getAdditionalData() {
+        DataDirective.prototype.getAdditionalData = function () {
             return this.additionalData;
-        }
-        exec(monitor) {
+        };
+        DataDirective.prototype.exec = function (monitor) {
             throw new Error(this.srcUrl + "; can not exec data only directive.");
-        }
-    }
+        };
+        return DataDirective;
+    }());
     Jhtml.DataDirective = DataDirective;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Request {
-        constructor(requestor, _xhr, _url) {
+    var Request = (function () {
+        function Request(requestor, _xhr, _url) {
             this.requestor = requestor;
             this._xhr = _xhr;
             this._url = _url;
         }
-        get xhr() {
-            return this._xhr;
-        }
-        get url() {
-            return this._url;
-        }
-        abort() {
+        Object.defineProperty(Request.prototype, "xhr", {
+            get: function () {
+                return this._xhr;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Request.prototype, "url", {
+            get: function () {
+                return this._url;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Request.prototype.abort = function () {
             this.xhr.abort();
-        }
-        send(data) {
+        };
+        Request.prototype.send = function (data) {
             this.xhr.send(data);
             return this.buildPromise();
-        }
-        buildPromise() {
-            return new Promise((resolve) => {
-                this.xhr.onreadystatechange = () => {
-                    if (this.xhr.readyState != 4)
+        };
+        Request.prototype.buildPromise = function () {
+            var _this = this;
+            return new Promise(function (resolve) {
+                _this.xhr.onreadystatechange = function () {
+                    if (_this.xhr.readyState != 4)
                         return;
-                    switch (this.xhr.status) {
+                    switch (_this.xhr.status) {
                         case 200:
-                            let model;
-                            let directive;
-                            if (!this.xhr.getResponseHeader("Content-Type").match(/json/)) {
-                                model = this.createModelFromHtml(this.xhr.responseText);
+                            var model = void 0;
+                            var directive = void 0;
+                            if (!_this.xhr.getResponseHeader("Content-Type").match(/json/)) {
+                                model = _this.createModelFromHtml(_this.xhr.responseText);
                             }
                             else {
-                                let jsonObj = this.createJsonObj(this.url, this.xhr.responseText);
-                                if (!(directive = this.scanForDirective(this.url, jsonObj))) {
-                                    model = this.createModelFromJson(this.url, jsonObj);
+                                var jsonObj = _this.createJsonObj(_this.url, _this.xhr.responseText);
+                                if (!(directive = _this.scanForDirective(_this.url, jsonObj))) {
+                                    model = _this.createModelFromJson(_this.url, jsonObj);
                                 }
                             }
                             if (model) {
                                 directive = model.isFull() ? new Jhtml.FullModelDirective(model) :
-                                    new Jhtml.SnippetDirective(this.url, model);
+                                    new Jhtml.SnippetDirective(_this.url, model);
                             }
-                            let response = { url: this.url, model: model, directive: directive };
+                            var response = { url: _this.url, model: model, directive: directive };
                             if (model) {
                                 model.response = response;
                             }
                             resolve(response);
                             break;
                         default:
-                            resolve({ url: this.url, directive: new Jhtml.ReplaceDirective(this.xhr.status, this.xhr.responseText, this.xhr.getResponseHeader("Content-Type"), this.url) });
+                            resolve({ url: _this.url, directive: new Jhtml.ReplaceDirective(_this.xhr.status, _this.xhr.responseText, _this.xhr.getResponseHeader("Content-Type"), _this.url) });
                     }
                 };
-                this.xhr.onerror = () => {
-                    throw new Error("Could not request " + this.url.toString());
+                _this.xhr.onerror = function () {
+                    throw new Error("Could not request " + _this.url.toString());
                 };
             });
-        }
-        createJsonObj(url, jsonText) {
+        };
+        Request.prototype.createJsonObj = function (url, jsonText) {
             try {
                 return JSON.parse(jsonText);
             }
             catch (e) {
                 throw new Error(url + "; invalid json response: " + e.message);
             }
-        }
-        scanForDirective(url, jsonObj) {
+        };
+        Request.prototype.scanForDirective = function (url, jsonObj) {
             switch (jsonObj.directive) {
                 case "redirect":
                     return new Jhtml.RedirectDirective(url, Jhtml.RedirectDirective.Type.TARGET, Jhtml.Url.create(jsonObj.location), Jhtml.FullRequestConfig.from(jsonObj.requestConfig), jsonObj.additional);
@@ -1405,10 +1611,10 @@ var Jhtml;
                     }
                     return null;
             }
-        }
-        createModelFromJson(url, jsonObj) {
+        };
+        Request.prototype.createModelFromJson = function (url, jsonObj) {
             try {
-                let model = Jhtml.ModelFactory.createFromJsonObj(jsonObj);
+                var model = Jhtml.ModelFactory.createFromJsonObj(jsonObj);
                 this.requestor.context.registerNewModel(model);
                 return model;
             }
@@ -1418,33 +1624,34 @@ var Jhtml;
                 }
                 throw e;
             }
-        }
-        createModelFromHtml(html) {
+        };
+        Request.prototype.createModelFromHtml = function (html) {
             try {
-                let model = Jhtml.ModelFactory.createFromHtml(html, true);
+                var model = Jhtml.ModelFactory.createFromHtml(html, true);
                 this.requestor.context.registerNewModel(model);
                 return model;
             }
             catch (e) {
                 throw new Error(this.url + "; invalid jhtml response: " + e.message);
             }
-        }
-    }
+        };
+        return Request;
+    }());
     Jhtml.Request = Request;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class FullRequestConfig {
-        constructor() {
+    var FullRequestConfig = (function () {
+        function FullRequestConfig() {
             this.forceReload = false;
             this.pushToHistory = true;
             this.usePageScrollPos = false;
         }
-        static from(requestConfig) {
+        FullRequestConfig.from = function (requestConfig) {
             if (requestConfig instanceof FullRequestConfig) {
                 return requestConfig;
             }
-            let config = new FullRequestConfig();
+            var config = new FullRequestConfig();
             if (!requestConfig)
                 return config;
             if (requestConfig.forceReload !== undefined) {
@@ -1457,30 +1664,36 @@ var Jhtml;
                 config.usePageScrollPos = requestConfig.usePageScrollPos;
             }
             return config;
-        }
-        static fromElement(element) {
-            let reader = new Jhtml.Util.ElemConfigReader(element);
-            let config = new FullRequestConfig();
+        };
+        FullRequestConfig.fromElement = function (element) {
+            var reader = new Jhtml.Util.ElemConfigReader(element);
+            var config = new FullRequestConfig();
             config.forceReload = reader.readBoolean("force-reload", config.forceReload);
             config.pushToHistory = reader.readBoolean("push-to-history", config.pushToHistory);
             config.usePageScrollPos = reader.readBoolean("use-page-scroll-pos", config.usePageScrollPos);
             return config;
-        }
-    }
+        };
+        return FullRequestConfig;
+    }());
     Jhtml.FullRequestConfig = FullRequestConfig;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Requestor {
-        constructor(_context) {
+    var Requestor = (function () {
+        function Requestor(_context) {
             this._context = _context;
         }
-        get context() {
-            return this._context;
-        }
-        lookupDirective(url) {
-            return new Promise(resolve => {
-                this.exec("GET", url).send().then((result) => {
+        Object.defineProperty(Requestor.prototype, "context", {
+            get: function () {
+                return this._context;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Requestor.prototype.lookupDirective = function (url) {
+            var _this = this;
+            return new Promise(function (resolve) {
+                _this.exec("GET", url).send().then(function (result) {
                     if (result.directive) {
                         resolve(result.directive);
                         return;
@@ -1488,10 +1701,11 @@ var Jhtml;
                     throw new Error(url + " provides no jhtml directive.");
                 });
             });
-        }
-        lookupModel(url) {
-            return new Promise(resolve => {
-                this.exec("GET", url).send().then((result) => {
+        };
+        Requestor.prototype.lookupModel = function (url) {
+            var _this = this;
+            return new Promise(function (resolve) {
+                _this.exec("GET", url).send().then(function (result) {
                     if (result.directive) {
                         resolve(result.model);
                         return;
@@ -1499,37 +1713,40 @@ var Jhtml;
                     throw new Error(url + " provides no jhtml model.");
                 });
             });
-        }
-        exec(method, url) {
-            let xhr = new XMLHttpRequest();
+        };
+        Requestor.prototype.exec = function (method, url) {
+            var xhr = new XMLHttpRequest();
             xhr.open(method, url.toString(), true);
             xhr.setRequestHeader("Accept", "application/json,text/html");
             return new Jhtml.Request(this, xhr, url);
-        }
-    }
+        };
+        return Requestor;
+    }());
     Jhtml.Requestor = Requestor;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
-    class Url {
-        constructor(urlStr) {
+    var Url = (function () {
+        function Url(urlStr) {
             this.urlStr = urlStr;
         }
-        toString() {
+        Url.prototype.toString = function () {
             return this.urlStr;
-        }
-        equals(url) {
+        };
+        Url.prototype.equals = function (url) {
             return this.urlStr == url.urlStr;
-        }
-        extR(pathExt = null, queryExt = null) {
-            let newUrlStr = this.urlStr;
+        };
+        Url.prototype.extR = function (pathExt, queryExt) {
+            if (pathExt === void 0) { pathExt = null; }
+            if (queryExt === void 0) { queryExt = null; }
+            var newUrlStr = this.urlStr;
             if (pathExt !== null && pathExt !== undefined) {
                 newUrlStr = newUrlStr.replace(/\/+$/, "") + "/" + encodeURI(pathExt);
             }
             if (queryExt !== null || queryExt !== undefined) {
-                let parts = [];
+                var parts = [];
                 this.compileQueryParts(parts, queryExt, null);
-                let queryExtStr = parts.join("&");
+                var queryExtStr = parts.join("&");
                 if (newUrlStr.match(/\?/)) {
                     newUrlStr += "&" + queryExtStr;
                 }
@@ -1538,40 +1755,40 @@ var Jhtml;
                 }
             }
             return new Url(newUrlStr);
-        }
-        compileQueryParts(parts, queryExt, prefix) {
-            for (let key in queryExt) {
-                let name = null;
+        };
+        Url.prototype.compileQueryParts = function (parts, queryExt, prefix) {
+            for (var key in queryExt) {
+                var name_6 = null;
                 if (prefix) {
-                    name = prefix + "[" + key + "]";
+                    name_6 = prefix + "[" + key + "]";
                 }
                 else {
-                    name = key;
+                    name_6 = key;
                 }
-                let value = queryExt[key];
+                var value = queryExt[key];
                 if (value === null || value === undefined) {
                     continue;
                 }
                 if (value instanceof Array || value instanceof Object) {
-                    this.compileQueryParts(parts, value, name);
+                    this.compileQueryParts(parts, value, name_6);
                 }
                 else {
-                    parts.push(encodeURIComponent(name) + "=" + encodeURIComponent(value));
+                    parts.push(encodeURIComponent(name_6) + "=" + encodeURIComponent(value));
                 }
             }
-        }
-        static build(urlExpression) {
+        };
+        Url.build = function (urlExpression) {
             if (urlExpression === null || urlExpression === undefined)
                 return null;
             return Url.create(urlExpression);
-        }
-        static create(urlExpression) {
+        };
+        Url.create = function (urlExpression) {
             if (urlExpression instanceof Url) {
                 return urlExpression;
             }
             return new Url(Url.absoluteStr(urlExpression));
-        }
-        static absoluteStr(urlExpression) {
+        };
+        Url.absoluteStr = function (urlExpression) {
             if (urlExpression instanceof Url) {
                 return urlExpression.toString();
             }
@@ -1583,16 +1800,17 @@ var Jhtml;
                 return window.location.protocol + "//" + window.location.host + urlStr;
             }
             return urlStr;
-        }
-    }
+        };
+        return Url;
+    }());
     Jhtml.Url = Url;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
     var Ui;
     (function (Ui) {
-        class Form {
-            constructor(_element) {
+        var Form = (function () {
+            function Form(_element) {
                 this._element = _element;
                 this._observing = false;
                 this._config = new Form.Config();
@@ -1601,118 +1819,133 @@ var Jhtml;
                 this.tmpSubmitDirective = null;
                 this.controlLockAutoReleaseable = true;
             }
-            get element() {
-                return this._element;
-            }
-            get observing() {
-                return this._observing;
-            }
-            get config() {
-                return this._config;
-            }
-            reset() {
+            Object.defineProperty(Form.prototype, "element", {
+                get: function () {
+                    return this._element;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Form.prototype, "observing", {
+                get: function () {
+                    return this._observing;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Form.prototype, "config", {
+                get: function () {
+                    return this._config;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Form.prototype.reset = function () {
                 this.element.reset();
-            }
-            fire(eventType) {
+            };
+            Form.prototype.fire = function (eventType) {
                 this.callbackRegistery.fireType(eventType.toString(), this);
-            }
-            on(eventType, callback) {
+            };
+            Form.prototype.on = function (eventType, callback) {
                 this.callbackRegistery.onType(eventType.toString(), callback);
-            }
-            off(eventType, callback) {
+            };
+            Form.prototype.off = function (eventType, callback) {
                 this.callbackRegistery.offType(eventType.toString(), callback);
-            }
-            observe() {
+            };
+            Form.prototype.observe = function () {
+                var _this = this;
                 if (this._observing)
                     return;
                 this._observing = true;
-                this.element.addEventListener("submit", (evt) => {
+                this.element.addEventListener("submit", function (evt) {
                     evt.preventDefault();
-                    if (this.config.autoSubmitAllowed) {
-                        let submitDirective = this.tmpSubmitDirective;
-                        setTimeout(() => {
-                            this.submit(submitDirective);
+                    if (_this.config.autoSubmitAllowed) {
+                        var submitDirective_1 = _this.tmpSubmitDirective;
+                        setTimeout(function () {
+                            _this.submit(submitDirective_1);
                         });
                     }
-                    this.tmpSubmitDirective = null;
+                    _this.tmpSubmitDirective = null;
                 }, false);
-                Jhtml.Util.find(this.element, "input[type=submit], button[type=submit]").forEach((elem) => {
-                    elem.addEventListener("click", (evt) => {
-                        this.tmpSubmitDirective = { button: elem };
+                Jhtml.Util.find(this.element, "input[type=submit], button[type=submit]").forEach(function (elem) {
+                    elem.addEventListener("click", function (evt) {
+                        _this.tmpSubmitDirective = { button: elem };
                     }, false);
                 });
-            }
-            buildFormData(submitConfig) {
+            };
+            Form.prototype.buildFormData = function (submitConfig) {
                 var formData = new FormData(this.element);
                 if (submitConfig && submitConfig.button) {
                     formData.append(submitConfig.button.getAttribute("name"), submitConfig.button.getAttribute("value"));
                 }
                 return formData;
-            }
-            block() {
+            };
+            Form.prototype.block = function () {
                 if (!this.controlLock && this.config.disableControls) {
                     this.disableControls();
                 }
-            }
-            unblock() {
+            };
+            Form.prototype.unblock = function () {
                 if (this.controlLock && this.controlLockAutoReleaseable) {
                     this.controlLock.release();
                 }
-            }
-            disableControls(autoReleaseable = true) {
+            };
+            Form.prototype.disableControls = function (autoReleaseable) {
+                if (autoReleaseable === void 0) { autoReleaseable = true; }
                 this.controlLockAutoReleaseable = autoReleaseable;
                 if (this.controlLock)
                     return;
                 this.controlLock = new ControlLock(this.element);
-            }
-            enableControls() {
+            };
+            Form.prototype.enableControls = function () {
                 if (this.controlLock) {
                     this.controlLock.release();
                     this.controlLock = null;
                     this.controlLockAutoReleaseable = true;
                 }
-            }
-            abortSubmit() {
+            };
+            Form.prototype.abortSubmit = function () {
                 if (this.curRequest) {
                     var curXhr = this.curRequest;
                     this.curRequest = null;
                     curXhr.abort();
                     this.unblock();
                 }
-            }
-            submit(submitConfig) {
+            };
+            Form.prototype.submit = function (submitConfig) {
+                var _this = this;
                 this.abortSubmit();
                 this.fire("submit");
                 var url = Jhtml.Url.build(this.config.actionUrl || this.element.getAttribute("action"));
                 var formData = this.buildFormData(submitConfig);
-                let monitor = Jhtml.Monitor.of(this.element);
-                let request = this.curRequest = Jhtml.getOrCreateContext(this.element.ownerDocument).requestor
+                var monitor = Jhtml.Monitor.of(this.element);
+                var request = this.curRequest = Jhtml.getOrCreateContext(this.element.ownerDocument).requestor
                     .exec("POST", url);
-                request.send(formData).then((response) => {
-                    if (this.curRequest !== request)
+                request.send(formData).then(function (response) {
+                    if (_this.curRequest !== request)
                         return;
-                    if ((!this.config.successResponseHandler || !this.config.successResponseHandler(response))
+                    if ((!_this.config.successResponseHandler || !_this.config.successResponseHandler(response))
                         && monitor) {
                         monitor.handleDirective(response.directive);
                     }
                     if (submitConfig && submitConfig.success) {
                         submitConfig.success();
                     }
-                    this.unblock();
-                    this.fire("submitted");
-                }).catch((e) => {
-                    if (this.curRequest !== request)
+                    _this.unblock();
+                    _this.fire("submitted");
+                }).catch(function (e) {
+                    if (_this.curRequest !== request)
                         return;
                     if (submitConfig && submitConfig.error) {
                         submitConfig.error();
                     }
-                    this.unblock();
-                    this.fire("submitted");
+                    _this.unblock();
+                    _this.fire("submitted");
                 });
                 this.block();
-            }
-            static from(element) {
-                let form = Jhtml.Util.getElemData(element, Form.KEY);
+            };
+            Form.from = function (element) {
+                var form = Jhtml.Util.getElemData(element, Form.KEY);
                 if (form instanceof Form) {
                     return form;
                 }
@@ -1720,40 +1953,45 @@ var Jhtml;
                 Jhtml.Util.bindElemData(element, Form.KEY, form);
                 form.observe();
                 return form;
-            }
-        }
-        Form.KEY = "jhtml-form";
+            };
+            Form.KEY = "jhtml-form";
+            return Form;
+        }());
         Ui.Form = Form;
-        class ControlLock {
-            constructor(containerElem) {
+        var ControlLock = (function () {
+            function ControlLock(containerElem) {
                 this.containerElem = containerElem;
                 this.lock();
             }
-            lock() {
+            ControlLock.prototype.lock = function () {
                 if (this.controls)
                     return;
                 this.controls = Jhtml.Util.find(this.containerElem, "input:not([disabled]), textarea:not([disabled]), button:not([disabled]), select:not([disabled])");
-                for (let control of this.controls) {
+                for (var _i = 0, _a = this.controls; _i < _a.length; _i++) {
+                    var control = _a[_i];
                     control.setAttribute("disabled", "disabled");
                 }
-            }
-            release() {
+            };
+            ControlLock.prototype.release = function () {
                 if (!this.controls)
                     return;
-                for (let control of this.controls) {
+                for (var _i = 0, _a = this.controls; _i < _a.length; _i++) {
+                    var control = _a[_i];
                     control.removeAttribute("disabled");
                 }
                 this.controls = null;
-            }
-        }
+            };
+            return ControlLock;
+        }());
         (function (Form) {
-            class Config {
-                constructor() {
+            var Config = (function () {
+                function Config() {
                     this.disableControls = true;
                     this.autoSubmitAllowed = true;
                     this.actionUrl = null;
                 }
-            }
+                return Config;
+            }());
             Form.Config = Config;
         })(Form = Ui.Form || (Ui.Form = {}));
     })(Ui = Jhtml.Ui || (Jhtml.Ui = {}));
@@ -1762,75 +2000,86 @@ var Jhtml;
 (function (Jhtml) {
     var Ui;
     (function (Ui) {
-        class Link {
-            constructor(elem) {
+        var Link = (function () {
+            function Link(elem) {
+                var _this = this;
                 this.elem = elem;
                 this.ecr = new Jhtml.Util.CallbackRegistry();
                 this.dcr = new Jhtml.Util.CallbackRegistry();
                 this.disabled = false;
                 this.requestConfig = Jhtml.FullRequestConfig.fromElement(this.elem);
-                elem.addEventListener("click", (evt) => {
+                elem.addEventListener("click", function (evt) {
                     evt.preventDefault();
-                    this.handle();
+                    _this.handle();
                     return false;
                 });
             }
-            handle() {
+            Link.prototype.handle = function () {
                 if (this.disabled)
                     return;
-                let event = new Link.Event();
+                var event = new Link.Event();
                 this.ecr.fire(event);
                 if (!event.execPrevented) {
                     this.exec();
                 }
-            }
-            exec() {
+            };
+            Link.prototype.exec = function () {
                 this.dcr.fire(Jhtml.Monitor.of(this.elem).exec(this.elem.href, this.requestConfig));
-            }
-            get element() {
-                return this.elem;
-            }
-            dispose() {
+            };
+            Object.defineProperty(Link.prototype, "element", {
+                get: function () {
+                    return this.elem;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Link.prototype.dispose = function () {
                 this.elem.remove();
                 this.elem = null;
                 this.dcr.clear();
-            }
-            onEvent(callback) {
+            };
+            Link.prototype.onEvent = function (callback) {
                 this.ecr.on(callback);
-            }
-            offEvent(callback) {
+            };
+            Link.prototype.offEvent = function (callback) {
                 this.ecr.off(callback);
-            }
-            onDirective(callback) {
+            };
+            Link.prototype.onDirective = function (callback) {
                 this.dcr.on(callback);
-            }
-            offDirective(callback) {
+            };
+            Link.prototype.offDirective = function (callback) {
                 this.dcr.off(callback);
-            }
-            static from(element) {
-                let link = Jhtml.Util.getElemData(element, Link.KEY);
+            };
+            Link.from = function (element) {
+                var link = Jhtml.Util.getElemData(element, Link.KEY);
                 if (link instanceof Link) {
                     return link;
                 }
                 link = new Link(element);
                 Jhtml.Util.bindElemData(element, Link.KEY, link);
                 return link;
-            }
-        }
-        Link.KEY = "jhtml-link";
+            };
+            Link.KEY = "jhtml-link";
+            return Link;
+        }());
         Ui.Link = Link;
         (function (Link) {
-            class Event {
-                constructor() {
+            var Event = (function () {
+                function Event() {
                     this._execPrevented = false;
                 }
-                get execPrevented() {
-                    return this._execPrevented;
-                }
-                preventExec() {
+                Object.defineProperty(Event.prototype, "execPrevented", {
+                    get: function () {
+                        return this._execPrevented;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Event.prototype.preventExec = function () {
                     this._execPrevented = true;
-                }
-            }
+                };
+                return Event;
+            }());
             Link.Event = Event;
         })(Link = Ui.Link || (Ui.Link = {}));
     })(Ui = Jhtml.Ui || (Jhtml.Ui = {}));
@@ -1839,25 +2088,31 @@ var Jhtml;
 (function (Jhtml) {
     var Ui;
     (function (Ui) {
-        class Scanner {
-            static scan(elem) {
-                for (let linkElem of Jhtml.Util.findAndSelf(elem, Scanner.A_SELECTOR)) {
+        var Scanner = (function () {
+            function Scanner() {
+            }
+            Scanner.scan = function (elem) {
+                for (var _i = 0, _a = Jhtml.Util.findAndSelf(elem, Scanner.A_SELECTOR); _i < _a.length; _i++) {
+                    var linkElem = _a[_i];
                     Ui.Link.from(linkElem);
                 }
-                for (let fromElem of Jhtml.Util.findAndSelf(elem, Scanner.FORM_SELECTOR)) {
+                for (var _b = 0, _c = Jhtml.Util.findAndSelf(elem, Scanner.FORM_SELECTOR); _b < _c.length; _b++) {
+                    var fromElem = _c[_b];
                     Ui.Form.from(fromElem);
                 }
-            }
-            static scanArray(elems) {
-                for (let elem of elems) {
+            };
+            Scanner.scanArray = function (elems) {
+                for (var _i = 0, elems_2 = elems; _i < elems_2.length; _i++) {
+                    var elem = elems_2[_i];
                     Scanner.scan(elem);
                 }
-            }
-        }
-        Scanner.A_ATTR = "data-jhtml";
-        Scanner.A_SELECTOR = "a[" + Scanner.A_ATTR + "]";
-        Scanner.FORM_ATTR = "data-jhtml";
-        Scanner.FORM_SELECTOR = "form[" + Scanner.FORM_ATTR + "]";
+            };
+            Scanner.A_ATTR = "data-jhtml";
+            Scanner.A_SELECTOR = "a[" + Scanner.A_ATTR + "]";
+            Scanner.FORM_ATTR = "data-jhtml";
+            Scanner.FORM_SELECTOR = "form[" + Scanner.FORM_ATTR + "]";
+            return Scanner;
+        }());
         Ui.Scanner = Scanner;
     })(Ui = Jhtml.Ui || (Jhtml.Ui = {}));
 })(Jhtml || (Jhtml = {}));
@@ -1865,44 +2120,56 @@ var Jhtml;
 (function (Jhtml) {
     var Util;
     (function (Util) {
-        class CallbackRegistry {
-            constructor() {
+        var CallbackRegistry = (function () {
+            function CallbackRegistry() {
                 this.callbacks = {};
             }
-            on(callback) {
+            CallbackRegistry.prototype.on = function (callback) {
                 this.onType("", callback);
-            }
-            onType(type = "", callback) {
+            };
+            CallbackRegistry.prototype.onType = function (type, callback) {
+                if (type === void 0) { type = ""; }
                 if (!this.callbacks[type]) {
                     this.callbacks[type] = [];
                 }
                 if (-1 == this.callbacks[type].indexOf(callback)) {
                     this.callbacks[type].push(callback);
                 }
-            }
-            off(callback) {
+            };
+            CallbackRegistry.prototype.off = function (callback) {
                 this.offType("", callback);
-            }
-            offType(type = "", callback) {
+            };
+            CallbackRegistry.prototype.offType = function (type, callback) {
+                if (type === void 0) { type = ""; }
                 if (!this.callbacks[type])
                     return;
-                let i = this.callbacks[type].indexOf(callback);
+                var i = this.callbacks[type].indexOf(callback);
                 this.callbacks[type].splice(i, 1);
-            }
-            fire(...args) {
-                this.fireType("", ...args);
-            }
-            fireType(type, ...args) {
+            };
+            CallbackRegistry.prototype.fire = function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                this.fireType.apply(this, [""].concat(args));
+            };
+            CallbackRegistry.prototype.fireType = function (type) {
+                var args = [];
+                for (var _i = 1; _i < arguments.length; _i++) {
+                    args[_i - 1] = arguments[_i];
+                }
                 if (!this.callbacks[type])
                     return;
-                for (let callback of this.callbacks[type]) {
-                    callback(...args);
+                for (var _a = 0, _b = this.callbacks[type]; _a < _b.length; _a++) {
+                    var callback = _b[_a];
+                    callback.apply(void 0, args);
                 }
-            }
-            clear() {
+            };
+            CallbackRegistry.prototype.clear = function () {
                 this.callbacks = {};
-            }
-        }
+            };
+            return CallbackRegistry;
+        }());
         Util.CallbackRegistry = CallbackRegistry;
     })(Util = Jhtml.Util || (Jhtml.Util = {}));
 })(Jhtml || (Jhtml = {}));
@@ -1927,7 +2194,7 @@ var Jhtml;
         }
         Util.bindElemData = bindElemData;
         function findAndSelf(element, selector) {
-            let foundElems = find(element, selector);
+            var foundElems = find(element, selector);
             if (element.matches(selector)) {
                 foundElems.unshift(element);
             }
@@ -1935,17 +2202,17 @@ var Jhtml;
         }
         Util.findAndSelf = findAndSelf;
         function find(nodeSelector, selector) {
-            let foundElems = [];
-            let nodeList = nodeSelector.querySelectorAll(selector);
-            for (let i = 0; i < nodeList.length; i++) {
+            var foundElems = [];
+            var nodeList = nodeSelector.querySelectorAll(selector);
+            for (var i = 0; i < nodeList.length; i++) {
                 foundElems.push(nodeList.item(i));
             }
             return foundElems;
         }
         Util.find = find;
         function array(nodeList) {
-            let elems = [];
-            for (let i = 0; i < nodeList.length; i++) {
+            var elems = [];
+            for (var i = 0; i < nodeList.length; i++) {
                 elems.push(nodeList.item(i));
             }
             return elems;
@@ -1957,15 +2224,15 @@ var Jhtml;
 (function (Jhtml) {
     var Util;
     (function (Util) {
-        class ElemConfigReader {
-            constructor(element) {
+        var ElemConfigReader = (function () {
+            function ElemConfigReader(element) {
                 this.element = element;
             }
-            buildName(key) {
+            ElemConfigReader.prototype.buildName = function (key) {
                 return "data-jhtml-" + key;
-            }
-            readBoolean(key, fallback) {
-                let value = this.element.getAttribute(this.buildName(key));
+            };
+            ElemConfigReader.prototype.readBoolean = function (key, fallback) {
+                var value = this.element.getAttribute(this.buildName(key));
                 if (value === null) {
                     return fallback;
                 }
@@ -1980,8 +2247,9 @@ var Jhtml;
                         throw new Error("Attribute '" + this.buildName(key) + " of Element " + this.element.tagName
                             + "  must contain a boolean value 'true|false'.");
                 }
-            }
-        }
+            };
+            return ElemConfigReader;
+        }());
         Util.ElemConfigReader = ElemConfigReader;
     })(Util = Jhtml.Util || (Jhtml.Util = {}));
 })(Jhtml || (Jhtml = {}));

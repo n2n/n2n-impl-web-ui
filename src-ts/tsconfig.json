@@ -6,13 +6,12 @@
 		"declaration": true,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"target": "es6",
+		"target": "es5",
 		"removeComments": true,
 		"lib": [
 	    	"es2017",
 	    	"dom"
-	  	],
-		"strictNullChecks": false
+	  	]
 	},
 	"include": ["jhtml/**/*"],
 	"exclude": ["node_modules"],
