@@ -365,9 +365,9 @@ declare namespace Jhtml {
         srcUrl: Url;
         back: RedirectDirective.Type;
         targetUrl: Url;
-        requestConfig: RequestConfig | undefined;
+        requestConfig: RequestConfig;
         additionalData: any;
-        constructor(srcUrl: Url, back: RedirectDirective.Type, targetUrl: Url, requestConfig?: RequestConfig | undefined, additionalData?: any);
+        constructor(srcUrl: Url, back: RedirectDirective.Type, targetUrl: Url, requestConfig?: RequestConfig, additionalData?: any);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
     }
@@ -555,9 +555,9 @@ declare namespace Jhtml.Util {
     class CallbackRegistry<C> {
         private callbacks;
         on(callback: C): void;
-        onType(type: string | undefined, callback: C): void;
+        onType(type: string, callback: C): void;
         off(callback: C): void;
-        offType(type: string | undefined, callback: C): void;
+        offType(type: string, callback: C): void;
         fire(...args: Array<any>): void;
         fireType(type: string, ...args: Array<any>): void;
         clear(): void;

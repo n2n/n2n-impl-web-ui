@@ -11,8 +11,7 @@
 		"lib": [
 	    	"es2017",
 	    	"dom"
-	  	],
-		"forceConsistentCasingInFileNames": true
+	  	]
 	},
 	"include": ["jhtml/**/*"],
 	"exclude": ["node_modules"]

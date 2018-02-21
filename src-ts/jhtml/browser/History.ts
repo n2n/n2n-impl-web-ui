@@ -1,7 +1,7 @@
 namespace Jhtml {
     
     export class History {
-        private _currentIndex: number;
+        private _currentIndex: number = null;
         private _entries: Array<History.Entry> = [];
         private changeCbr = new Util.CallbackRegistry<(evt: ChangeEvent) => any>();
         private changedCbr = new Util.CallbackRegistry<(evt: ChangeEvent) => any>();
