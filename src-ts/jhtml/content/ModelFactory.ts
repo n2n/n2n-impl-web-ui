@@ -36,10 +36,6 @@ namespace Jhtml {
     			rootElem.innerHTML = jsonObj.content;
     			model.snippet = new Snippet(Util.array(rootElem.children), model, document.createElement("template"));
     		}
-    		
-    		if (jsonObj.additional) {
-    			model.additionalData = jsonObj.additional; 
-    		}
 
     		return model;
     	}

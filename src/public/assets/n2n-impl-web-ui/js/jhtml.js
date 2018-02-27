@@ -44,7 +44,7 @@ var Jhtml;
         }
         return new Promise(function (resolve) {
             getOrCreateContext().requestor.exec("GET", Jhtml.Url.create(url)).send().then(function (response) {
-                resolve(response.model);
+                resolve({ model: response.model, response: response });
             });
         });
     }
@@ -937,7 +937,6 @@ var Jhtml;
         function Model(meta) {
             this.meta = meta;
             this.comps = {};
-            this.additionalData = {};
         }
         Model.prototype.isFull = function () {
             return !!this.container;
@@ -984,9 +983,6 @@ var Jhtml;
                 rootElem = document.createElement("div");
                 rootElem.innerHTML = jsonObj.content;
                 model.snippet = new Jhtml.Snippet(Jhtml.Util.array(rootElem.children), model, document.createElement("template"));
-            }
-            if (jsonObj.additional) {
-                model.additionalData = jsonObj.additional;
             }
             return model;
         };
@@ -1197,7 +1193,7 @@ var Jhtml;
             return new Promise(function (resolve) {
                 _this.context.requestor.exec("GET", url).send().then(function (response) {
                     if (response.model) {
-                        resolve(response.model);
+                        resolve({ model: response.model, response: response });
                     }
                     else {
                         _this.handleDirective(response.directive);
@@ -1414,14 +1410,15 @@ var Jhtml;
 var Jhtml;
 (function (Jhtml) {
     var FullModelDirective = (function () {
-        function FullModelDirective(model) {
+        function FullModelDirective(model, additionalData) {
             this.model = model;
+            this.additionalData = additionalData;
             if (!model.isFull()) {
                 throw new Error("Invalid argument. Full model required.");
             }
         }
         FullModelDirective.prototype.getAdditionalData = function () {
-            return this.model.additionalData;
+            return this.additionalData;
         };
         FullModelDirective.prototype.exec = function (monitor) {
             if (!monitor.pseudo) {
@@ -1493,34 +1490,6 @@ var Jhtml;
             Type[Type["BACK"] = 2] = "BACK";
         })(Type = RedirectDirective.Type || (RedirectDirective.Type = {}));
     })(RedirectDirective = Jhtml.RedirectDirective || (Jhtml.RedirectDirective = {}));
-    var SnippetDirective = (function () {
-        function SnippetDirective(srcUrl, model) {
-            this.srcUrl = srcUrl;
-            this.model = model;
-        }
-        SnippetDirective.prototype.getAdditionalData = function () {
-            return this.model.additionalData;
-        };
-        SnippetDirective.prototype.exec = function (monitor) {
-            throw new Error(this.srcUrl + "; can not exec snippet only directive.");
-        };
-        return SnippetDirective;
-    }());
-    Jhtml.SnippetDirective = SnippetDirective;
-    var DataDirective = (function () {
-        function DataDirective(srcUrl, additionalData) {
-            this.srcUrl = srcUrl;
-            this.additionalData = additionalData;
-        }
-        DataDirective.prototype.getAdditionalData = function () {
-            return this.additionalData;
-        };
-        DataDirective.prototype.exec = function (monitor) {
-            throw new Error(this.srcUrl + "; can not exec data only directive.");
-        };
-        return DataDirective;
-    }());
-    Jhtml.DataDirective = DataDirective;
 })(Jhtml || (Jhtml = {}));
 var Jhtml;
 (function (Jhtml) {
@@ -1561,27 +1530,30 @@ var Jhtml;
                         case 200:
                             var model = void 0;
                             var directive = void 0;
+                            var additionalData = void 0;
                             if (!_this.xhr.getResponseHeader("Content-Type").match(/json/)) {
                                 model = _this.createModelFromHtml(_this.xhr.responseText);
                             }
                             else {
                                 var jsonObj = _this.createJsonObj(_this.url, _this.xhr.responseText);
-                                if (!(directive = _this.scanForDirective(_this.url, jsonObj))) {
+                                additionalData = jsonObj.additional;
+                                directive = _this.scanForDirective(_this.url, jsonObj);
+                                if (!directive && (additionalData === undefined || jsonObj.content)) {
                                     model = _this.createModelFromJson(_this.url, jsonObj);
                                 }
                             }
                             if (model) {
-                                directive = model.isFull() ? new Jhtml.FullModelDirective(model) :
-                                    new Jhtml.SnippetDirective(_this.url, model);
+                                directive = model.isFull() ? new Jhtml.FullModelDirective(model, additionalData) : null;
                             }
-                            var response = { url: _this.url, model: model, directive: directive };
-                            if (model) {
-                                model.response = response;
-                            }
+                            var response = { status: 200, request: _this, model: model, directive: directive, additionalData: additionalData };
                             resolve(response);
                             break;
                         default:
-                            resolve({ url: _this.url, directive: new Jhtml.ReplaceDirective(_this.xhr.status, _this.xhr.responseText, _this.xhr.getResponseHeader("Content-Type"), _this.url) });
+                            resolve({
+                                status: _this.xhr.status,
+                                request: _this,
+                                directive: new Jhtml.ReplaceDirective(_this.xhr.status, _this.xhr.responseText, _this.xhr.getResponseHeader("Content-Type"), _this.url)
+                            });
                     }
                 };
                 _this.xhr.onerror = function () {
@@ -1606,9 +1578,6 @@ var Jhtml;
                 case "redirectBack":
                     return new Jhtml.RedirectDirective(url, Jhtml.RedirectDirective.Type.BACK, Jhtml.Url.create(jsonObj.location), Jhtml.FullRequestConfig.from(jsonObj.requestConfig), jsonObj.additional);
                 default:
-                    if (!jsonObj.content) {
-                        return new Jhtml.DataDirective(url, jsonObj.additional);
-                    }
                     return null;
             }
         };

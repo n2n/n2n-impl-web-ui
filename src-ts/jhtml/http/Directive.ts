@@ -8,14 +8,14 @@ namespace Jhtml {
 	}
     
     export class FullModelDirective implements Directive {
-    	constructor(private model: Model) {
+    	constructor(private model: Model, public additionalData: any) {
     		if (!model.isFull()) {
     			throw new Error("Invalid argument. Full model required.")
     		}
     	}
     	
     	getAdditionalData(): any {
-    		return this.model.additionalData;
+    		return this.additionalData;
     	}
     	
     	exec(monitor: Monitor) {
@@ -83,30 +83,30 @@ namespace Jhtml {
         }
     }
     
-    export class SnippetDirective implements Directive {
-    	constructor(public srcUrl: Url, public model: Model) {
-    	}
-    	
-    	getAdditionalData(): any {
-        	return this.model.additionalData;
-        }
-    	
-    	exec(monitor: Monitor) {
-    		throw new Error(this.srcUrl + "; can not exec snippet only directive.");
-        }
-    }
-    
-    export class DataDirective implements Directive {
-    	constructor(public srcUrl: Url, public additionalData: any) {
-    	}
-    	
-    	getAdditionalData(): any {
-        	return this.additionalData;
-        }
-    	
-    	exec(monitor: Monitor) {
-    		throw new Error(this.srcUrl + "; can not exec data only directive.");
-        }
-    }
+//    export class SnippetDirective implements Directive {
+//    	constructor(public srcUrl: Url, public model: Model) {
+//    	}
+//    	
+//    	getAdditionalData(): any {
+//        	return this.model.additionalData;
+//        }
+//    	
+//    	exec(monitor: Monitor) {
+//    		throw new Error(this.srcUrl + "; can not exec snippet only directive.");
+//        }
+//    }
+//    
+//    export class DataDirective implements Directive {
+//    	constructor(public srcUrl: Url, public additionalData: any) {
+//    	}
+//    	
+//    	getAdditionalData(): any {
+//        	return this.additionalData;
+//        }
+//    	
+//    	exec(monitor: Monitor) {
+//    		throw new Error(this.srcUrl + "; can not exec data only directive.");
+//        }
+//    }
     
 }

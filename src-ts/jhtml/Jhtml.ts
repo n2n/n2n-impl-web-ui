@@ -29,7 +29,7 @@ namespace Jhtml {
 		return Context.from(document || window.document);
 	}
 	
-	export function lookupModel(url: Url|string): Promise<Model> {
+	export function lookupModel(url: Url|string): Promise<ModelResult> {
 		getOrCreateBrowser();
 		if (monitor) {
 			return monitor.lookupModel(Url.create(url))
@@ -37,7 +37,7 @@ namespace Jhtml {
 		
 		return new Promise(resolve => {
 			getOrCreateContext().requestor.exec("GET", Url.create(url)).send().then((response: Response) => {
-				resolve(response.model);
+				resolve({ model: response.model, response: response });
 			});
 		});
 	}

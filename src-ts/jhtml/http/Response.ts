@@ -1,8 +1,10 @@
 namespace Jhtml {
 	
 	export interface Response {
-		url: Url;
+		status: number;
+		request: Request;
 		model?: Model;
-		directive: Directive;
+		directive?: Directive;
+		additionalData?: any;
 	}
 }

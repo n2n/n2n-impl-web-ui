@@ -32,29 +32,35 @@ namespace Jhtml {
 						case 200:
 							let model: Model;
 							let directive: Directive; 
+							let additionalData: any;
 							if (!this.xhr.getResponseHeader("Content-Type").match(/json/)) {
 								model = this.createModelFromHtml(this.xhr.responseText);
 							} else {
 								let jsonObj: any =  this.createJsonObj(this.url, this.xhr.responseText);
-								if (!(directive = this.scanForDirective(this.url, jsonObj))) {
+								additionalData = jsonObj.additional;
+								directive = this.scanForDirective(this.url, jsonObj);
+								if (!directive && (additionalData === undefined || jsonObj.content)) {
 									model = this.createModelFromJson(this.url, jsonObj);
 								}
 							}
 							
 							if (model) {
-								directive = model.isFull() ? new FullModelDirective(model) : 
-									new SnippetDirective(this.url, model);
+								directive = model.isFull() ? new FullModelDirective(model, additionalData) : null;
 							}
 							
-							let response = {url: this.url, model: model, directive: directive };
-							if (model) {
-								model.response = response;
-							}
+							let response: Response = { status: 200, request: this, model: model, directive: directive, additionalData: additionalData };
+//							if (model) {
+//								model.response = response;
+//							}
 							resolve(response);
 							break;
 						default:
-							resolve({url: this.url, directive: new ReplaceDirective(this.xhr.status, this.xhr.responseText, 
-									this.xhr.getResponseHeader("Content-Type"), this.url) });
+							resolve({
+								status: this.xhr.status,
+								request: this,
+								directive: new ReplaceDirective(this.xhr.status, this.xhr.responseText, 
+										this.xhr.getResponseHeader("Content-Type"), this.url)
+							});
 					}
 				};
 				
@@ -84,9 +90,9 @@ namespace Jhtml {
 				return new RedirectDirective(url, RedirectDirective.Type.BACK, Jhtml.Url.create(jsonObj.location),
 						FullRequestConfig.from(jsonObj.requestConfig), jsonObj.additional);
 			default:
-				if (/*jsonObj.additional !== undefined && */!jsonObj.content) {
-					return new DataDirective(url, jsonObj.additional);
-				}
+//				if (/*jsonObj.additional !== undefined && */!jsonObj.content) {
+//					return new DataDirective(url, jsonObj.additional);
+//				}
 			
 				return null;
 			}

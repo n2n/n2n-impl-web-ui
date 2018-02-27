@@ -107,11 +107,11 @@ namespace Jhtml {
 			this.directiveExecutedCbr.off(callback);
 		}
 		
-		public lookupModel(url: Url): Promise<Model> {
+		public lookupModel(url: Url): Promise<ModelResult> {
 			return new Promise(resolve => {
 				this.context.requestor.exec("GET", url).send().then((response: Response) => {
 					if (response.model) {
-						resolve(response.model)
+						resolve({ model: response.model, response: response });
 					} else {
 						this.handleDirective(response.directive);
 					}
@@ -175,5 +175,10 @@ namespace Jhtml {
 	export interface DirectiveEvent {
 		directive: Directive;
 		new: boolean;
+	}
+	
+	export interface ModelResult {
+		model: Model; 
+		response: Response;
 	}
 } 

@@ -3,7 +3,7 @@ declare namespace Jhtml {
     function getOrCreateBrowser(): Browser | null;
     function getOrCreateMonitor(): Monitor | null;
     function getOrCreateContext(document?: Document): Context;
-    function lookupModel(url: Url | string): Promise<Model>;
+    function lookupModel(url: Url | string): Promise<ModelResult>;
     function request(method: Requestor.Method, url: Url | string): Request;
 }
 declare namespace Jhtml {
@@ -213,13 +213,11 @@ declare namespace Jhtml {
     class Model {
         meta: Meta;
         constructor(meta: Meta);
-        response: Response | null;
         container: Container;
         comps: {
             [name: string]: Comp;
         };
         snippet: Snippet;
-        additionalData: any;
         isFull(): boolean;
     }
     class ModelState {
@@ -277,7 +275,7 @@ declare namespace Jhtml {
         private triggerDirectiveExecutedCallbacks(evt);
         onDirectiveExecuted(callback: (evt: DirectiveEvent) => any): void;
         offDirectiveExecuted(callback: (evt: DirectiveEvent) => any): void;
-        lookupModel(url: Url): Promise<Model>;
+        lookupModel(url: Url): Promise<ModelResult>;
         private historyChanged();
         private static readonly KEY;
         private static readonly CSS_CLASS;
@@ -288,6 +286,10 @@ declare namespace Jhtml {
     interface DirectiveEvent {
         directive: Directive;
         new: boolean;
+    }
+    interface ModelResult {
+        model: Model;
+        response: Response;
     }
 }
 declare namespace Jhtml {
@@ -348,7 +350,8 @@ declare namespace Jhtml {
     }
     class FullModelDirective implements Directive {
         private model;
-        constructor(model: Model);
+        additionalData: any;
+        constructor(model: Model, additionalData: any);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
     }
@@ -377,20 +380,6 @@ declare namespace Jhtml {
             REFERER = 1,
             BACK = 2,
         }
-    }
-    class SnippetDirective implements Directive {
-        srcUrl: Url;
-        model: Model;
-        constructor(srcUrl: Url, model: Model);
-        getAdditionalData(): any;
-        exec(monitor: Monitor): void;
-    }
-    class DataDirective implements Directive {
-        srcUrl: Url;
-        additionalData: any;
-        constructor(srcUrl: Url, additionalData: any);
-        getAdditionalData(): any;
-        exec(monitor: Monitor): void;
     }
 }
 declare namespace Jhtml {
@@ -441,9 +430,11 @@ declare namespace Jhtml {
 }
 declare namespace Jhtml {
     interface Response {
-        url: Url;
+        status: number;
+        request: Request;
         model?: Model;
-        directive: Directive;
+        directive?: Directive;
+        additionalData?: any;
     }
 }
 declare namespace Jhtml {
