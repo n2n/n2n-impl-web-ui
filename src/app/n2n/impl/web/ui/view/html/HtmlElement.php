@@ -77,6 +77,15 @@ class HtmlElement implements UiComponent {
 		$this->contents[] = $content;
 	}
 	
+	/**
+	 * @param mixed ...$contents
+	 * @return \n2n\impl\web\ui\view\html\HtmlElement
+	 */
+	public function append(...$contents) {
+		array_push($this->contents, ...$contents);
+		return $this;
+	}
+	
 	public function appendLn($content = null) {
 		if ($content !== null) {
 			$this->appendContent($content);
@@ -91,11 +100,15 @@ class HtmlElement implements UiComponent {
 		}
 	}
 	
+	public function isEmpty() {
+		return empty($this->contents);
+	}
+	
 	public function build(BuildContext $buildContext): string {
 		$html = '<' . htmlspecialchars($this->tagName) . self::buildAttrsHtml($this->attrs);
 		
-		if (null !== ($contentHtml = $this->buildContentHtml($buildContext))) {
-			$html .= '>' . $contentHtml . '</' . htmlspecialchars($this->tagName) . '>';
+		if (!$this->isEmpty()) {
+			$html .= '>' . $this->buildContentHtml($buildContext) . '</' . htmlspecialchars($this->tagName) . '>';
 		} else {
 			$html .= ' />';
 		}

@@ -222,8 +222,8 @@ class HtmlBuilder {
 	 * @param array $attrs
 	 */
 	public function link($murl, $label = null, array $attrs = null, string $alternateTagName = null, 
-			array $alternateAttrs = null) {
-		$this->view->out($this->getLink($murl, $label, $attrs, $alternateTagName, $alternateAttrs));
+			array $alternateAttrs = null, bool $required = false) {
+		$this->view->out($this->getLink($murl, $label, $attrs, $alternateTagName, $alternateAttrs, $required));
 	}
 	
 	/**

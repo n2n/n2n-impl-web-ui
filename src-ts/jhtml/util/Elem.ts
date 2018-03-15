@@ -1,14 +1,15 @@
 namespace Jhtml.Util {
-	
-	
-	export function closest(element: Element, selector: string, selfIncluded: boolean): Element {
+
+	export function closest(element: Element, selector: string, selfIncluded: boolean): Element|null {
+		let elem: Element|null = element;
 		do {
-			if (element.matches(selector)) {
-				return element;
+			if (elem.matches(selector)) {
+				return elem;
 			}
-		} while(element = element.parentElement);
+		} while(elem = elem.parentElement);
+		
+		return null;
 	}
-	
 	
 	export function getElemData(elem: Element, key: string) {
 		return elem["data-" + key];

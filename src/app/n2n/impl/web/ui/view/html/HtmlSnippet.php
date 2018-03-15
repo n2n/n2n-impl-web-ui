@@ -31,9 +31,23 @@ class HtmlSnippet implements UiComponent {
 	public function __construct(...$contents) {
 		$this->contents = $contents;
 	}
+
+	/**
+	 * @param mixed ...$contents
+	 * @return \n2n\impl\web\ui\view\html\HtmlSnippet
+	 */
+	public function prepend(...$contents) {
+		array_unshift($this->contents, ...$contents);
+		return $this;
+	}
 	
-	public function append($content) {
-		$this->contents[] = $content;	
+	/**
+	 * @param mixed ...$contents
+	 * @return \n2n\impl\web\ui\view\html\HtmlSnippet
+	 */
+	public function append(...$contents) {
+		array_push($this->contents, ...$contents);
+		return $this;
 	}
 	
 	public function appendLn($content) {
