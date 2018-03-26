@@ -49,7 +49,7 @@ namespace Jhtml {
 				page = new Page(url, this.context.requestor.lookupDirective(url));
 			} else if (page.config.frozen) {
 				if (page.disposed) {
-					throw new Error("Targed page is frozen and disposed.");
+					throw new Error("Target page is frozen and disposed.");
 				}
 			} else if (page.disposed || config.forceReload || !page.config.keep) {
 				page.promise = this.context.requestor.lookupDirective(page.loadUrl || url);
@@ -76,7 +76,8 @@ namespace Jhtml {
 		public handleDirective(directive: Directive, fresh: boolean = true, usePageScrollPos: boolean = false) {
 			this.triggerDirectiveCallbacks({ directive: directive, new: fresh });
 			directive.exec(this);
-			if (this.history.currentEntry) {
+
+			if (this.history.currentEntry && this.active) {
 				window.scroll(0, (usePageScrollPos ? this.history.currentPage.config.scrollPos 
 						: this.history.currentEntry.scrollPos));
 			}
@@ -120,7 +121,7 @@ namespace Jhtml {
 		}
 		
 		private historyChanged() {
-		    if (this.pushing || !this.active) return;
+		    if (this.pushing/* || !this.active*/) return;
 		    
 		    let currentPage = this.history.currentPage;
 		    

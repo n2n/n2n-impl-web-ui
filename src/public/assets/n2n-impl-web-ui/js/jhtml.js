@@ -1140,7 +1140,7 @@ var Jhtml;
             }
             else if (page.config.frozen) {
                 if (page.disposed) {
-                    throw new Error("Targed page is frozen and disposed.");
+                    throw new Error("Target page is frozen and disposed.");
                 }
             }
             else if (page.disposed || config.forceReload || !page.config.keep) {
@@ -1164,7 +1164,7 @@ var Jhtml;
             if (usePageScrollPos === void 0) { usePageScrollPos = false; }
             this.triggerDirectiveCallbacks({ directive: directive, new: fresh });
             directive.exec(this);
-            if (this.history.currentEntry) {
+            if (this.history.currentEntry && this.active) {
                 window.scroll(0, (usePageScrollPos ? this.history.currentPage.config.scrollPos
                     : this.history.currentEntry.scrollPos));
             }
@@ -1203,7 +1203,7 @@ var Jhtml;
         };
         Monitor.prototype.historyChanged = function () {
             var _this = this;
-            if (this.pushing || !this.active)
+            if (this.pushing)
                 return;
             var currentPage = this.history.currentPage;
             if (!currentPage.promise) {
@@ -2147,11 +2147,13 @@ var Jhtml;
     var Util;
     (function (Util) {
         function closest(element, selector, selfIncluded) {
+            var elem = element;
             do {
-                if (element.matches(selector)) {
-                    return element;
+                if (elem.matches(selector)) {
+                    return elem;
                 }
-            } while (element = element.parentElement);
+            } while (elem = elem.parentElement);
+            return null;
         }
         Util.closest = closest;
         function getElemData(elem, key) {

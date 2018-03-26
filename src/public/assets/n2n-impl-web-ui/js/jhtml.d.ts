@@ -555,7 +555,7 @@ declare namespace Jhtml.Util {
     }
 }
 declare namespace Jhtml.Util {
-    function closest(element: Element, selector: string, selfIncluded: boolean): Element;
+    function closest(element: Element, selector: string, selfIncluded: boolean): Element | null;
     function getElemData(elem: Element, key: string): any;
     function bindElemData<T>(elem: Element, key: string, data: any): void;
     function findAndSelf(element: Element, selector: string): Element[];
