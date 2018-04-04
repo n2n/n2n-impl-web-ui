@@ -267,7 +267,7 @@ class HtmlBuilder {
 	 * @return array
 	 */
 	private function secureLinkAttrs(array $attrs) {
-		if ($attrs['target'] == '_blank' && !array_key_exists('rel', $attrs)) {
+		if (isset($attrs['target']) && $attrs['target'] == '_blank' && !array_key_exists('rel', $attrs)) {
 			$attrs['rel'] = 'noopener';
 		}
 		return $attrs;
