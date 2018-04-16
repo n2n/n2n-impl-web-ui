@@ -41,10 +41,11 @@ namespace Jhtml {
 			}
 			
 			let url = Url.create(urlExpr);
+//			console.log("exec " + url);
 			let config = FullRequestConfig.from(requestConfig);
 			
 			let page = this.history.getPageByUrl(url);
-
+			
 			if (!page) {
 				page = new Page(url, this.context.requestor.lookupDirective(url));
 			} else if (page.config.frozen) {

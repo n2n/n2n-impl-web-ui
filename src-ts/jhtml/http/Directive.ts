@@ -59,9 +59,15 @@ namespace Jhtml {
         }
         
     	exec(monitor: Monitor) {
+//    		console.log(this.srcUrl + ' ' + this.back)
+    		
             switch (this.back) {
             case RedirectDirective.Type.REFERER:
-                if (!monitor.history.currentPage.url.equals(this.srcUrl)) {
+            	let currentPage = monitor.history.currentPage;
+                if (!currentPage.url.equals(this.srcUrl)) {
+                	if (currentPage.disposed) {
+                		monitor.exec(currentPage.url, { pushToHistory: false })
+                	}
                 	return;
                 }
             case RedirectDirective.Type.BACK:
