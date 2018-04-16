@@ -22,7 +22,6 @@ namespace Jhtml {
 			return this.buildPromise();
 		}
 		
-		
 		private buildPromise(): Promise<Response> {
 			return new Promise((resolve) =>  {
 				this.xhr.onreadystatechange = () => {

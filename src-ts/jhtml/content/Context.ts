@@ -58,55 +58,44 @@ namespace Jhtml {
 			return this.modelState || null;
 		}
 		
-		replaceModel(newModel: Model, montiorCompHandlers: { [compName: string]: CompHandler } = {}): LoadObserver {
+		replaceModel(newModel: Model, montiorCompHandlers: { [compName: string]: CompHandler } = {}): void {
 			let boundModelState: ModelState = this.getModelState(true);
 			
-			for (let name in boundModelState.comps) {
-				let comp = boundModelState.comps[name];
-				
-				if (!(montiorCompHandlers[name] && montiorCompHandlers[name].detachComp(comp))
-						&& !(this.compHandlers[name] && this.compHandlers[name].detachComp(comp))) {
-					comp.detach();
+			let mergeObserver = boundModelState.metaState.replaceWith(newModel.meta);
+			
+			mergeObserver.done(() => {
+				for (let name in boundModelState.comps) {
+					let comp = boundModelState.comps[name];
+					
+					if (!(montiorCompHandlers[name] && montiorCompHandlers[name].detachComp(comp))
+							&& !(this.compHandlers[name] && this.compHandlers[name].detachComp(comp))) {
+						comp.detach();
+					}
 				}
-			}
-
-			boundModelState.container.detach();
-			let loadObserver = boundModelState.metaState.replaceWith(newModel.meta);
-			this.registerLoadObserver(loadObserver);
-			
-			if (!boundModelState.container.matches(newModel.container)) {
-				boundModelState.container = newModel.container;
-			} 
-
-			boundModelState.container.attachTo(boundModelState.metaState.containerElement, loadObserver);
-			
-			for (let name in newModel.comps) {
-				let comp = boundModelState.comps[name] = newModel.comps[name];
 				
-				if (!(montiorCompHandlers[name] && montiorCompHandlers[name].attachComp(comp, loadObserver))
-						&& !(this.compHandlers[name] && this.compHandlers[name].attachComp(comp, loadObserver))) {
-					comp.attachTo(boundModelState.container.compElements[name], loadObserver);
+				if (!boundModelState.container.matches(newModel.container)) {
+					boundModelState.container.detach();
+					boundModelState.container = newModel.container;
+					boundModelState.container.attachTo(boundModelState.metaState.containerElement);
 				}
-			}
-			
-			return loadObserver;
+				
+				for (let name in newModel.comps) {
+					let comp = boundModelState.comps[name] = newModel.comps[name];
+					
+					if (!(montiorCompHandlers[name] && montiorCompHandlers[name].attachComp(comp))
+							&& !(this.compHandlers[name] && this.compHandlers[name].attachComp(comp))) {
+						comp.attachTo(boundModelState.container.compElements[name]);
+					}
+				}
+			});
 		}
 		
 		importMeta(meta: Meta): LoadObserver {
 			let boundModelState = this.getModelState(true);
 			
 			let loadObserver = boundModelState.metaState.import(meta, true);
-			this.registerLoadObserver(loadObserver);
+//			this.registerLoadObserver(loadObserver);
 			return loadObserver;
-		}
-		
-		private loadObservers: Array<LoadObserver> = [];
-		
-		private registerLoadObserver(loadObserver: LoadObserver) {
-			this.loadObservers.push(loadObserver);
-			loadObserver.whenLoaded(() => {
-				this.loadObservers.splice(this.loadObservers.indexOf(loadObserver), 1);
-			});
 		}
 		
 		registerNewModel(model: Model) {
@@ -114,10 +103,10 @@ namespace Jhtml {
 			if (container) {
 				let containerReadyCallback = () => {
 					container.off("attached", containerReadyCallback)
-					container.loadObserver.whenLoaded(() => {
+//					container.loadObserver.whenLoaded(() => {
 						this.readyCbr.fire(container.elements, { container: container });
 						this.triggerAndScan(container.elements);
-					});
+//					});
 				};
 				container.on("attached", containerReadyCallback);
 			}
@@ -125,10 +114,10 @@ namespace Jhtml {
 			for (let comp of Object.values(model.comps)) {
 				let compReadyCallback = () => {
 					comp.off("attached", compReadyCallback);
-					comp.loadObserver.whenLoaded(() => {
+//					comp.loadObserver.whenLoaded(() => {
 						this.readyCbr.fire(comp.elements, { comp: Comp });
 						this.triggerAndScan(comp.elements);
-					});
+//					});
 				};
 				comp.on("attached", compReadyCallback);
 			}
@@ -172,7 +161,7 @@ namespace Jhtml {
 			this.readyCbr.on(readyCallback);
 
 			if ((this._document.readyState === "complete" || this._document.readyState === "interactive") 
-					 && this.loadObservers.length == 0) {
+					 && !this.modelState.metaState.busy) {
 				readyCallback([this.document.documentElement], {});	
 			}
 		}
@@ -201,7 +190,7 @@ namespace Jhtml {
 	}
 	
 	export interface CompHandler {
-		attachComp(comp: Comp, loadObserver: LoadObserver): boolean;
+		attachComp(comp: Comp): boolean;
 		
 		detachComp(comp: Comp): boolean;
 	}

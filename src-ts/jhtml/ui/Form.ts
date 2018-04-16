@@ -137,7 +137,7 @@ namespace Jhtml.Ui {
 			request.send(formData).then((response: Response) => {
 				if (this.curRequest !== request) return;
 
-				if ((!this.config.successResponseHandler || !this.config.successResponseHandler(response))
+				if ((!this.config.successResponseHandler || !this.config.successResponseHandler(response)) 
 						&& monitor) {
 					monitor.handleDirective(response.directive);
 				}

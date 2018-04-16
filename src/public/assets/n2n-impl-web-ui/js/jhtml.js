@@ -357,7 +357,6 @@ var Jhtml;
             this.compHandlers = {};
             this.readyCbr = new Jhtml.Util.CallbackRegistry();
             this.readyBound = false;
-            this.loadObservers = [];
             this._requestor = new Jhtml.Requestor(this);
             this._document.addEventListener("DOMContentLoaded", function () {
                 _this.readyCbr.fire([_this.document.documentElement], {});
@@ -406,43 +405,36 @@ var Jhtml;
             return this.modelState || null;
         };
         Context.prototype.replaceModel = function (newModel, montiorCompHandlers) {
+            var _this = this;
             if (montiorCompHandlers === void 0) { montiorCompHandlers = {}; }
             var boundModelState = this.getModelState(true);
-            for (var name_1 in boundModelState.comps) {
-                var comp = boundModelState.comps[name_1];
-                if (!(montiorCompHandlers[name_1] && montiorCompHandlers[name_1].detachComp(comp))
-                    && !(this.compHandlers[name_1] && this.compHandlers[name_1].detachComp(comp))) {
-                    comp.detach();
+            var mergeObserver = boundModelState.metaState.replaceWith(newModel.meta);
+            mergeObserver.done(function () {
+                for (var name_1 in boundModelState.comps) {
+                    var comp = boundModelState.comps[name_1];
+                    if (!(montiorCompHandlers[name_1] && montiorCompHandlers[name_1].detachComp(comp))
+                        && !(_this.compHandlers[name_1] && _this.compHandlers[name_1].detachComp(comp))) {
+                        comp.detach();
+                    }
                 }
-            }
-            boundModelState.container.detach();
-            var loadObserver = boundModelState.metaState.replaceWith(newModel.meta);
-            this.registerLoadObserver(loadObserver);
-            if (!boundModelState.container.matches(newModel.container)) {
-                boundModelState.container = newModel.container;
-            }
-            boundModelState.container.attachTo(boundModelState.metaState.containerElement, loadObserver);
-            for (var name_2 in newModel.comps) {
-                var comp = boundModelState.comps[name_2] = newModel.comps[name_2];
-                if (!(montiorCompHandlers[name_2] && montiorCompHandlers[name_2].attachComp(comp, loadObserver))
-                    && !(this.compHandlers[name_2] && this.compHandlers[name_2].attachComp(comp, loadObserver))) {
-                    comp.attachTo(boundModelState.container.compElements[name_2], loadObserver);
+                if (!boundModelState.container.matches(newModel.container)) {
+                    boundModelState.container.detach();
+                    boundModelState.container = newModel.container;
+                    boundModelState.container.attachTo(boundModelState.metaState.containerElement);
                 }
-            }
-            return loadObserver;
+                for (var name_2 in newModel.comps) {
+                    var comp = boundModelState.comps[name_2] = newModel.comps[name_2];
+                    if (!(montiorCompHandlers[name_2] && montiorCompHandlers[name_2].attachComp(comp))
+                        && !(_this.compHandlers[name_2] && _this.compHandlers[name_2].attachComp(comp))) {
+                        comp.attachTo(boundModelState.container.compElements[name_2]);
+                    }
+                }
+            });
         };
         Context.prototype.importMeta = function (meta) {
             var boundModelState = this.getModelState(true);
             var loadObserver = boundModelState.metaState.import(meta, true);
-            this.registerLoadObserver(loadObserver);
             return loadObserver;
-        };
-        Context.prototype.registerLoadObserver = function (loadObserver) {
-            var _this = this;
-            this.loadObservers.push(loadObserver);
-            loadObserver.whenLoaded(function () {
-                _this.loadObservers.splice(_this.loadObservers.indexOf(loadObserver), 1);
-            });
         };
         Context.prototype.registerNewModel = function (model) {
             var _this = this;
@@ -450,20 +442,16 @@ var Jhtml;
             if (container) {
                 var containerReadyCallback_1 = function () {
                     container.off("attached", containerReadyCallback_1);
-                    container.loadObserver.whenLoaded(function () {
-                        _this.readyCbr.fire(container.elements, { container: container });
-                        _this.triggerAndScan(container.elements);
-                    });
+                    _this.readyCbr.fire(container.elements, { container: container });
+                    _this.triggerAndScan(container.elements);
                 };
                 container.on("attached", containerReadyCallback_1);
             }
             var _loop_1 = function (comp) {
                 var compReadyCallback = function () {
                     comp.off("attached", compReadyCallback);
-                    comp.loadObserver.whenLoaded(function () {
-                        _this.readyCbr.fire(comp.elements, { comp: Jhtml.Comp });
-                        _this.triggerAndScan(comp.elements);
-                    });
+                    _this.readyCbr.fire(comp.elements, { comp: Jhtml.Comp });
+                    _this.triggerAndScan(comp.elements);
                 };
                 comp.on("attached", compReadyCallback);
             };
@@ -504,7 +492,7 @@ var Jhtml;
         Context.prototype.onReady = function (readyCallback) {
             this.readyCbr.on(readyCallback);
             if ((this._document.readyState === "complete" || this._document.readyState === "interactive")
-                && this.loadObservers.length == 0) {
+                && !this.modelState.metaState.busy) {
                 readyCallback([this.document.documentElement], {});
             }
         };
@@ -783,9 +771,8 @@ var Jhtml;
             this.bodyElem = bodyElem;
             this.containerElem = containerElem;
             this._browsable = false;
-            this.usedElements = [];
-            this.pendingRemoveElements = [];
-            this.blockedElements = [];
+            this.loadObservers = [];
+            this.mergeQueue = new ElementMergeQueue();
             this.markAsUsed(this.headElements);
             this.markAsUsed(this.bodyElements);
             var reader = new Jhtml.Util.ElemConfigReader(containerElem);
@@ -803,7 +790,7 @@ var Jhtml;
                 var element = elements_1[_i];
                 if (element === this.containerElement)
                     continue;
-                this.usedElements.push(element);
+                this.mergeQueue.addUsed(element);
                 this.markAsUsed(Jhtml.Util.array(element.children));
             }
         };
@@ -828,65 +815,180 @@ var Jhtml;
             enumerable: true,
             configurable: true
         });
+        MetaState.prototype.registerLoadObserver = function (loadObserver) {
+            var _this = this;
+            this.loadObservers.push(loadObserver);
+            loadObserver.whenLoaded(function () {
+                _this.loadObservers.splice(_this.loadObservers.indexOf(loadObserver), 1);
+            });
+        };
+        Object.defineProperty(MetaState.prototype, "busy", {
+            get: function () {
+                return this.loadObservers.length > 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         MetaState.prototype.import = function (newMeta, curModelDependent) {
             var merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
             merger.importInto(newMeta.headElements, this.headElem, Meta.Target.HEAD);
             merger.importInto(newMeta.bodyElements, this.bodyElem, Meta.Target.BODY);
+            this.registerLoadObserver(merger.loadObserver);
             if (!curModelDependent) {
                 return merger.loadObserver;
             }
-            for (var _i = 0, _a = merger.processedElements; _i < _a.length; _i++) {
-                var element = _a[_i];
-                this.usedElements.push(element);
-            }
+            this.mergeQueue.finalizeImport(merger);
             return merger.loadObserver;
         };
         MetaState.prototype.replaceWith = function (newMeta) {
-            var _this = this;
             var merger = new Jhtml.Merger(this.rootElem, this.headElem, this.bodyElem, this.containerElem, newMeta.containerElement);
             merger.mergeInto(newMeta.headElements, this.headElem, Meta.Target.HEAD);
             merger.mergeInto(newMeta.bodyElements, this.bodyElem, Meta.Target.BODY);
             if (newMeta.bodyElement) {
                 merger.mergeAttrsInto(newMeta.bodyElement, this.bodyElem);
             }
-            var removableElements = new Array();
+            this.registerLoadObserver(merger.loadObserver);
+            return this.mergeQueue.finalizeMerge(merger);
+        };
+        return MetaState;
+    }());
+    Jhtml.MetaState = MetaState;
+    var ElementMergeQueue = (function () {
+        function ElementMergeQueue() {
+            this.usedElements = [];
+            this.unnecessaryElements = [];
+            this.blockedElements = [];
+            this.curObserver = null;
+        }
+        ElementMergeQueue.prototype.addUsed = function (usedElement) {
+            if (this.containsUsed(usedElement))
+                return;
+            this.usedElements.push(usedElement);
+        };
+        ElementMergeQueue.prototype.containsUsed = function (element) {
+            return -1 < this.usedElements.indexOf(element);
+        };
+        ElementMergeQueue.prototype.addBlocked = function (blockedElement) {
+            if (this.containsBlocked(blockedElement))
+                return;
+            this.blockedElements.push(blockedElement);
+        };
+        ElementMergeQueue.prototype.containsBlocked = function (element) {
+            return -1 < this.blockedElements.indexOf(element);
+        };
+        ElementMergeQueue.prototype.addUnnecessary = function (unnecessaryElement) {
+            if (this.containsUnnecessary(unnecessaryElement))
+                return;
+            this.unnecessaryElements.push(unnecessaryElement);
+        };
+        ElementMergeQueue.prototype.containsUnnecessary = function (element) {
+            return -1 < this.unnecessaryElements.indexOf(element);
+        };
+        ElementMergeQueue.prototype.removeUnnecessary = function (element) {
+            this.unnecessaryElements.splice(this.unnecessaryElements.indexOf(element), 1);
+        };
+        ElementMergeQueue.prototype.approveRemove = function () {
+            var removeElement;
+            while (removeElement = this.unnecessaryElements.pop()) {
+                removeElement.remove();
+            }
+        };
+        ElementMergeQueue.prototype.finalizeImport = function (merger) {
+            for (var _i = 0, _a = merger.processedElements; _i < _a.length; _i++) {
+                var element = _a[_i];
+                this.removeUnnecessary(element);
+                this.addUsed(element);
+            }
+        };
+        ElementMergeQueue.prototype.finalizeMerge = function (merger) {
+            var _this = this;
+            var removableElements = [];
             var remainingElements = merger.remainingElements;
             var remainingElement;
             while (remainingElement = remainingElements.pop()) {
                 if (this.containsBlocked(remainingElement))
                     continue;
-                if (-1 == this.usedElements.indexOf(remainingElement)
-                    && -1 == this.pendingRemoveElements.indexOf(remainingElement)) {
-                    this.blockedElements.push(remainingElement);
+                if (!this.containsUsed(remainingElement)
+                    && !this.containsUnnecessary(remainingElement)) {
+                    this.addBlocked(remainingElement);
                     continue;
                 }
-                removableElements.push(remainingElement);
+                this.addUnnecessary(remainingElement);
             }
-            this.usedElements = merger.processedElements;
-            for (var _i = 0, removableElements_1 = removableElements; _i < removableElements_1.length; _i++) {
-                var removableElement = removableElements_1[_i];
-                if (-1 == this.pendingRemoveElements.indexOf(removableElement)) {
-                    this.pendingRemoveElements.push(removableElement);
-                }
+            for (var _i = 0, _a = merger.processedElements; _i < _a.length; _i++) {
+                var processedElement = _a[_i];
+                this.removeUnnecessary(processedElement);
+                this.addUsed(processedElement);
             }
+            if (this.curObserver !== null) {
+                this.curObserver.abort();
+            }
+            var observer = this.curObserver = new MergeObserverImpl();
             merger.loadObserver.whenLoaded(function () {
-                for (var _i = 0, removableElements_2 = removableElements; _i < removableElements_2.length; _i++) {
-                    var removableElement = removableElements_2[_i];
-                    var i = _this.pendingRemoveElements.indexOf(removableElement);
-                    if (-1 == i)
-                        continue;
-                    removableElement.remove();
-                    _this.pendingRemoveElements.splice(i, 1);
+                if (_this.curObserver !== observer) {
+                    return;
                 }
+                _this.curObserver = null;
+                observer.complete();
+                _this.approveRemove();
             });
-            return merger.loadObserver;
+            return observer;
         };
-        MetaState.prototype.containsBlocked = function (element) {
-            return -1 < this.blockedElements.indexOf(element);
-        };
-        return MetaState;
+        return ElementMergeQueue;
     }());
-    Jhtml.MetaState = MetaState;
+    var MergeObserverImpl = (function () {
+        function MergeObserverImpl() {
+            this.success = null;
+            this.successCallbacks = [];
+            this.abortedCallbacks = [];
+        }
+        MergeObserverImpl.prototype.ensure = function () {
+            if (this.success === null)
+                return;
+            throw new Error("already finished");
+        };
+        MergeObserverImpl.prototype.complete = function () {
+            this.ensure();
+            this.success = true;
+            var successCallback;
+            while (successCallback = this.successCallbacks.pop()) {
+                successCallback();
+            }
+            this.reset();
+        };
+        MergeObserverImpl.prototype.abort = function () {
+            this.ensure();
+            this.success = false;
+            var abortedCallback;
+            while (abortedCallback = this.abortedCallbacks.pop()) {
+                abortedCallback();
+            }
+            this.reset();
+        };
+        MergeObserverImpl.prototype.reset = function () {
+            this.successCallbacks = [];
+            this.abortedCallbacks = [];
+        };
+        MergeObserverImpl.prototype.done = function (callback) {
+            if (this.success === null) {
+                this.successCallbacks.push(callback);
+            }
+            else if (this.success) {
+                callback();
+            }
+            return this;
+        };
+        MergeObserverImpl.prototype.aborted = function (callback) {
+            if (this.success === null) {
+                this.abortedCallbacks.push(callback);
+            }
+            else if (!this.success) {
+                callback();
+            }
+            return this;
+        };
+        return MergeObserverImpl;
+    }());
     (function (Meta) {
         var Target;
         (function (Target) {
@@ -909,7 +1011,11 @@ var Jhtml;
             };
             this.loadCallbacks.push(loadCallback);
             elem.addEventListener("load", loadCallback, false);
-            tn = setTimeout(loadCallback, 5000);
+            tn = setTimeout(function () {
+                console.warn("Jhtml continues; following resource could not be loaded in time: "
+                    + elem.outerHTML);
+                loadCallback();
+            }, 2000);
         };
         LoadObserver.prototype.unregisterLoadCallback = function (callback) {
             this.loadCallbacks.splice(this.loadCallbacks.indexOf(callback), 1);
@@ -1330,19 +1436,10 @@ var Jhtml;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(Panel.prototype, "loadObserver", {
-            get: function () {
-                return this._loadObserver;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Panel.prototype.attachTo = function (element, loadObserver) {
-            this._loadObserver = loadObserver;
+        Panel.prototype.attachTo = function (element) {
             this.attach(element);
         };
         Panel.prototype.detach = function () {
-            this._loadObserver = null;
             _super.prototype.detach.call(this);
         };
         return Panel;
@@ -1429,7 +1526,7 @@ var Jhtml;
             for (var name_5 in this.model.comps) {
                 if (!monitor.compHandlerReg[name_5])
                     continue;
-                monitor.compHandlerReg[name_5].attachComp(this.model.comps[name_5], loadObserver);
+                monitor.compHandlerReg[name_5].attachComp(this.model.comps[name_5]);
             }
         };
         return FullModelDirective;

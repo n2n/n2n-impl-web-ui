@@ -103,10 +103,8 @@ declare namespace Jhtml {
         private getModelState(required);
         replaceModel(newModel: Model, montiorCompHandlers?: {
             [compName: string]: CompHandler;
-        }): LoadObserver;
+        }): void;
         importMeta(meta: Meta): LoadObserver;
-        private loadObservers;
-        private registerLoadObserver(loadObserver);
         registerNewModel(model: Model): void;
         private triggerAndScan(elements);
         replace(text: string, mimeType: string, replace: boolean): void;
@@ -119,7 +117,7 @@ declare namespace Jhtml {
         static from(document: Document): Context;
     }
     interface CompHandler {
-        attachComp(comp: Comp, loadObserver: LoadObserver): boolean;
+        attachComp(comp: Comp): boolean;
         detachComp(comp: Comp): boolean;
     }
     interface CompHandlerReg {
@@ -180,18 +178,22 @@ declare namespace Jhtml {
         private bodyElem;
         private containerElem;
         private _browsable;
+        private mergeQueue;
         constructor(rootElem: Element, headElem: Element, bodyElem: Element, containerElem: Element);
         readonly browsable: boolean;
         private markAsUsed(elements);
         readonly headElements: Array<Element>;
         readonly bodyElements: Array<Element>;
         readonly containerElement: Element;
-        private usedElements;
-        private pendingRemoveElements;
-        private blockedElements;
+        private loadObservers;
+        private registerLoadObserver(loadObserver);
+        readonly busy: boolean;
         import(newMeta: Meta, curModelDependent: boolean): LoadObserver;
-        replaceWith(newMeta: Meta): LoadObserver;
-        private containsBlocked(element);
+        replaceWith(newMeta: Meta): MergeObserver;
+    }
+    interface MergeObserver {
+        done(callback: () => any): MergeObserver;
+        aborted(callback: () => any): MergeObserver;
     }
     namespace Meta {
         enum Target {
@@ -312,11 +314,9 @@ declare namespace Jhtml {
     }
     abstract class Panel extends Content {
         private _name;
-        private _loadObserver;
         constructor(_name: string, attachedElem: Element, model: Model);
         readonly name: string;
-        readonly loadObserver: LoadObserver;
-        attachTo(element: Element, loadObserver: LoadObserver): void;
+        attachTo(element: Element): void;
         detach(): void;
     }
     namespace Content {

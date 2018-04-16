@@ -71,7 +71,7 @@ namespace Jhtml {
 	}
 	
     export abstract class Panel extends Content {
-    	private _loadObserver: LoadObserver;
+//    	private _loadObserver: LoadObserver;
     	
     	constructor(private _name: string, attachedElem: Element, model: Model) {
     		super(Util.array(attachedElem.children), model, attachedElem.ownerDocument.createElement("template"));
@@ -82,18 +82,16 @@ namespace Jhtml {
     		return this._name;
     	}
     	
-    	get loadObserver(): LoadObserver {
-    		return this._loadObserver;
-    	}
+//    	get loadObserver(): LoadObserver {
+//    		return this._loadObserver;
+//    	}
     	
-    	attachTo(element: Element, loadObserver: LoadObserver) {
-    		this._loadObserver = loadObserver;
-    		
+    	attachTo(element: Element) {
     		this.attach(element);
     	}
     	
     	detach() {
-    		this._loadObserver = null;
+//    		this._loadObserver = null;
     		
     		super.detach();
     	}

@@ -29,7 +29,7 @@ namespace Jhtml {
     		for (let name in this.model.comps) {
     			if (!monitor.compHandlerReg[name]) continue;
     			
-    			monitor.compHandlerReg[name].attachComp(this.model.comps[name], loadObserver)
+    			monitor.compHandlerReg[name].attachComp(this.model.comps[name]);
 			}
     		
     	}

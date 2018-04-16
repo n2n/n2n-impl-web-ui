@@ -9,9 +9,11 @@ namespace Jhtml {
 	
     export class MetaState {
     	private _browsable: boolean = false;
+    	private mergeQueue: ElementMergeQueue;
     	
     	constructor(private rootElem: Element, private headElem: Element, private bodyElem: Element,
     			private containerElem: Element) {
+    		this.mergeQueue = new ElementMergeQueue();
     		this.markAsUsed(this.headElements);
     		this.markAsUsed(this.bodyElements);
     		
@@ -27,7 +29,7 @@ namespace Jhtml {
     		for (let element of elements) {
     			if (element === this.containerElement) continue;
     			
-    			this.usedElements.push(element);
+    			this.mergeQueue.addUsed(element);
     			
     			this.markAsUsed(Util.array(element.children));
     		}
@@ -44,10 +46,19 @@ namespace Jhtml {
     	get containerElement(): Element {
     		return this.containerElem;
     	}
-    	
-		private usedElements: Array<Element> = [];
-    	private pendingRemoveElements: Array<Element> = [];
-    	private blockedElements: Array<Element> = [];
+
+    	private loadObservers: Array<LoadObserver> = [];
+		
+		private registerLoadObserver(loadObserver: LoadObserver) {
+			this.loadObservers.push(loadObserver);
+			loadObserver.whenLoaded(() => {
+				this.loadObservers.splice(this.loadObservers.indexOf(loadObserver), 1);
+			});
+		}
+		
+		get busy(): boolean {
+			return this.loadObservers.length > 0;
+		}
     	
     	public import(newMeta: Meta, curModelDependent: boolean): LoadObserver {
     		let merger = new Merger(this.rootElem, this.headElem, this.bodyElem,
@@ -56,18 +67,18 @@ namespace Jhtml {
     		merger.importInto(newMeta.headElements, this.headElem, Meta.Target.HEAD);
     		merger.importInto(newMeta.bodyElements, this.bodyElem, Meta.Target.BODY);
 			
+    		this.registerLoadObserver(merger.loadObserver);
+    		
     		if (!curModelDependent) {
     			return merger.loadObserver;
     		}
     		
-    		for (let element of merger.processedElements) {
-    			this.usedElements.push(element);
-    		}
+    		this.mergeQueue.finalizeImport(merger);
     		
 			return merger.loadObserver;
     	}
     	
-    	public replaceWith(newMeta: Meta): LoadObserver {
+    	public replaceWith(newMeta: Meta): MergeObserver {
     		let merger = new Merger(this.rootElem, this.headElem, this.bodyElem,
     				this.containerElem, newMeta.containerElement);
     		
@@ -78,43 +89,179 @@ namespace Jhtml {
 				merger.mergeAttrsInto(newMeta.bodyElement, this.bodyElem);
 			}
 			
-			let removableElements = new Array<Element>();
-			let remainingElements = merger.remainingElements;
+			this.registerLoadObserver(merger.loadObserver);
+			
+			return this.mergeQueue.finalizeMerge(merger);
+		}
+    }
+    
+    class ElementMergeQueue {
+		private usedElements: Array<Element> = [];
+    	private unnecessaryElements: Array<Element> = [];
+    	private blockedElements: Array<Element> = [];
+    	private curObserver: MergeObserverImpl|null = null;
+    
+    	addUsed(usedElement: Element) {
+    		if (this.containsUsed(usedElement)) return;
+    		
+    		this.usedElements.push(usedElement);
+    	}
+    	
+    	containsUsed(element: Element) {
+    		return -1 < this.usedElements.indexOf(element);
+    	}
+    	
+    	/**
+    	 * Blocked elements are added outside of the 
+    	 * @param blockedElement
+    	 */
+    	private addBlocked(blockedElement: Element) {
+    		if (this.containsBlocked(blockedElement)) return;
+    		
+    		this.blockedElements.push(blockedElement);
+    	}
+    	
+    	containsBlocked(element: Element) {
+    		return -1 < this.blockedElements.indexOf(element);
+    	}
+    	
+    	private addUnnecessary(unnecessaryElement: Element) {
+    		if (this.containsUnnecessary(unnecessaryElement)) return;
+    		
+    		this.unnecessaryElements.push(unnecessaryElement);
+    	}
+    	
+//    	private clearUnnecessaries() {
+//    		this.unnecessaryElements.splice(0);
+//    	}
+    	
+    	containsUnnecessary(element: Element) {
+    		return -1 < this.unnecessaryElements.indexOf(element);
+    	}
+    	
+    	private removeUnnecessary(element: Element) {
+    		this.unnecessaryElements.splice(
+    				this.unnecessaryElements.indexOf(element), 1);
+    	}
+    	
+    	private approveRemove() {
+    		let removeElement;
+    		while (removeElement = this.unnecessaryElements.pop()) {
+    			removeElement.remove();
+    		}
+    	}
+    	
+    	finalizeImport(merger: Merger) {
+    		for (let element of merger.processedElements) {
+				this.removeUnnecessary(element);
+    			this.addUsed(element);
+    		}
+    	}
+    	
+    	finalizeMerge(merger: Merger): MergeObserver {
+    		let removableElements: Element[] = [];
+    		
+    		let remainingElements = merger.remainingElements;
 			let remainingElement;
 			while (remainingElement = remainingElements.pop()) {
 				if (this.containsBlocked(remainingElement)) continue;
 				
-				if (-1 == this.usedElements.indexOf(remainingElement)
-						&& -1 == this.pendingRemoveElements.indexOf(remainingElement)) {
-					this.blockedElements.push(remainingElement);
+				if (!this.containsUsed(remainingElement)
+						&& !this.containsUnnecessary(remainingElement)) {
+					this.addBlocked(remainingElement);
 					continue;
 				}
 				
-				removableElements.push(remainingElement);
+				this.addUnnecessary(remainingElement);
 			}
 			
-			this.usedElements = merger.processedElements;
-			for (let removableElement of removableElements) {
-				if (-1 == this.pendingRemoveElements.indexOf(removableElement)) {
-					this.pendingRemoveElements.push(removableElement);
-				}
+			for (let processedElement of merger.processedElements) {
+				this.removeUnnecessary(processedElement);
+				this.addUsed(processedElement);
 			}
+			
+			if (this.curObserver !== null) {
+				this.curObserver.abort();
+			}
+			
+			let observer = this.curObserver = new MergeObserverImpl();
 			
 			merger.loadObserver.whenLoaded(() => {
-				for (let removableElement of removableElements) {
-					let i = this.pendingRemoveElements.indexOf(removableElement);
-					if (-1 == i) continue;
-					
-					removableElement.remove();
-					this.pendingRemoveElements.splice(i, 1);
+				if (this.curObserver !== observer) {
+					return;
 				}
+				
+				this.curObserver = null;
+				observer.complete();
+				
+				this.approveRemove();
 			});
-
-			return merger.loadObserver;
-		}
+			
+			return observer;
+    	}
+    }
+    
+    export interface MergeObserver {
+    	done(callback: () => any): MergeObserver;
+    	aborted(callback: () => any): MergeObserver;
+    }
+    
+    class MergeObserverImpl implements MergeObserver {
+    	private success: boolean = null;
+    	private successCallbacks: Array<() => any> = [];
+    	private abortedCallbacks: Array<() => any> = [];
     	
-    	private containsBlocked(element: Element) {
-    		return -1 < this.blockedElements.indexOf(element);
+    	private ensure() {
+    		if (this.success === null) return;
+    		
+    		throw new Error("already finished");
+    	}
+    	
+    	complete() {
+    		this.ensure();
+    		this.success = true;
+    		
+    		let successCallback;
+    		while (successCallback = this.successCallbacks.pop()) {
+    			successCallback();
+    		}
+    		
+    		this.reset();
+    	}
+    	
+    	abort() {
+    		this.ensure();
+    		this.success = false;
+    		
+    		let abortedCallback;
+    		while (abortedCallback = this.abortedCallbacks.pop()) {
+    			abortedCallback();
+    		}
+    		
+    		this.reset();
+    	}
+    	
+    	private reset() {
+    		this.successCallbacks = [];
+    		this.abortedCallbacks = [];
+    	}
+    	
+    	done(callback: () => any): MergeObserver {
+    		if (this.success === null) {
+    			this.successCallbacks.push(callback);
+    		} else if (this.success) {
+    			callback();
+    		}
+    		return this;
+    	}
+    	
+    	aborted(callback: () => any): MergeObserver {
+    		if (this.success === null) {
+    			this.abortedCallbacks.push(callback);
+    		} else if (!this.success) {
+    			callback();
+    		}
+    		return this;
     	}
     }
     
@@ -141,7 +288,11 @@ namespace Jhtml {
 			}
     		this.loadCallbacks.push(loadCallback)
 			elem.addEventListener("load", loadCallback, false);
-    		tn = setTimeout(loadCallback, 5000);
+    		tn = setTimeout(() => {
+    			console.warn("Jhtml continues; following resource could not be loaded in time: " 
+    					+ elem.outerHTML);
+    			loadCallback();
+    		}, 2000);
     	}
     	
     	private unregisterLoadCallback(callback: () => any) {
