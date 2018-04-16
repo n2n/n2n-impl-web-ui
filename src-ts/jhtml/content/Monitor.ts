@@ -41,7 +41,7 @@ namespace Jhtml {
 			}
 			
 			let url = Url.create(urlExpr);
-//			console.log("exec " + url);
+			
 			let config = FullRequestConfig.from(requestConfig);
 			
 			let page = this.history.getPageByUrl(url);
@@ -76,6 +76,7 @@ namespace Jhtml {
 		
 		public handleDirective(directive: Directive, fresh: boolean = true, usePageScrollPos: boolean = false) {
 			this.triggerDirectiveCallbacks({ directive: directive, new: fresh });
+
 			directive.exec(this);
 
 			if (this.history.currentEntry && this.active) {

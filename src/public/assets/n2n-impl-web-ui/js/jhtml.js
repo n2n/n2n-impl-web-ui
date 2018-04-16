@@ -1562,7 +1562,11 @@ var Jhtml;
         RedirectDirective.prototype.exec = function (monitor) {
             switch (this.back) {
                 case RedirectDirective.Type.REFERER:
-                    if (!monitor.history.currentPage.url.equals(this.srcUrl)) {
+                    var currentPage = monitor.history.currentPage;
+                    if (!currentPage.url.equals(this.srcUrl)) {
+                        if (currentPage.disposed) {
+                            monitor.exec(currentPage.url, { pushToHistory: false });
+                        }
                         return;
                     }
                 case RedirectDirective.Type.BACK:

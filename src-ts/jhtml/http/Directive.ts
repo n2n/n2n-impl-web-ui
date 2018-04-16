@@ -59,8 +59,6 @@ namespace Jhtml {
         }
         
     	exec(monitor: Monitor) {
-//    		console.log(this.srcUrl + ' ' + this.back)
-    		
             switch (this.back) {
             case RedirectDirective.Type.REFERER:
             	let currentPage = monitor.history.currentPage;
