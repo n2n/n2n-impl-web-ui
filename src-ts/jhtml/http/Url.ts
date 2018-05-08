@@ -15,10 +15,15 @@ namespace Jhtml {
         }
         
         public extR(pathExt: string = null, queryExt: { [key: string]: any } = null): Url {
-        	let newUrlStr = this.urlStr;
+        	let urlParts = this.urlStr.split("?");
+        	let newUrlStr = urlParts[0];
         	
             if (pathExt !== null && pathExt !== undefined) {
             	newUrlStr = newUrlStr.replace(/\/+$/, "") + "/" + encodeURI(pathExt);
+            }
+            
+            if (urlParts[1]) {
+            	newUrlStr += "?" + urlParts[1];
             }
             
             if (queryExt !== null || queryExt !== undefined) {

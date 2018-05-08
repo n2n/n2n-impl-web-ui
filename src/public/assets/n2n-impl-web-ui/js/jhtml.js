@@ -312,6 +312,11 @@ var Jhtml;
                 var _this = this;
                 if (this._promise === promise)
                     return;
+                if (this._promise) {
+                    this._promise.then(function (directive) {
+                        directive.destroy();
+                    });
+                }
                 this._promise = promise;
                 if (!promise) {
                     this.fire("disposed");
@@ -442,6 +447,7 @@ var Jhtml;
             if (container) {
                 var containerReadyCallback_1 = function () {
                     container.off("attached", containerReadyCallback_1);
+                    console.log("container attached");
                     _this.readyCbr.fire(container.elements, { container: container });
                     _this.triggerAndScan(container.elements);
                 };
@@ -492,7 +498,7 @@ var Jhtml;
         Context.prototype.onReady = function (readyCallback) {
             this.readyCbr.on(readyCallback);
             if ((this._document.readyState === "complete" || this._document.readyState === "interactive")
-                && !this.modelState.metaState.busy) {
+                && (!this.modelState || !this.modelState.metaState.busy)) {
                 readyCallback([this.document.documentElement], {});
             }
         };
@@ -1047,6 +1053,17 @@ var Jhtml;
         Model.prototype.isFull = function () {
             return !!this.container;
         };
+        Model.prototype.abadone = function () {
+            if (this.container) {
+                this.container.abadone();
+            }
+            for (var name_4 in this.comps) {
+                this.comps[name_4].abadone();
+            }
+            if (this.snippet) {
+                this.snippet.abadone();
+            }
+        };
         return Model;
     }());
     Jhtml.Model = Model;
@@ -1163,12 +1180,12 @@ var Jhtml;
             var comps = {};
             for (var _i = 0, _a = Jhtml.Util.find(containerElem, ModelFactory.COMP_SELECTOR); _i < _a.length; _i++) {
                 var compElem = _a[_i];
-                var name_4 = compElem.getAttribute(ModelFactory.COMP_ATTR);
-                if (comps[name_4]) {
-                    throw new Jhtml.ParseError("Duplicated comp name: " + name_4);
+                var name_5 = compElem.getAttribute(ModelFactory.COMP_ATTR);
+                if (comps[name_5]) {
+                    throw new Jhtml.ParseError("Duplicated comp name: " + name_5);
                 }
-                container.compElements[name_4] = compElem;
-                comps[name_4] = new Jhtml.Comp(name_4, compElem, model);
+                container.compElements[name_5] = compElem;
+                comps[name_5] = new Jhtml.Comp(name_5, compElem, model);
             }
             return comps;
         };
@@ -1373,6 +1390,7 @@ var Jhtml;
             this.cbr.fireType(eventType);
         };
         Content.prototype.on = function (eventType, callback) {
+            this.eunsureNotDisposed();
             this.cbr.onType(eventType, callback);
         };
         Content.prototype.off = function (eventType, callback) {
@@ -1387,10 +1405,16 @@ var Jhtml;
         });
         Content.prototype.ensureDetached = function () {
             if (this.attached) {
-                throw new Error("Element already attached.");
+                throw new Error("Content already attached.");
             }
         };
+        Content.prototype.eunsureNotDisposed = function () {
+            if (!this.disposed)
+                return;
+            throw new Error("Content disposed.");
+        };
         Content.prototype.attach = function (element) {
+            this.eunsureNotDisposed();
             this.ensureDetached();
             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                 var childElem = _a[_i];
@@ -1405,18 +1429,48 @@ var Jhtml;
             this.cbr.fireType("detach");
             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                 var childElem = _a[_i];
-                this.detachedElem.appendChild(childElem);
+                if (this.abadoned) {
+                    childElem.remove();
+                }
+                else {
+                    this.detachedElem.appendChild(childElem);
+                }
             }
             this.attached = false;
+            this.cbr.fireType("detached");
         };
+        Object.defineProperty(Content.prototype, "abadoned", {
+            get: function () {
+                return !this.detachedElem;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Content.prototype.abadone = function () {
+            if (this.abadoned)
+                return;
+            this.detachedElem.remove();
+            this.detachedElem = null;
+            if (!this.attached) {
+                this.dispose();
+            }
+        };
+        Object.defineProperty(Content.prototype, "disposed", {
+            get: function () {
+                return this.elements === null;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Content.prototype.dispose = function () {
+            this.fire("dispose");
+            this.abadone();
             if (this.attached) {
                 this.detach();
             }
-            this.fire("dispose");
+            this.elements = null;
+            this.fire("disposed");
             this.cbr = null;
-            this.detachedElem.remove();
-            this.detachedElem = null;
         };
         return Content;
     }());
@@ -1523,11 +1577,14 @@ var Jhtml;
                 return;
             }
             var loadObserver = monitor.context.importMeta(this.model.meta);
-            for (var name_5 in this.model.comps) {
-                if (!monitor.compHandlerReg[name_5])
+            for (var name_6 in this.model.comps) {
+                if (!monitor.compHandlerReg[name_6])
                     continue;
-                monitor.compHandlerReg[name_5].attachComp(this.model.comps[name_5]);
+                monitor.compHandlerReg[name_6].attachComp(this.model.comps[name_6]);
             }
+        };
+        FullModelDirective.prototype.destroy = function () {
+            this.model.abadone();
         };
         return FullModelDirective;
     }());
@@ -1544,6 +1601,8 @@ var Jhtml;
         };
         ReplaceDirective.prototype.exec = function (monitor) {
             monitor.context.replace(this.responseText, this.mimeType, monitor.history.currentPage.url.equals(this.url));
+        };
+        ReplaceDirective.prototype.destroy = function () {
         };
         return ReplaceDirective;
     }());
@@ -1579,6 +1638,8 @@ var Jhtml;
                 default:
                     monitor.exec(this.targetUrl, this.requestConfig);
             }
+        };
+        RedirectDirective.prototype.destroy = function () {
         };
         return RedirectDirective;
     }());
@@ -1809,9 +1870,13 @@ var Jhtml;
         Url.prototype.extR = function (pathExt, queryExt) {
             if (pathExt === void 0) { pathExt = null; }
             if (queryExt === void 0) { queryExt = null; }
-            var newUrlStr = this.urlStr;
+            var urlParts = this.urlStr.split("?");
+            var newUrlStr = urlParts[0];
             if (pathExt !== null && pathExt !== undefined) {
                 newUrlStr = newUrlStr.replace(/\/+$/, "") + "/" + encodeURI(pathExt);
+            }
+            if (urlParts[1]) {
+                newUrlStr += "?" + urlParts[1];
             }
             if (queryExt !== null || queryExt !== undefined) {
                 var parts = [];
@@ -1828,22 +1893,22 @@ var Jhtml;
         };
         Url.prototype.compileQueryParts = function (parts, queryExt, prefix) {
             for (var key in queryExt) {
-                var name_6 = null;
+                var name_7 = null;
                 if (prefix) {
-                    name_6 = prefix + "[" + key + "]";
+                    name_7 = prefix + "[" + key + "]";
                 }
                 else {
-                    name_6 = key;
+                    name_7 = key;
                 }
                 var value = queryExt[key];
                 if (value === null || value === undefined) {
                     continue;
                 }
                 if (value instanceof Array || value instanceof Object) {
-                    this.compileQueryParts(parts, value, name_6);
+                    this.compileQueryParts(parts, value, name_7);
                 }
                 else {
-                    parts.push(encodeURIComponent(name_6) + "=" + encodeURIComponent(value));
+                    parts.push(encodeURIComponent(name_7) + "=" + encodeURIComponent(value));
                 }
             }
         };
@@ -2214,7 +2279,9 @@ var Jhtml;
                 if (!this.callbacks[type])
                     return;
                 var i = this.callbacks[type].indexOf(callback);
-                this.callbacks[type].splice(i, 1);
+                if (i > -1) {
+                    this.callbacks[type].splice(i, 1);
+                }
             };
             CallbackRegistry.prototype.fire = function () {
                 var args = [];

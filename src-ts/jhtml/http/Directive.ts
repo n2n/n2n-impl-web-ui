@@ -5,6 +5,8 @@ namespace Jhtml {
 		getAdditionalData(): any;
 		
 		exec(monitor: Monitor);
+		
+		destroy();
 	}
     
     export class FullModelDirective implements Directive {
@@ -33,6 +35,10 @@ namespace Jhtml {
 			}
     		
     	}
+    	
+    	destroy() {
+    		this.model.abadone();
+    	}
     }
     
     export class ReplaceDirective implements Directive {
@@ -46,6 +52,9 @@ namespace Jhtml {
         exec(monitor: Monitor) {
         	monitor.context.replace(this.responseText, this.mimeType, 
         			monitor.history.currentPage.url.equals(this.url));
+        }
+        
+        destroy() {
         }
     }
     
@@ -78,6 +87,9 @@ namespace Jhtml {
             default:
                 monitor.exec(this.targetUrl, this.requestConfig);
             }
+        }
+    	
+    	destroy() {
         }
     }
     

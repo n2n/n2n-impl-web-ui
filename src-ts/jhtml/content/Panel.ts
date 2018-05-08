@@ -16,6 +16,8 @@ namespace Jhtml {
 		}
 		
     	on(eventType: Content.EventType, callback: () => any) {
+    		this.eunsureNotDisposed();
+    		
     		this.cbr.onType(eventType, callback);
     	}
     	
@@ -29,11 +31,18 @@ namespace Jhtml {
     	
     	protected ensureDetached() {
     		if (this.attached) {
-    			throw new Error("Element already attached.");
+    			throw new Error("Content already attached.");
     		}
     	}
 		
+    	protected eunsureNotDisposed() {
+    		if (!this.disposed) return; 
+    		
+    		throw new Error("Content disposed.");
+    	}
+    	
 		protected attach(element: Element) {
+			this.eunsureNotDisposed();
     		this.ensureDetached();
     		
     		for (let childElem of this.elements) {
@@ -49,23 +58,52 @@ namespace Jhtml {
     		
     		this.cbr.fireType("detach");
     		
-    		for (let childElem of this.elements) {
-    			this.detachedElem.appendChild(childElem);
+			for (let childElem of this.elements) {
+				if (this.abadoned) {
+					childElem.remove();
+				} else {
+					this.detachedElem.appendChild(childElem);
+				}
     		}
     		
     		this.attached = false;
+    		
+    		this.cbr.fireType("detached");
     	}
+		
+		get abadoned(): boolean {
+			return !this.detachedElem;
+		}
+		
+		abadone() {
+			if (this.abadoned) return;
+			
+			this.detachedElem.remove();
+			this.detachedElem = null;
+			
+			if (!this.attached) {
+				this.dispose();
+			}
+		}
+		
+		get disposed() {
+			return this.elements === null;
+		}
     	
     	dispose() {
+    		this.fire("dispose");
+    		
+    		this.abadone();
+    		
     		if (this.attached) {
     			this.detach();
     		}
     		
-    		this.fire("dispose");
+    		this.elements = null;
+    		
+    		this.fire("disposed");
     		
     		this.cbr = null;
-    		this.detachedElem.remove();
-    		this.detachedElem = null;
     	}
 		
 	}
@@ -98,7 +136,7 @@ namespace Jhtml {
     }
     
     export namespace Content {
-    	export type EventType = "attached" | "detach" | "dispose";
+    	export type EventType = "attach" | "attached" | "detach" | "detached" | "dispose" | "disposed";
     }
 
     export class Container extends Panel {

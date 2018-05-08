@@ -221,6 +221,7 @@ declare namespace Jhtml {
         };
         snippet: Snippet;
         isFull(): boolean;
+        abadone(): void;
     }
     class ModelState {
         metaState: MetaState;
@@ -308,8 +309,12 @@ declare namespace Jhtml {
         off(eventType: Content.EventType, callback: () => any): void;
         readonly isAttached: boolean;
         protected ensureDetached(): void;
+        protected eunsureNotDisposed(): void;
         protected attach(element: Element): void;
         detach(): void;
+        readonly abadoned: boolean;
+        abadone(): void;
+        readonly disposed: boolean;
         dispose(): void;
     }
     abstract class Panel extends Content {
@@ -320,7 +325,7 @@ declare namespace Jhtml {
         detach(): void;
     }
     namespace Content {
-        type EventType = "attached" | "detach" | "dispose";
+        type EventType = "attach" | "attached" | "detach" | "detached" | "dispose" | "disposed";
     }
     class Container extends Panel {
         compElements: {
@@ -347,6 +352,7 @@ declare namespace Jhtml {
     interface Directive {
         getAdditionalData(): any;
         exec(monitor: Monitor): any;
+        destroy(): any;
     }
     class FullModelDirective implements Directive {
         private model;
@@ -354,6 +360,7 @@ declare namespace Jhtml {
         constructor(model: Model, additionalData: any);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
+        destroy(): void;
     }
     class ReplaceDirective implements Directive {
         status: number;
@@ -363,6 +370,7 @@ declare namespace Jhtml {
         constructor(status: number, responseText: string, mimeType: string, url: Url);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
+        destroy(): void;
     }
     class RedirectDirective implements Directive {
         srcUrl: Url;
@@ -373,6 +381,7 @@ declare namespace Jhtml {
         constructor(srcUrl: Url, back: RedirectDirective.Type, targetUrl: Url, requestConfig?: RequestConfig, additionalData?: any);
         getAdditionalData(): any;
         exec(monitor: Monitor): void;
+        destroy(): void;
     }
     namespace RedirectDirective {
         enum Type {

@@ -13,6 +13,20 @@ namespace Jhtml {
     	public isFull(): boolean {
     		return !!this.container;
     	}
+    	
+    	abadone() {
+    		if (this.container) {
+    			this.container.abadone();
+    		}
+    		
+    		for (let name in this.comps) {
+    			this.comps[name].abadone();
+    		}
+    		
+    		if (this.snippet) {
+    			this.snippet.abadone();
+    		}
+    	}
     }
     
     export class ModelState {

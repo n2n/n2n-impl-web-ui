@@ -27,6 +27,7 @@ use n2n\util\HashUtils;
 use n2n\reflection\ReflectionUtils;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
+use n2n\util\StringUtils;
 
 class HtmlUtils {
 	public static function validateCustomAttrs(array $customAttrs, array $reservedAttrNames) {
@@ -60,35 +61,47 @@ class HtmlUtils {
 		return $attrs;
 	}
 	
+	/**
+	 * @param string $str
+	 * @return string
+	 */
+	public static function hsc(string $str) {
+		return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE);
+	}
+	
+	/**
+	 * @param mixed $contents
+	 * @param BuildContext $buildContext
+	 * @return string
+	 */
 	public static function contentsToHtml($contents, BuildContext $buildContext) {
 		if ($contents instanceof UiComponent) {
 			return $contents->build($buildContext);
 		}
 		
-		if (is_object($contents) && !method_exists($contents, '__toString')) {
-			$contents = ReflectionUtils::getTypeInfo($contents);
-		}
-		
-		return htmlspecialchars((string) $contents);
+		return self::hsc(StringUtils::strOf($contents, true));
 	}
 	
+	/**
+	 * @param mixed $contents
+	 * @param \Closure $pcf
+	 * @throws \InvalidArgumentException
+	 * @return string
+	 */
 	public static function escape($contents, \Closure $pcf = null) {
-		$html = null;
-		
-		if ($contents === null) {
-			$html = '';
-		} else if (is_scalar($contents)) {
-			$html = htmlspecialchars((string) $contents);
-		} else if ($contents instanceof UiComponent) {
-			return htmlspecialchars($contents->build(new SimpleBuildContext()));
-		} else if (is_object($contents) && method_exists($contents, '__toString')) {
-			$html = htmlspecialchars((string) $contents);
+		$html;
+		if ($contents instanceof UiComponent) {
+			$html = self::hsc($contents->build(new SimpleBuildContext()));
 		} else {
-			throw new \InvalidArgumentException('Could not convert type to escaped string: ' 
-					. ReflectionUtils::getTypeInfo($contents));
+			try {
+				$html = self::hsc(StringUtils::strOf($contents));
+			} catch (\InvalidArgumentException $e) {
+				throw new \InvalidArgumentException('Could not convert type to escaped string: '
+						. ReflectionUtils::getTypeInfo($contents));
+			}	
 		}
 		
-		if (isset($pcf)) {
+		if ($pcf !== null) {
 			$html = $pcf($html);
 		}
 		

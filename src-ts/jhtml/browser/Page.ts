@@ -45,6 +45,12 @@ namespace Jhtml {
     	set promise(promise: Promise<Directive>|null) {
     		if (this._promise === promise) return;
     		
+    		if (this._promise) {
+    			this._promise.then((directive: Directive) => {
+    				directive.destroy();
+    			});
+    		}
+    		
     		this._promise = promise;
     		
     		if (!promise) {

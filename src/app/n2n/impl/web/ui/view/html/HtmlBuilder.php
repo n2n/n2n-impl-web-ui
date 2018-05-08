@@ -437,7 +437,7 @@ class HtmlBuilder {
 	 * @param array $infoAttrs
 	 * @param array $successAttrs
 	 */
-	public function messageList($groupName = null, $severity = null, array $attrs = null, array $errorAttrs = null, 
+	public function messageList(string $groupName = null, int $severity = null, array $attrs = null, array $errorAttrs = null, 
 			array $warnAttrs = null, array $infoAttrs = null, array $successAttrs = null) {
 		$this->view->out($this->getMessageList($groupName, $severity, $attrs, $errorAttrs, 
 				$warnAttrs, $infoAttrs, $successAttrs));
@@ -453,7 +453,7 @@ class HtmlBuilder {
 	 * @param array $successAttrs
 	 * @return \n2n\impl\web\ui\view\html\MessageList
 	 */
-	public function getMessageList($groupName = null, $severity = null, array $attrs = null, array $errorAttrs = null, 
+	public function getMessageList(string $groupName = null, int $severity = null, array $attrs = null, array $errorAttrs = null, 
 			array $warnAttrs = null, array $infoAttrs = null, array $successAttrs = null) {
 		
 		return new MessageList($this->meta->getMessages($groupName, $severity), $attrs, 

@@ -31,8 +31,8 @@ class HtmlElement implements UiComponent {
 	private $attrs; 
 	private $contents = array();
 	
-	public function __construct($tagName, array $attrs = null, $content = null) {
-		$this->tagName = (string) $tagName;
+	public function __construct(string $tagName, array $attrs = null, $content = null) {
+		$this->tagName = $tagName;
 		$this->attrs = (array) $attrs;
 		
 		if ($content === null) return;
@@ -43,8 +43,8 @@ class HtmlElement implements UiComponent {
 		}
 	}
 	
-	public function setTagName($tagName) {
-		$this->tagName = (string) $tagName;
+	public function setTagName(string $tagName) {
+		$this->tagName = $tagName;
 	}
 	
 	public function getTagName() {
@@ -105,10 +105,11 @@ class HtmlElement implements UiComponent {
 	}
 	
 	public function build(BuildContext $buildContext): string {
-		$html = '<' . htmlspecialchars($this->tagName) . self::buildAttrsHtml($this->attrs);
+		$html = '<' . HtmlUtils::hsc($this->tagName ) . self::buildAttrsHtml($this->attrs);
 		
 		if (!$this->isEmpty()) {
-			$html .= '>' . $this->buildContentHtml($buildContext) . '</' . htmlspecialchars($this->tagName) . '>';
+			$html .= '>' . $this->buildContentHtml($buildContext) . '</' 
+					. HtmlUtils::hsc($this->tagName) . '>';
 		} else {
 			$html .= ' />';
 		}
@@ -139,9 +140,9 @@ class HtmlElement implements UiComponent {
 			}
 
 			if (is_numeric($name)) {
-				$html .= ' ' . htmlspecialchars((string) $value);
+				$html .= ' ' . HtmlUtils::hsc($value);
 			} else {
-				$html .= ' ' . htmlspecialchars((string) $name) . '="' . htmlspecialchars((string) $value) . '"';
+				$html .= ' ' . HtmlUtils::hsc((string) $name) . '="' . HtmlUtils::contentsToHtml($value, new SimpleBuildContext()) . '"';
 			}
 		}
 		return $html;

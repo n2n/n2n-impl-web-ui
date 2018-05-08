@@ -25,7 +25,9 @@ namespace Jhtml.Util {
 			if (!this.callbacks[type]) 	return;
 			
 			let i = this.callbacks[type].indexOf(callback);
-			this.callbacks[type].splice(i, 1);
+			if (i > -1) {
+				this.callbacks[type].splice(i, 1);
+			}
 		}
 		
 		fire(...args: Array<any>) {
