@@ -323,14 +323,14 @@ class HtmlBuilderMeta {
 	}
 	
 	/**
-	 * @param string|UiComponent $html
+	 * @param string|UiComponent $contents
 	 * @param bool $prepend
 	 * @param string $target
 	 */
-	public function addHtml($html, bool $prepend = false, $target = self::TARGET_BODY_START) {
+	public function addContents($contents, bool $prepend = false, $target = self::TARGET_BODY_START) {
 		ArgUtils::valEnum($target, array(self::TARGET_BODY_START, self::TARGET_BODY_END, self::TARGET_HEAD));
 		
-		$this->htmlProperties->push($target, new Raw($this->view->getOut($html)), $prepend);
+		$this->htmlProperties->push($target, new Raw($this->view->getHtmlBuilder()->getOut($contents)), $prepend);
 	}
 	
 	/**
