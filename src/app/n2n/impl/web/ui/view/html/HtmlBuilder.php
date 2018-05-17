@@ -89,6 +89,10 @@ class HtmlBuilder {
 		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_SCRIPT_KEY)) {
 			$this->contentBuffer->breakPoint(HtmlBuilderMeta::HEAD_SCRIPT_KEY);
 		}
+		
+		if (!$this->contentBuffer->hasBreakPoint(HtmlBuilderMeta::HEAD_CONTENTS_KEY)) {
+			$this->contentBuffer->breakPoint(HtmlBuilderMeta::HEAD_CONTENTS_KEY);
+		}
 	}
 
 	/**

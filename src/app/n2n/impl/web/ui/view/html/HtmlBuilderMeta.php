@@ -253,12 +253,14 @@ class HtmlBuilderMeta {
 	const HEAD_SCRIPT_KEY = 'head.script';
 	const HEAD_LINK_KEY = 'head.link';
 	const HEAD_META_KEY = 'head.meta';
+	const HEAD_CONTENTS_KEY = 'head.contents';
 	
 	/**
 	 * @return string[]
 	 */
 	public static function getHeadKeys() {
-		return array(self::HEAD_TITLE_KEY, self::HEAD_SCRIPT_KEY, self::HEAD_LINK_KEY, self::HEAD_META_KEY);
+		return array(self::HEAD_TITLE_KEY, self::HEAD_SCRIPT_KEY, self::HEAD_LINK_KEY, self::HEAD_META_KEY, 
+				self::HEAD_CONTENTS_KEY);
 	}
 	
 	const TARGET_HEAD = 'head';
@@ -277,7 +279,7 @@ class HtmlBuilderMeta {
 	 */
 	public static function getKeys() {
 		return array(self::HEAD_TITLE_KEY, self::HEAD_SCRIPT_KEY, self::HEAD_LINK_KEY, self::HEAD_META_KEY,
-				self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END);
+				self::HEAD_CONTENTS_KEY, self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END);
 	}
 	
 	/**
@@ -314,7 +316,7 @@ class HtmlBuilderMeta {
 		ArgUtils::valEnum($target, self::getTargets());
 		
 		if ($target == self::TARGET_HEAD) {
-			$target = self::HEAD_SCRIPT_KEY;
+			$target = self::HEAD_LINK_KEY;
 		}
 		
 		$this->htmlProperties->push($target,
@@ -329,6 +331,10 @@ class HtmlBuilderMeta {
 	 */
 	public function addContents($contents, bool $prepend = false, $target = self::TARGET_BODY_START) {
 		ArgUtils::valEnum($target, array(self::TARGET_BODY_START, self::TARGET_BODY_END, self::TARGET_HEAD));
+		
+		if ($target == self::TARGET_HEAD) {
+			$target = self::HEAD_CONTENTS_KEY;
+		}
 		
 		$this->htmlProperties->push($target, new Raw($this->view->getHtmlBuilder()->getOut($contents)), $prepend);
 	}
@@ -536,10 +542,10 @@ class BodyBuilderMeta {
 	}
 	
 	public function addJsCode($code, bool $defer = false, $prepend = false, array $attrs = null) {
-		$this->meta->addJscode($code, $defer, $prepend, $attrs, $this->target);
+		$this->meta->addJsCode($code, $defer, $prepend, $attrs, $this->target);
 	}
 	
-	public function addHtml($html, bool $prepend = false) {
-		$this->meta->addHtml($html, $prepend, $this->target);
+	public function addContents($html, bool $prepend = false) {
+		$this->meta->addContents($html, $prepend, $this->target);
 	}
 }
