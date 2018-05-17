@@ -330,7 +330,7 @@ class HtmlBuilderMeta {
 	public function addHtml($html, bool $prepend = false, $target = self::TARGET_BODY_START) {
 		ArgUtils::valEnum($target, array(self::TARGET_BODY_START, self::TARGET_BODY_END, self::TARGET_HEAD));
 		
-		$this->htmlProperties->push($target, new Raw($this->view->getOut($contents)), $prepend);
+		$this->htmlProperties->push($target, new Raw($this->view->getOut($html)), $prepend);
 	}
 	
 	/**
