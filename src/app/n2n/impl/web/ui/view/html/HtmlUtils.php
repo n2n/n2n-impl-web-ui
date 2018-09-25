@@ -30,6 +30,11 @@ use n2n\web\ui\SimpleBuildContext;
 use n2n\util\StringUtils;
 
 class HtmlUtils {
+	/**
+	 * @param array $customAttrs
+	 * @param array $reservedAttrNames
+	 * @throws AttributeNameIsReservedException
+	 */
 	public static function validateCustomAttrs(array $customAttrs, array $reservedAttrNames) {
 		foreach ($customAttrs as $name => $value) {
 			if (in_array($name, $reservedAttrNames)) {
@@ -39,6 +44,13 @@ class HtmlUtils {
 		}
 	}
 	
+	/**
+	 * @param array $attrs
+	 * @param array $customAttrs
+	 * @param bool $overwrite
+	 * @throws AttributeNameIsReservedException
+	 * @return array
+	 */
 	public static function mergeAttrs(array $attrs, array $customAttrs = null, bool $overwrite = false) {
 		if ($customAttrs === null) return $attrs;
 		
