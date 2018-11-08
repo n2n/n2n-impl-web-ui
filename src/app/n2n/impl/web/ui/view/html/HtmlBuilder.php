@@ -32,6 +32,11 @@ use n2n\web\ui\CouldNotRenderUiComponentException;
 use n2n\web\ui\Raw;
 use n2n\web\ui\UiComponent;
 use n2n\web\ui\UiException;
+use n2n\io\managed\impl\AssetFileManager;
+use n2n\reflection\CastUtils;
+use n2n\io\managed\impl\engine\QualifiedNameBuilder;
+use n2n\util\uri\Path;
+use n2n\core\VarStore;
 
 class HtmlBuilder {
 	private $view;
@@ -654,5 +659,45 @@ class HtmlBuilder {
 		return new HtmlElement('img', HtmlUtils::mergeAttrs(
 				array('src' => $this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($pathExt), 
 						'alt' => $alt), (array) $attrs));
+	}
+	
+	/**
+	 * @param mixed $pathExt
+	 * @param mixed $imgComposer
+	 * @param array $attrs
+	 * @param string $moduleNamespace
+	 * @param bool $addWidthAttr
+	 * @param bool $addHeightAttr
+	 */
+	public function imageMimgAsset($pathExt, $imgComposer = null, array $attrs = null, string $moduleNamespace = null,
+			bool $addWidthAttr = true, bool $addHeightAttr = true) {
+		$this->out($this->getImageMimgAsset($pathExt, $imgComposer, $attrs, $moduleNamespace, $addWidthAttr, $addHeightAttr));
+	}
+	
+	/**
+	 * @param mixed $pathExt
+	 * @param mixed $imgComposer
+	 * @param array $attrs
+	 * @param string $moduleNamespace
+	 * @param bool $addWidthAttr
+	 * @param bool $addHeightAttr
+	 * @return \n2n\impl\web\ui\view\html\HtmlElement
+	 */
+	public function getImageMimgAsset($pathExt, $imgComposer = null, array $attrs = null, string $moduleNamespace = null,
+			bool $addWidthAttr = true, bool $addHeightAttr = true) {
+		$assetFileManager = $this->view->lookup(AssetFileManager::class);
+		CastUtils::assertTrue($assetFileManager instanceof AssetFileManager);
+		
+		if ($moduleNamespace === null) {
+			$moduleNamespace = $this->view->getModuleNamespace();
+		}
+		
+		$qnLevels = [VarStore::namespaceToDirName($moduleNamespace)];
+		array_push($qnLevels, ...Path::create($pathExt)->getPathParts());
+		$fileName = array_pop($qnLevels);
+		
+		$file = $assetFileManager->getByQualifiedName((new QualifiedNameBuilder($qnLevels, $fileName))->__toString());
+		
+		return $this->getImage($file, $imgComposer, $attrs, $addWidthAttr, $addHeightAttr);
 	}
 }
