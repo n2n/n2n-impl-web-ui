@@ -25,12 +25,13 @@ use n2n\l10n\Message;
 use n2n\web\ui\UiComponent;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
+use n2n\l10n\DynamicTextCollection;
 
 class MessageList implements UiComponent {
 	private $messages = array();
 	private $html = '';
 	
-	public function __construct(array $messages, array $attrs = null, array $errorAttrs = null, 
+	public function __construct(DynamicTextCollection $dtc, array $messages, array $attrs = null, array $errorAttrs = null, 
 			array $warnAttrs = null, array $infoAttrs = null) {
 		$this->messages = $messages;
 		if (empty($messages)) return;
@@ -50,7 +51,7 @@ class MessageList implements UiComponent {
 					break;
 			}
 			
-			$liElement = new HtmlElement('li', $attrs, $message->__toString());
+			$liElement = new HtmlElement('li', $attrs, $message->tByDtc($dtc));
 			$this->html .= $liElement->getContents() . "\r\n";
 		}		
 		$this->html .= '</ul>';
