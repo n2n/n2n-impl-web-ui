@@ -21,7 +21,7 @@
  */
 namespace n2n\impl\web\ui\view\html;
 
-use n2n\reflection\ArgUtils;
+use n2n\util\type\ArgUtils;
 use n2n\web\ui\Raw;
 use n2n\util\uri\Url;
 use n2n\web\http\nav\Murl;

@@ -25,7 +25,7 @@ use n2n\web\ui\UiException;
 use n2n\io\ob\OutputBuffer;
 use n2n\core\N2N;
 use n2n\web\ui\view\View;
-use n2n\reflection\ArgUtils;
+use n2n\util\type\ArgUtils;
 use n2n\web\http\Response;
 use n2n\impl\web\dispatch\ui\FormHtmlBuilder;
 use n2n\impl\web\dispatch\ui\AriaFormHtmlBuilder;

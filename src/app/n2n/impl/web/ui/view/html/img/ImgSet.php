@@ -21,7 +21,7 @@
  */
 namespace n2n\impl\web\ui\view\html\img;
 
-use n2n\reflection\ArgUtils;
+use n2n\util\type\ArgUtils;
 
 class ImgSet {
 	private $defaultSrcAttr;

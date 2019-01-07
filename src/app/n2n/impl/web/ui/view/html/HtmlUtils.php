@@ -24,10 +24,10 @@ namespace n2n\impl\web\ui\view\html;
 use n2n\web\ui\UiComponent;
 use n2n\web\ui\UiException;
 use n2n\util\HashUtils;
-use n2n\reflection\ReflectionUtils;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
 use n2n\util\StringUtils;
+use n2n\util\type\TypeUtils;
 
 class HtmlUtils {
 	/**
@@ -109,7 +109,7 @@ class HtmlUtils {
 				$html = self::hsc(StringUtils::strOf($contents));
 			} catch (\InvalidArgumentException $e) {
 				throw new \InvalidArgumentException('Could not convert type to escaped string: '
-						. ReflectionUtils::getTypeInfo($contents));
+						. TypeUtils::getTypeInfo($contents));
 			}	
 		}
 		
