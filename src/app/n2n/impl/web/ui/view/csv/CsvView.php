@@ -63,3 +63,4 @@ class CsvView extends View {
  */
 return;
 $csv = new \n2n\impl\web\ui\view\csv\CsvBuilder();
+$csv->meta();

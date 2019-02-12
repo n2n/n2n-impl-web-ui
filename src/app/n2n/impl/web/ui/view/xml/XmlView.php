@@ -60,3 +60,4 @@ class XmlView extends View {
  */
 return;
 $xml = new \n2n\impl\web\ui\view\xml\XmlBuilder();
+$xml->getEsc('');

@@ -278,6 +278,12 @@ class NoHttpControllerContextAssignetException extends UiException {
  * hack to provide autocompletion in views
  */
 return;
+
 $html = new \n2n\impl\web\ui\view\html\HtmlBuilder();
 $formHtml = new \n2n\impl\web\dispatch\ui\FormHtmlBuilder();
 $ariaFormHtml = new \n2n\impl\web\dispatch\ui\AriaFormHtmlBuilder();
+
+// to avoid never used warinings
+$html->meta();
+$formHtml->meta();
+$ariaFormHtml->close();

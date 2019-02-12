@@ -101,7 +101,7 @@ class HtmlUtils {
 	 * @return string
 	 */
 	public static function escape($contents, \Closure $pcf = null) {
-		$html;
+		$html = null;
 		if ($contents instanceof UiComponent) {
 			$html = self::hsc($contents->build(new SimpleBuildContext()));
 		} else {

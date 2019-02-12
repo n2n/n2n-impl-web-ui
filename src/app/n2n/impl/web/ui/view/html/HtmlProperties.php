@@ -21,7 +21,7 @@
  */
 namespace n2n\impl\web\ui\view\html;
 
-use n2n\util\config\Attributes;
+use n2n\util\type\attrs\Attributes;
 use n2n\web\ui\UiComponent;
 use n2n\io\ob\OutputBuffer;
 use n2n\web\ui\ViewStuffFailedException;
@@ -149,7 +149,7 @@ class HtmlProperties {
 	}
 	
 	/**
-	 * @return \n2n\util\config\Attributes[]
+	 * @return \n2n\util\type\attrs\Attributes[]
 	 */
 	public function getAttributesCollection() {
 		$collection = array($this->prependedAttributes, $this->attributes);
