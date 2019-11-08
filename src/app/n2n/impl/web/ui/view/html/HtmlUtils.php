@@ -39,7 +39,7 @@ class HtmlUtils {
 		foreach ($customAttrs as $name => $value) {
 			if (in_array($name, $reservedAttrNames)) {
 				throw new AttributeNameIsReservedException('Attribute is reserved: ' . $name 
-						. ' All reserved dataSet: ' . implode(', ', $reservedAttrNames));
+						. ' All reserved attributes: ' . implode(', ', $reservedAttrNames));
 			}
 		}
 	}
@@ -63,7 +63,7 @@ class HtmlUtils {
 					continue;
 				} else if (!$overwrite) {
 					throw new AttributeNameIsReservedException('Html attribute \'' . $name . '\' is reserved.'
-							. ' Reserved dataSet: ' . implode(', ', array_keys($attrs)));
+							. ' Reserved attributes: ' . implode(', ', array_keys($attrs)));
 				}
 			}
 			
