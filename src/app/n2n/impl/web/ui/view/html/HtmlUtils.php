@@ -39,7 +39,7 @@ class HtmlUtils {
 		foreach ($customAttrs as $name => $value) {
 			if (in_array($name, $reservedAttrNames)) {
 				throw new AttributeNameIsReservedException('Attribute is reserved: ' . $name 
-						. ' All reserved attributes: ' . implode(', ', $reservedAttrNames));
+						. ' All reserved dataSet: ' . implode(', ', $reservedAttrNames));
 			}
 		}
 	}
@@ -63,7 +63,7 @@ class HtmlUtils {
 					continue;
 				} else if (!$overwrite) {
 					throw new AttributeNameIsReservedException('Html attribute \'' . $name . '\' is reserved.'
-							. ' Reserved attributes: ' . implode(', ', array_keys($attrs)));
+							. ' Reserved dataSet: ' . implode(', ', array_keys($attrs)));
 				}
 			}
 			
@@ -79,6 +79,9 @@ class HtmlUtils {
 	 */
 	public static function hsc(string $str) {
 		return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE);
+		
+		// htmlentities returnes empty string  on some characters, but seams to be fixed now
+		// return htmlentities($str, ENT_QUOTES | ENT_HTML401 | ENT_SUBSTITUTE, N2N::CHARSET_UPPER);
 	}
 	
 	/**
