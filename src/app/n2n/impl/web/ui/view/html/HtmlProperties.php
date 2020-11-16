@@ -29,10 +29,11 @@ use n2n\impl\web\dispatch\ui\Form;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
 use n2n\web\http\ServerPushDirective;
+use n2n\util\type\attrs\DataSet;
 
 class HtmlProperties {	
 	protected $prependedAttributes;
-	protected $attributes;
+	protected $dataSet;
 	protected $contentHtmlProperties;
 	protected $serverPushDirectives = array();
 	
@@ -42,8 +43,8 @@ class HtmlProperties {
 	private $ids = array();
 	
 	public function __construct() {
-		$this->prependedAttributes = new Attributes();
-		$this->attributes = new Attributes();
+		$this->prependedAttributes = new DataSet();
+		$this->dataSet = new DataSet();
 		$this->buildContext = new SimpleBuildContext();
 	}
 	
@@ -70,10 +71,10 @@ class HtmlProperties {
 		if ($prepend) {
 			if ($this->prependedAttributes->contains($name)) return;
 			$this->prependedAttributes->set($name, $value);
-			$this->attributes->remove($name);
+			$this->dataSet->remove($name);
 		} else if (!$this->prependedAttributes->contains($name) 
-				&& !$this->attributes->contains($name)) {
-			$this->attributes->set($name, $value);
+				&& !$this->dataSet->contains($name)) {
+			$this->dataSet->set($name, $value);
 		}
 		
 		if ($this->contentHtmlProperties !== null) {
@@ -90,7 +91,7 @@ class HtmlProperties {
 		if ($prepend) {
 			$this->prependedAttributes->push($name, $value);
 		} else {
-			$this->attributes->push($name, $value);
+			$this->dataSet->push($name, $value);
 		}
 		
 // 		if ($this->contentHtmlProperties !== null) {
@@ -102,10 +103,10 @@ class HtmlProperties {
 		if ($prepend) {
 			if ($this->prependedAttributes->hasKey($name, $key)) return;
 			$this->prependedAttributes->add($name, $key, $value);
-			$this->attributes->removeKey($name, $key);
+			$this->dataSet->removeKey($name, $key);
 		} else if (!$this->prependedAttributes->hasKey($name, $key)  
-				&& !$this->attributes->hasKey($name, $key)) {
-			$this->attributes->add($name, $key, $value);
+				&& !$this->dataSet->hasKey($name, $key)) {
+			$this->dataSet->add($name, $key, $value);
 		}
 
 		if ($this->contentHtmlProperties !== null) {
@@ -118,7 +119,7 @@ class HtmlProperties {
 	 */
 	public function remove(string $name) {
 		$this->prependedAttributes->remove($name);
-		$this->attributes->remove($name);
+		$this->dataSet->remove($name);
 		
 		if ($this->contentHtmlProperties !== null) {
 			$this->contentHtmlProperties->remove($name);
@@ -127,7 +128,7 @@ class HtmlProperties {
 	
 	public function removeKey($name, $key) {
 		$this->prependedAttributes->removeKey($name, $key);
-		$this->attributes->removeKey($name, $key);
+		$this->dataSet->removeKey($name, $key);
 		
 		if ($this->contentHtmlProperties !== null) {
 			$this->contentHtmlProperties->removeKey($name, $key);
@@ -139,12 +140,12 @@ class HtmlProperties {
 	 * @return boolean
 	 */
 	public function containsName(string $name) {
-		return ($this->prependedAttributes->contains($name) || $this->attributes->contains($name))
+		return ($this->prependedAttributes->contains($name) || $this->dataSet->contains($name))
 				|| ($this->contentHtmlProperties !== null && $this->contentHtmlProperties->containsName($name));
 	}
 	
 	public function hasKey($name, $key) {
-		return ($this->prependedAttributes->hasKey($name, $key) || $this->attributes->hasKey($name, $key))
+		return ($this->prependedAttributes->hasKey($name, $key) || $this->dataSet->hasKey($name, $key))
 				|| ($this->contentHtmlProperties !== null && $this->contentHtmlProperties->hasKey($name, $key));
 	}
 	
@@ -152,7 +153,7 @@ class HtmlProperties {
 	 * @return \n2n\util\type\attrs\Attributes[]
 	 */
 	public function getAttributesCollection() {
-		$collection = array($this->prependedAttributes, $this->attributes);
+		$collection = array($this->prependedAttributes, $this->dataSet);
 		if ($this->contentHtmlProperties !== null) {
 			$collection = array_merge($collection, $this->contentHtmlProperties->getAttributesCollection());
 		}
@@ -166,8 +167,8 @@ class HtmlProperties {
 	public function fetchUiComponentHtmlSnipplets(array $keys) {
 		$contents = array_fill_keys($keys, array());
 		
-		foreach ($this->getAttributesCollection() as $attributes) {
-			foreach ($attributes->toArray() as $name => $value) {
+		foreach ($this->getAttributesCollection() as $dataSet) {
+			foreach ($dataSet->toArray() as $name => $value) {
 				if (!array_key_exists($name, $contents)) continue;
 		
 				if (is_array($value)) {
@@ -178,7 +179,7 @@ class HtmlProperties {
 					$contents[$name][] = $value->build($this->buildContext);
 				}
 		
-				$attributes->remove($name);
+				$dataSet->remove($name);
 			}
 		}
 		
@@ -188,8 +189,8 @@ class HtmlProperties {
 	public function fetchHtmlSnipplets(array $keys): array {
 		$htmlSnipplets = array_fill_keys($keys, null);
 		
-		foreach ($this->getAttributesCollection() as $attributes) {
-			foreach ($attributes->toArray() as $name => $value) {
+		foreach ($this->getAttributesCollection() as $dataSet) {
+			foreach ($dataSet->toArray() as $name => $value) {
 				if (!array_key_exists($name, $htmlSnipplets)) continue;
 		
 				if (is_array($value)) {
@@ -200,7 +201,7 @@ class HtmlProperties {
 					$htmlSnipplets[$name] = $value->build($this->buildContext) . "\r\n";
 				}
 		
-				$attributes->remove($name);
+				$dataSet->remove($name);
 			}
 		}
 		
@@ -216,8 +217,8 @@ class HtmlProperties {
 	}
 	
 	private function getFirstHtmlSnipplet(BuildContext $buildContext) {
-		foreach ($this->getAttributesCollection() as $attributes) {
-			foreach ($attributes->toArray() as $value) {
+		foreach ($this->getAttributesCollection() as $dataSet) {
+			foreach ($dataSet->toArray() as $value) {
 				if (is_array($value)) {
 					foreach ($value as $uiComponent) {
 						return $uiComponent->build($buildContext);
@@ -232,7 +233,7 @@ class HtmlProperties {
 	}
 	
 	public function isEmpty() {
-		return $this->attributes->isEmpty() && $this->prependedAttributes->isEmpty();
+		return $this->dataSet->isEmpty() && $this->prependedAttributes->isEmpty();
 	}
 	
 	public function validateForResponse() {
@@ -289,7 +290,7 @@ class HtmlProperties {
 	
 	public function merge(HtmlProperties $htmlProperties) {
 		$this->prependedAttributes->append($htmlProperties->prependedAttributes);
-		$this->attributes->append($htmlProperties->attributes);
+		$this->dataSet->append($htmlProperties->dataSet);
 		$this->serverPushDirectives += $htmlProperties->serverPushDirectives;
 	}
 }

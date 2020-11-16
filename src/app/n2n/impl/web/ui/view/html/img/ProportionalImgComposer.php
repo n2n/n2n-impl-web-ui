@@ -147,18 +147,18 @@ class ProportionalImgComposer implements ImgComposer {
 			}
 		}
 	
-		$lastSize = null;
-		$lastWidth = null;
-		foreach ($imageFiles as $width => $imageFile) {
-			if ($width > $this->maxWidth || $width < $this->minWidth) continue;
+// 		$lastSize = null;
+// 		$lastWidth = null;
+// 		foreach ($imageFiles as $width => $imageFile) {
+// 			if ($width > $this->maxWidth || $width < $this->minWidth) continue;
 	
-			// 			$size = $imageFile->getFile()->getFileSource()->getSize();
-			// 			if (!$this->isSizeGabTooLarge($lastWidth, $lastWidth = $size)) continue;
+// 			// 			$size = $imageFile->getFile()->getFileSource()->getSize();
+// 			// 			if (!$this->isSizeGabTooLarge($lastWidth, $lastWidth = $size)) continue;
 	
-			// 			if ($lastSize > $size) {
+// 			// 			if ($lastSize > $size) {
 	
-			// 			}
-		}
+// 			// 			}
+// 		}
 	
 		$imgSrcs = array();
 		foreach ($imageFiles as $width => $imageFile) {
@@ -248,6 +248,8 @@ class ProportionalImgComposer implements ImgComposer {
 			$orgImageSource = $orgImageFile->getImageSource();
 		}
 
+		$strategy->getImageDimension();
+		
 		return $imageFile->getOrCreateVariation($strategy, $orgImageSource);
 	}
 	
