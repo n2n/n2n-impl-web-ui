@@ -91,13 +91,16 @@ class UiComponentFactory {
 		
 		$imageSourceSets = $imgSet->getImageSourceSets();
 		if (empty($imageSourceSets) || (count($imageSourceSets) == 1 && count($imageSourceSets[0]->getImgSrcs()) <= 1)) {
-			if ($addWidthAttr) $attrs['width'] = $imgSet->getDefaultWidthAttr();
-			if ($addHeightAttr) $attrs['height'] = $imgSet->getDefaultHeightAttr();
+// 			if ($addWidthAttr) $attrs['width'] = $imgSet->getDefaultWidthAttr();
+// 			if ($addHeightAttr) $attrs['height'] = $imgSet->getDefaultHeightAttr();
 		} else {
 			$imageSourceSet = current($imageSourceSets);
 			$attrs['srcset'] = $imageSourceSet->getSrcsetAttr();
 			$attrs = HtmlUtils::mergeAttrs($attrs, $imageSourceSet->getAttrs());
 		}
+		// @tomekk: 05.07.2021 --> moved to top. Needs to be set for both, single img tag and img tag with imgSets. See: https://web.dev/optimize-cls/#modern-best-practice
+		if ($addWidthAttr) $attrs['width'] = $imgSet->getDefaultWidthAttr();
+		if ($addHeightAttr) $attrs['height'] = $imgSet->getDefaultHeightAttr();
 
 		return new HtmlElement('img', HtmlUtils::mergeAttrs($attrs, $customAttrs));
 	}
