@@ -1,4 +1,1 @@
-/src/vendor/
-/src/.phpunit.result.cache
-.DS_Store
 /composer.lock
