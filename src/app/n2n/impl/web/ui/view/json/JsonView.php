@@ -22,7 +22,7 @@
 namespace n2n\impl\web\ui\view\json;
 
 use n2n\web\ui\view\View;
-use n2n\io\ob\OutputBuffer;
+use n2n\util\io\ob\OutputBuffer;
 use n2n\web\ui\BuildContext;
 
 class JsonView extends View {

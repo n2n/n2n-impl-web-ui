@@ -23,7 +23,7 @@ namespace n2n\impl\web\ui\view\html;
 
 use n2n\util\type\attrs\Attributes;
 use n2n\web\ui\UiComponent;
-use n2n\io\ob\OutputBuffer;
+use n2n\util\io\ob\OutputBuffer;
 use n2n\web\ui\ViewStuffFailedException;
 use n2n\impl\web\dispatch\ui\Form;
 use n2n\web\ui\BuildContext;

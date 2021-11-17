@@ -26,7 +26,7 @@ use n2n\impl\web\ui\view\html\img\ImgComposer;
 use n2n\impl\web\ui\view\html\img\UiComponentFactory;
 use n2n\io\managed\File;
 use n2n\io\managed\img\ThumbStrategy;
-use n2n\io\ob\OutputBuffer;
+use n2n\util\io\ob\OutputBuffer;
 use n2n\util\type\ArgUtils;
 use n2n\web\ui\CouldNotRenderUiComponentException;
 use n2n\web\ui\Raw;

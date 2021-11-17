@@ -23,7 +23,7 @@ namespace n2n\impl\web\ui\view\xml;
 
 use n2n\web\ui\view\View;
 use n2n\core\N2N;
-use n2n\io\ob\OutputBuffer;
+use n2n\util\io\ob\OutputBuffer;
 use n2n\web\ui\BuildContext;
 
 class XmlView extends View {
