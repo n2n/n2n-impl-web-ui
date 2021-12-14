@@ -356,7 +356,7 @@ class HtmlBuilderMeta {
 		}
 		
 		$this->htmlProperties->push($target,
-				new HtmlElement('script', $attrs, new Raw("\r\n" . $code . "\r\n" . "\r\n")),
+				new HtmlElement('script', $attrs, new Raw("\r\n" . $code . "\r\n")),
 				$prepend);
 		
 		return $this;
