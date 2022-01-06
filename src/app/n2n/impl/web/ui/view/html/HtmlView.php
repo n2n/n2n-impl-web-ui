@@ -231,7 +231,7 @@ class HtmlView extends View {
 				'htmlProperties' => $this->htmlProperties);
 	}
 	
-	public function prepareForResponse(Response $response) {
+	public function prepareForResponse(Response $response): void {
 		parent::prepareForResponse($response);
 		
 		foreach ($this->htmlProperties->getServerPushDirectives() as $directive) {
