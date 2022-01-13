@@ -231,7 +231,7 @@ class HtmlView extends View {
 				'htmlProperties' => $this->htmlProperties);
 	}
 	
-	public function prepareForResponse(Response $response) {
+	public function prepareForResponse(Response $response): void {
 		parent::prepareForResponse($response);
 		
 		foreach ($this->htmlProperties->getServerPushDirectives() as $directive) {
@@ -244,7 +244,16 @@ class HtmlView extends View {
 // 			throw new ViewStuffFailedException('Could not send view to response: ' . $this->toKownPayloadString(), 0, $e);
 // 		}
 	}
-	
+
+	/**
+	 * @param View $view
+	 * @return View
+	 */
+	public static function view(View $view): HtmlView {
+		ArgUtils::assertTrue($view instanceof HtmlView);
+		return $view;
+	}
+
 	/**
 	 * @param HtmlView $view
 	 * @return \n2n\impl\web\ui\view\html\HtmlBuilder
