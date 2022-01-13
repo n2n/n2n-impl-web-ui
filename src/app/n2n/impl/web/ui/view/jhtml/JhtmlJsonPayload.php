@@ -39,7 +39,7 @@ class JhtmlJsonPayload extends BufferedPayload {
 	 * {@inheritDoc}
 	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
 	 */
-	public function prepareForResponse(Response $response) {
+	public function prepareForResponse(Response $response): void {
 		$this->jsonPayload = new JsonPayload($this->data);
 		$this->jsonPayload->prepareForResponse($response);
 	}

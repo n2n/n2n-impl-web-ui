@@ -55,7 +55,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	/* (non-PHPdoc)
 	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
 	 */
-	public function prepareForResponse(Response $response) {
+	public function prepareForResponse(Response $response): void {
 		if ('application/json' == $response->getRequest()->getAcceptRange()
 	               ->bestMatch(['text/html', 'application/json'])) {
             	$this->payload = new JhtmlJsonPayload($this->additionalAttrs);

@@ -47,7 +47,7 @@ class AjahResponse extends BufferedPayload {
 	public function setAdditionalAttrs(array $additionalAttrs) {
 		$this->additionalAttrs = $additionalAttrs;
 	}
-	
+
 	/* (non-PHPdoc)
 	 * @see \n2n\web\http\payload\BufferedPayload::getBufferedContents()
 	 */
@@ -77,7 +77,7 @@ class AjahResponse extends BufferedPayload {
 	/* (non-PHPdoc)
 	 * @see \n2n\web\http\payload\Payload::prepareForResponse()
 	 */
-	public function prepareForResponse(Response $response) {
+	public function prepareForResponse(Response $response): void {
 		$response->setHeader('Content-Type: application/json');
 	}
 	/* (non-PHPdoc)

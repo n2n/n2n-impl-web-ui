@@ -212,7 +212,7 @@ class HtmlProperties {
 		$htmlSnipplets = $this->fetchHtmlSnipplets($contentBuffer->getBreakPointNames(), $buildContext);
 				
 		foreach ($htmlSnipplets as $name => $htmlSnipplet) {
-			$contentBuffer->insertOnBreakPoint($name, $htmlSnipplets[$name]);
+			$contentBuffer->insertOnBreakPoint($name, $htmlSnipplet);
 		}
 	}
 	
