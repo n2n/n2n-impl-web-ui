@@ -148,7 +148,8 @@ class HtmlBuilderMeta {
 		}
 		
 		$this->htmlProperties->add($target, 'rel:stylesheet:' . (string) $href . ':' . (string) $media,
-				new HtmlElement('link', array('rel' => 'stylesheet', 'type' => 'text/css', 'media' => $media, 'href' => $href)),
+				new HtmlElement('link', HtmlUtils::mergeAttrs(
+						array('rel' => 'stylesheet', 'type' => 'text/css', 'media' => $media, 'href' => $href), $attrs)),
 				$prepend);
 		
 		return $this;
@@ -349,12 +350,11 @@ class HtmlBuilderMeta {
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_SCRIPT_KEY;
 		}
-		
-		$attrs = array(/*'type' => 'text/javascript'*/);
+
 		if ($defer) {
-			$attrs['defer'] = 'defer';
+			$attrs = HtmlUtils::mergeAttrs(array('defer' => 'defer'), $attrs);
 		}
-		
+
 		$this->htmlProperties->push($target,
 				new HtmlElement('script', $attrs, new Raw("\r\n" . $code . "\r\n")),
 				$prepend);
