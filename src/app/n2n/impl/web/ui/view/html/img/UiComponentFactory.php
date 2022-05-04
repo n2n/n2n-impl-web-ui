@@ -69,7 +69,12 @@ class UiComponentFactory {
 		
 		foreach ($imgSet->getImageSourceSets() as $imageSourceSet) {
 			$htmlElement->appendLn(new HtmlElement('source', HtmlUtils::mergeAttrs(
-					array('media' => $imageSourceSet->getMediaAttr(), 'srcset' => $imageSourceSet->getSrcsetAttr()), 
+					[
+						'media' => $imageSourceSet->getMediaAttr(), 
+						'srcset' => $imageSourceSet->getSrcsetAttr(),
+						'width' => $imageSourceSet->getWidthAttr(),
+						'height' => $imageSourceSet->getHeightAttr()
+					], 
 					$imageSourceSet->getAttrs())));
 		}
 		
