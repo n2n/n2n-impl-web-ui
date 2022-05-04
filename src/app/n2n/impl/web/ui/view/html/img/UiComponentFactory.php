@@ -74,7 +74,9 @@ class UiComponentFactory {
 		}
 		
 		$htmlElement->appendLn(new HtmlElement('img', array('src' => $imgSet->getDefaultSrcAttr(), 
-				'alt' => ($defaultAlt !== null ? $defaultAlt : $imgSet->getDefaultAltAttr()))));
+				'alt' => ($defaultAlt !== null ? $defaultAlt : $imgSet->getDefaultAltAttr()),
+				'width' => $imgSet->getDefaultWidthAttr(),
+				'height' => $imgSet->getDefaultHeightAttr())));
 		
 		return $htmlElement;
 	}
