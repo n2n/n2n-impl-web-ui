@@ -26,7 +26,8 @@ class ImageSourceSet {
 	private $mediaAttr;
 	private $attrs;
 
-	public function __construct(array $imgSrcs, string $mediaAttr = null, array $attrs = null) {
+	public function __construct(array $imgSrcs, string $mediaAttr = null, array $attrs = null,
+			private ?string $widthAttr = null, private ?string $heightAttr = null) {
 		$this->imgSrcs = $imgSrcs;
 		$this->mediaAttr = $mediaAttr;
 		$this->attrs = (array) $attrs;
@@ -54,5 +55,13 @@ class ImageSourceSet {
 
 	public function getAttrs() {
 		return $this->attrs;
+	}
+	
+	public function getWidthAttr() {
+		return $this->widthAttr;
+	}
+	
+	public function getHeightAttr() {
+		return $this->heightAttr;
 	}
 }
