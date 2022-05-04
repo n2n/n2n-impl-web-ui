@@ -69,12 +69,19 @@ class UiComponentFactory {
 		
 		foreach ($imgSet->getImageSourceSets() as $imageSourceSet) {
 			$htmlElement->appendLn(new HtmlElement('source', HtmlUtils::mergeAttrs(
-					array('media' => $imageSourceSet->getMediaAttr(), 'srcset' => $imageSourceSet->getSrcsetAttr()), 
+					[
+						'media' => $imageSourceSet->getMediaAttr(), 
+						'srcset' => $imageSourceSet->getSrcsetAttr(),
+						'width' => $imageSourceSet->getWidthAttr(),
+						'height' => $imageSourceSet->getHeightAttr()
+					], 
 					$imageSourceSet->getAttrs())));
 		}
 		
 		$htmlElement->appendLn(new HtmlElement('img', array('src' => $imgSet->getDefaultSrcAttr(), 
-				'alt' => ($defaultAlt !== null ? $defaultAlt : $imgSet->getDefaultAltAttr()))));
+				'alt' => ($defaultAlt !== null ? $defaultAlt : $imgSet->getDefaultAltAttr()),
+				'width' => $imgSet->getDefaultWidthAttr(),
+				'height' => $imgSet->getDefaultHeightAttr())));
 		
 		return $htmlElement;
 	}
