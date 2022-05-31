@@ -148,7 +148,10 @@ class HtmlUtils {
 		return HtmlUtils::encode('mailto:' . urlencode($email));
 	}
 
-	public static function stripHtml($content) {
+	public static function stripHtml(?string $content) {
+		if ($content === null) {
+			return null;
+		}
 		return strip_tags($content);
 	}
 }
