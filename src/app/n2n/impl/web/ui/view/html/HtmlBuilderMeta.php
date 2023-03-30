@@ -469,7 +469,13 @@ class HtmlBuilderMeta {
 		return $this;
 	}
 
-	function extCsp(PolicyDirective $directive, PolicySource $source): static {
+	function extCsp(PolicyDirective $directive, PolicySource|PolicySourceKeyword|Url $source): static {
+		if ($source instanceof PolicySourceKeyword) {
+			$source = PolicySource::createKeyword($source);
+		} else if ($source instanceof Url) {
+			$source = PolicySource::createUrl($source);
+		}
+
 		$this->htmlProperties->addContentSecurityPolicyDirective($directive ,$source);
 		return $this;
 	}
