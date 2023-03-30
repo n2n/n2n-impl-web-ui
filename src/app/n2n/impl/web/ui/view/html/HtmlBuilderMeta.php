@@ -256,10 +256,10 @@ class HtmlBuilderMeta {
 		$this->htmlProperties->add($target, 'type:javascript:src:' . $src, $htmlElement, $prepend);
 
 		if ($url->isRelative()) {
-			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELEM,
 					PolicySource::createKeyword(PolicySourceKeyword::SELF));
 		} else {
-			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELEM,
 					PolicySource::createUrl($url));
 		}
 		
@@ -387,7 +387,7 @@ class HtmlBuilderMeta {
 				new HtmlElement('script', $attrs, new Raw($content)),
 				$prepend);
 
-		$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+		$this->extCsp(PolicyDirective::SCRIPT_SRC_ELEM,
 				PolicySource::createHash($content));
 		
 		return $this;
