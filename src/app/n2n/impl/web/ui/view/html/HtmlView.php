@@ -40,7 +40,7 @@ class HtmlView extends View {
 	private $formHtmlBuilder;
 	private $ariaFormHtmlBuilder;
 	protected $imported = false;
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see \n2n\web\ui\view\View::getContentType()
@@ -48,7 +48,7 @@ class HtmlView extends View {
 	public function getContentType() {
 		return 'text/html; charset=' . N2N::CHARSET;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see \n2n\web\ui\view\View::compile($contentBuffer)
@@ -58,11 +58,11 @@ class HtmlView extends View {
 		if (!$this->imported && ($buildContextView = $buildContext->getView()) instanceof HtmlView) {
 			$contextView = $buildContextView;
 		}
-		
+
 		$this->htmlBuilder = new HtmlBuilder($this, $contentBuffer);
 		$this->formHtmlBuilder = new FormHtmlBuilder($this);
 		$this->ariaFormHtmlBuilder = new AriaFormHtmlBuilder($this);
-		
+
 		$attrs = array('view' => $this, 'html' => $this->htmlBuilder, 'formHtml' => $this->formHtmlBuilder,
 				'ariaFormHtml' => $this->ariaFormHtmlBuilder);
 		if ($this->getN2nContext()->isHttpContextAvailable()) {
@@ -71,28 +71,28 @@ class HtmlView extends View {
 			$attrs['request'] = $httpContext->getRequest();
 			$attrs['response'] = $httpContext->getResponse();
 		}
-		
+
 		if ($contextView !== null) {
 			$this->getHtmlProperties()->setForm($contextView->getHtmlProperties()->getForm());
 		}
-		
+
 		$htmlProperties = $this->htmlProperties;
 		$contentsBuildContext = $this->contentsBuildContext;
 		parent::bufferContents($attrs,
 				function (OutputBuffer $contentBuffer) use ($htmlProperties, $contentsBuildContext) {
 					$htmlProperties->out($contentBuffer, $contentsBuildContext);
 				});
-				
+
 		$this->htmlBuilder = null;
 		$this->formHtmlBuilder = null;
 		$this->ariaFormHtmlBuilder = null;
-		
+
 		if ($contextView !== null) {
 			$contextView->getHtmlProperties()->merge($this->getHtmlProperties());
 		}
-	} 
-	
-// 	protected function createImportView(string $viewNameExpression, $params = null, 
+	}
+
+// 	protected function createImportView(string $viewNameExpression, $params = null,
 // 			ViewCacheControl $viewCacheControl = null, Module $module = null) {
 // 		$view = parent::createImportView($viewNameExpression, $params, $viewCacheControl, $module);
 // 		if ($view instanceof HtmlView) {
@@ -104,23 +104,23 @@ class HtmlView extends View {
 	public function getImport($viewNameExpression, array $params = null,
 			ViewCacheControl $viewCacheControl = null, Module $module = null) {
 		$view = parent::getImport($viewNameExpression, $params, $viewCacheControl, $module);
-				
+
 		if (!($view instanceof HtmlView) || $view->imported) {
 			return $view;
 		}
-		
+
 		if ($view->isInitialized()) {
 			$this->htmlProperties->merge($view->getHtmlProperties());
-			return $view;	
+			return $view;
 		}
-		
+
 		$view->imported = true;
-		
+
 		$view->getHtmlProperties()->setForm($this->getHtmlProperties()->getForm());
 		$view->registerStateListener(new class($this->htmlProperties, $view) implements ViewStateListener {
 			private $htmlProperties;
 			private $importedView;
-			
+
 			public function __construct(HtmlProperties $htmlProperties, HtmlView $importedView) {
 				$this->htmlProperties = $htmlProperties;
 				$this->importedView = $importedView;
@@ -131,7 +131,7 @@ class HtmlView extends View {
 			 */
 			public function onViewContentsBuffering(\n2n\web\ui\view\View $view) {
 			}
-		
+
 			/**
 			 * {@inheritDoc}
 			 * @see \n2n\web\ui\view\ViewStateListener::viewContentsInitialized()
@@ -139,41 +139,41 @@ class HtmlView extends View {
 			public function viewContentsInitialized(\n2n\web\ui\view\View $view) {
 				$this->htmlProperties->merge($this->importedView->getHtmlProperties());
 			}
-		
+
 			/**
 			 * {@inheritDoc}
 			 * @see \n2n\web\ui\view\ViewStateListener::onPanelImport()
 			 */
 			public function onPanelImport(\n2n\web\ui\view\View $view, $panelName) {
 			}
-		
+
 		});
-		
+
 		return $view;
 	}
-	
+
 // 	public function getOut($uiComponent) {
 // 		if (!($uiComponent instanceof HtmlView)) {
 // 			return parent::getOut($uiComponent);
 // 		}
-		
+
 // 		if (!$uiComponent->isInitialized()) {
 // 			$uiComponent->getHtmlProperties()->setForm($this->getHtmlProperties()->getForm());
 // 		}
-		
+
 // 		$contents = parent::getOut($uiComponent);
-		
+
 // // 		if ($uiComponent->getHtmlProperties() !== $this->getHtmlProperties()) {
 // 			$this->htmlProperties->merge($uiComponent->getHtmlProperties());
 // // 		}
-		
+
 // 		return $contents;
 // 	}
-	
+
 	public function setHtmlProperties(HtmlProperties $htmlProperties) {
 		$this->htmlProperties = $htmlProperties;
 	}
-	
+
 	/**
 	 * @return HtmlProperties
 	 */
@@ -181,64 +181,72 @@ class HtmlView extends View {
 		if ($this->htmlProperties === null) {
 			$this->htmlProperties = new HtmlProperties();
 		}
-		
+
 		return $this->htmlProperties;
 	}
-	
+
 	/**
 	 * @return \n2n\impl\web\ui\view\html\HtmlBuilder
 	 */
 	public function getHtmlBuilder() {
 		return $this->htmlBuilder;
 	}
-	
+
 	/**
 	 * @return \n2n\impl\web\dispatch\ui\FormHtmlBuilder
 	 */
 	public function getFormHtmlBuilder() {
 		return $this->formHtmlBuilder;
 	}
-	
+
 	/**
 	 * @return \n2n\impl\web\dispatch\ui\AriaFormHtmlBuilder
 	 */
 	public function getAriaFormHtmlBuilder() {
 		return $this->ariaFormHtmlBuilder;
 	}
-	
+
 // 	public function readCachedContents(ViewCacheReader $cacheReader) {
 // 		parent::readCachedContents($cacheReader);
 // 		$this->htmlProperties = $cacheReader->readAttributesObject();
 // 	}
-	
+
 // 	public function writeCachedContents(ViewCacheWriter $cacheWriter) {
 // 		parent::writeCachedContents($cacheWriter);
 // 		$cacheWriter->writeAttributesObject($this->htmlProperties);
 // 	}
-	
+
 	public function initializeFromCache($data) {
 		ArgUtils::assertTrue(is_array($data) && isset($data['contents'])
-				&& isset($data['htmlProperties']) && isset($data['htmlProperties']) 
+				&& isset($data['htmlProperties']) && isset($data['htmlProperties'])
 				&& $data['htmlProperties'] instanceof HtmlProperties);
 
 		$this->htmlProperties = $data['htmlProperties'];
 		parent::initializeFromCache($data['contents']);
 	}
-	
+
 	public function toCacheData() {
 		return array(
-				'contents' => parent::toCacheData(),				
+				'contents' => parent::toCacheData(),
 				'htmlProperties' => $this->htmlProperties);
 	}
-	
+
 	public function prepareForResponse(Response $response): void {
 		parent::prepareForResponse($response);
-		
-		foreach ($this->htmlProperties->getServerPushDirectives() as $directive) {
+
+		$htmlProperties = $this->htmlProperties;
+		$view = $this;
+		while (null !== ($view = $view->getTemplateView())) {
+			if ($view instanceof HtmlView) {
+				$htmlProperties = $view->getHtmlProperties();
+			}
+		}
+
+		foreach ($htmlProperties->getServerPushDirectives() as $directive) {
 			$response->serverPush($directive);
 		}
 
-		$response->setContentSecurityPolicy($this->htmlProperties->getContentSecurityPolicy());
+		$response->setContentSecurityPolicy($htmlProperties->getContentSecurityPolicy());
 
 // 		try {
 // 			$this->htmlProperties->validateForResponse();
@@ -263,7 +271,7 @@ class HtmlView extends View {
 	public static function html(HtmlView $view) {
 		return $view->getHtmlBuilder();
 	}
-	
+
 	/**
 	 * @param HtmlView $view
 	 * @return \n2n\impl\web\dispatch\ui\FormHtmlBuilder
@@ -271,7 +279,7 @@ class HtmlView extends View {
 	public static function formHtml(HtmlView $view): FormHtmlBuilder {
 		return $view->getFormHtmlBuilder();
 	}
-	
+
 	/**
 	 * @param HtmlView $view
 	 * @return \n2n\impl\web\dispatch\ui\AriaFormHtmlBuilder
@@ -282,7 +290,7 @@ class HtmlView extends View {
 }
 
 class NoHttpControllerContextAssignetException extends UiException {
-		
+
 }
 
 /**
