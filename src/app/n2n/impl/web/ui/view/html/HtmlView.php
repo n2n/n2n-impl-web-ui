@@ -35,7 +35,7 @@ use n2n\web\ui\view\ViewCacheControl;
 use n2n\web\ui\BuildContext;
 
 class HtmlView extends View {
-	private $htmlProperties = null;
+	private ?HtmlProperties $htmlProperties = null;
 	private $htmlBuilder;
 	private $formHtmlBuilder;
 	private $ariaFormHtmlBuilder;
@@ -237,6 +237,8 @@ class HtmlView extends View {
 		foreach ($this->htmlProperties->getServerPushDirectives() as $directive) {
 			$response->serverPush($directive);
 		}
+
+		$response->setContentSecurityPolicy($this->htmlProperties->getContentSecurityPolicy());
 
 // 		try {
 // 			$this->htmlProperties->validateForResponse();

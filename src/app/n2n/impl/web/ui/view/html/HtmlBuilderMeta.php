@@ -31,6 +31,9 @@ use n2n\core\config\GeneralConfig;
 use n2n\web\http\ServerPushDirective;
 use n2n\web\ui\UiComponent;
 use n2n\web\ui\SimpleBuildContext;
+use n2n\web\http\csp\PolicyDirective;
+use n2n\web\http\csp\PolicySource;
+use n2n\web\http\csp\PolicySourceKeyword;
 
 /**
  * Accessible through <code>$html-&#x3E;meta()</code> in every html view
@@ -141,17 +144,29 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addCssUrl(string $href, string $media = null, bool $prepend = false, array $attrs = null,
+	public function addCssUrl(Url|string $href, string $media = null, bool $prepend = false, array $attrs = null,
 			$target = self::TARGET_HEAD) {
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_SCRIPT_KEY;
 		}
+
+
+		$url = Url::create($href);
+		$href = (string) $href;
 		
 		$this->htmlProperties->add($target, 'rel:stylesheet:' . (string) $href . ':' . (string) $media,
 				new HtmlElement('link', HtmlUtils::mergeAttrs(
 						array('rel' => 'stylesheet', 'type' => 'text/css', 'media' => $media, 'href' => $href), $attrs)),
 				$prepend);
-		
+
+		if ($url->isRelative()) {
+			$this->extCsp(PolicyDirective::STYLE_SRC_ELEM,
+					PolicySource::createKeyword(PolicySourceKeyword::SELF));
+		} else {
+			$this->extCsp(PolicyDirective::STYLE_SRC_ELEM,
+					PolicySource::createUrl($url));
+		}
+
 		return $this;
 	}
 	
@@ -219,7 +234,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addJsUrl(string $src, bool $defer = false, bool $prepend = false, array $attrs = null, 
+	public function addJsUrl(string|Url $src, bool $defer = false, bool $prepend = false, array $attrs = null,
 			$target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
 		
@@ -231,11 +246,22 @@ class HtmlBuilderMeta {
 		if ($defer) {
 			$attrs['defer'] = 'defer';
 		}
-		
+
+		$url = Url::create($src);
+		$src = (string) $src;
+
 		$htmlElement = new HtmlElement('script', HtmlUtils::mergeAttrs(
 				array(/*'type' => 'text/javascript', */'src' => $src), $attrs), '');
 		
 		$this->htmlProperties->add($target, 'type:javascript:src:' . $src, $htmlElement, $prepend);
+
+		if ($url->isRelative()) {
+			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+					PolicySource::createKeyword(PolicySourceKeyword::SELF));
+		} else {
+			$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+					PolicySource::createUrl($url));
+		}
 		
 		return $this;
 	}
@@ -355,9 +381,14 @@ class HtmlBuilderMeta {
 			$attrs = HtmlUtils::mergeAttrs(array('defer' => 'defer'), $attrs);
 		}
 
+		$content = "\r\n" . $code . "\r\n";
+
 		$this->htmlProperties->push($target,
-				new HtmlElement('script', $attrs, new Raw("\r\n" . $code . "\r\n")),
+				new HtmlElement('script', $attrs, new Raw($content)),
 				$prepend);
+
+		$this->extCsp(PolicyDirective::SCRIPT_SRC_ELM,
+				PolicySource::createHash($content));
 		
 		return $this;
 	}
@@ -376,11 +407,16 @@ class HtmlBuilderMeta {
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_LINK_KEY;
 		}
-		
+
+		$content = "\r\n" . $code . "\r\n" . "\r\n";
+
 		$this->htmlProperties->push($target,
-				new HtmlElement('style', $attrs, new Raw("\r\n" . $code . "\r\n" . "\r\n")),
+				new HtmlElement('style', $attrs, new Raw($content)),
 				$prepend);
-		
+
+		$this->extCsp(PolicyDirective::STYLE_SRC_ELEM,
+				PolicySource::createHash($content));
+
 		return $this;
 	}
 	
@@ -430,6 +466,11 @@ class HtmlBuilderMeta {
 	public function serverPush($url, string $as) {
 		$this->view->getHtmlProperties()->addServerPushDirective(new ServerPushDirective($url, $as));
 		
+		return $this;
+	}
+
+	function extCsp(PolicyDirective $directive, PolicySource $source): static {
+		$this->htmlProperties->addContentSecurityPolicyDirective($directive ,$source);
 		return $this;
 	}
 	

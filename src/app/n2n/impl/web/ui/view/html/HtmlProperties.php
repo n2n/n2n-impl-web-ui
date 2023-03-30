@@ -30,6 +30,9 @@ use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
 use n2n\web\http\ServerPushDirective;
 use n2n\util\type\attrs\DataSet;
+use n2n\web\http\csp\PolicyDirective;
+use n2n\web\http\csp\PolicySource;
+use n2n\web\http\csp\ContentSecurityPolicy;
 
 class HtmlProperties {	
 	protected $prependedAttributes;
@@ -41,11 +44,14 @@ class HtmlProperties {
 	private $form;
 	private $libraryHashCodes = array();
 	private $ids = array();
+
+	private ContentSecurityPolicy $contentSecurityPolicy;
 	
 	public function __construct() {
 		$this->prependedAttributes = new DataSet();
 		$this->dataSet = new DataSet();
 		$this->buildContext = new SimpleBuildContext();
+		$this->contentSecurityPolicy = new ContentSecurityPolicy();
 	}
 	
 	/**
@@ -67,7 +73,7 @@ class HtmlProperties {
 	 * @param UiComponent $value
 	 * @param bool $prepend
 	 */
-	public function set(string $name, UiComponent $value, bool $prepend = false) {
+	public function set(string $name, UiComponent $value, bool $prepend = false): void {
 		if ($prepend) {
 			if ($this->prependedAttributes->contains($name)) return;
 			$this->prependedAttributes->set($name, $value);
@@ -87,7 +93,7 @@ class HtmlProperties {
 	 * @param UiComponent $value
 	 * @param bool $prepend
 	 */
-	public function push(string $name, UiComponent $value, bool $prepend = false) {
+	public function push(string $name, UiComponent $value, bool $prepend = false): void {
 		if ($prepend) {
 			$this->prependedAttributes->push($name, $value);
 		} else {
@@ -99,7 +105,7 @@ class HtmlProperties {
 // 		}
 	}
 	
-	public function add(string $name, string $key, UiComponent $value, bool $prepend = false) {
+	public function add(string $name, string $key, UiComponent $value, bool $prepend = false): void {
 		if ($prepend) {
 			if ($this->prependedAttributes->hasKey($name, $key)) return;
 			$this->prependedAttributes->add($name, $key, $value);
@@ -267,6 +273,14 @@ class HtmlProperties {
 	public function getServerPushDirectives() {
 		return $this->serverPushDirectives;
 	}
+
+	function addContentSecurityPolicyDirective(PolicyDirective $directive, PolicySource $policySource) {
+		$this->contentSecurityPolicy->addSource($directive, $policySource);
+	}
+
+	function getContentSecurityPolicy(): ContentSecurityPolicy {
+		return $this->contentSecurityPolicy;
+	}
 	
 	public function registerId($id) {
 		if (in_array($id, $this->ids)) {
@@ -292,5 +306,6 @@ class HtmlProperties {
 		$this->prependedAttributes->append($htmlProperties->prependedAttributes);
 		$this->dataSet->append($htmlProperties->dataSet);
 		$this->serverPushDirectives += $htmlProperties->serverPushDirectives;
+		$this->contentSecurityPolicy->append($htmlProperties->contentSecurityPolicy);
 	}
 }
