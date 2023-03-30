@@ -381,7 +381,8 @@ class HtmlBuilderMeta {
 			$attrs = HtmlUtils::mergeAttrs(array('defer' => 'defer'), $attrs);
 		}
 
-		$content = "\r\n" . $code . "\r\n";
+		// carriage returns cause problems with content security policy hashes
+		$content = "\n" . str_replace("\r", '', $code) . "\n";
 
 		$this->htmlProperties->push($target,
 				new HtmlElement('script', $attrs, new Raw($content)),
@@ -408,7 +409,8 @@ class HtmlBuilderMeta {
 			$target = self::HEAD_LINK_KEY;
 		}
 
-		$content = "\r\n" . $code . "\r\n" . "\r\n";
+		// carriage returns cause problems with content security policy hashes
+		$content = "\n" . str_replace("\r", '', $code) . "\n";
 
 		$this->htmlProperties->push($target,
 				new HtmlElement('style', $attrs, new Raw($content)),
