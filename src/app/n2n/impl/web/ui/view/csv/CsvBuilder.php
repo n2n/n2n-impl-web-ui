@@ -35,7 +35,8 @@ class CsvBuilder {
 	}
 	
 	public function getEsc($text) {
-		return str_replace($this->meta->getTextDelimiter(), str_repeat($this->meta->getTextDelimiter(), 2), $text);
+		return str_replace($this->meta->getTextDelimiter(), str_repeat($this->meta->getTextDelimiter(), 2),
+				(string) $text);
 	}
 	/**
 	 *
