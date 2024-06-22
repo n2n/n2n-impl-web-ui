@@ -136,7 +136,7 @@ class HtmlElement implements UiComponent {
 			try {
 				$value = StringUtils::strOf($value);
 			} catch (\InvalidArgumentException $e) {
-				throw new \InvalidArgumentException('Invalid attrs field ' . $name, null, $e);
+				throw new \InvalidArgumentException('Invalid attrs field ' . $name, previous: $e);
 			}
 
 			if (is_numeric($name)) {
