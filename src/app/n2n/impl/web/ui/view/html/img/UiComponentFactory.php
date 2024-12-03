@@ -37,8 +37,8 @@ class UiComponentFactory {
 	 * @param bool $addHeightAttr
 	 * @return \n2n\impl\web\ui\view\html\HtmlElement
 	 */
-	public static function createImgFromThSt(File $file = null, ThumbStrategy $thumbStrategy = null, 
-			array $attrs = null, bool $addWidthAttr = true, bool $addHeightAttr = true) {
+	public static function createImgFromThSt(?File $file = null, ?ThumbStrategy $thumbStrategy = null,
+			?array $attrs = null, bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		
 		if ($file === null || !$file->isValid()) {
 			return self::createInvalidImg($thumbStrategy !== null ? $thumbStrategy->getImageDimension() : null, 
@@ -64,7 +64,7 @@ class UiComponentFactory {
 	}
 	
 	
-	public static function createPicture(ImgSet $imgSet, array $attrs = null, $defaultAlt = null) {
+	public static function createPicture(ImgSet $imgSet, ?array $attrs = null, $defaultAlt = null) {
 		$htmlElement = new HtmlElement('picture', $attrs);
 		
 		foreach ($imgSet->getImageSourceSets() as $imageSourceSet) {
@@ -86,7 +86,7 @@ class UiComponentFactory {
 		return $htmlElement;
 	}
 	
-	public static function createImg(ImgSet $imgSet, array $customAttrs = null, bool $addWidthAttr = true, 
+	public static function createImg(ImgSet $imgSet, ?array $customAttrs = null, bool $addWidthAttr = true,
 			bool $addHeightAttr = true) {
 		
 		$attrs = array('src' => $imgSet->getDefaultSrcAttr());
@@ -135,8 +135,8 @@ class UiComponentFactory {
 	const INVALID_IMG_DEFAULT_WIDTH = 200;
 	const INVALID_IMG_DEFAULT_HEIGHT = 200;
 	
-	public static function createInvalidImg(ImageDimension $imageDimension = null, 
-			array $attrs = null, bool $addWidthAttr = true, bool $addHeightAttr = true) {
+	public static function createInvalidImg(?ImageDimension $imageDimension = null,
+			?array $attrs = null, bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		$width = self::INVALID_IMG_DEFAULT_WIDTH;
 		$height = self::INVALID_IMG_DEFAULT_HEIGHT;
 		

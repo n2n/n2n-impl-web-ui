@@ -123,8 +123,8 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addCss($relativeUrl, string $media = null, string $moduleNamespace = null, bool $prepend = false,
-			array $attrs = null, $target = self::TARGET_HEAD) {
+	public function addCss($relativeUrl, ?string $media = null, ?string $moduleNamespace = null, bool $prepend = false,
+			?array $attrs = null, $target = self::TARGET_HEAD) {
 		if ($moduleNamespace === null) {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
@@ -144,7 +144,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addCssUrl(Url|string $href, string $media = null, bool $prepend = false, array $attrs = null,
+	public function addCssUrl(Url|string $href, ?string $media = null, bool $prepend = false, ?array $attrs = null,
 			$target = self::TARGET_HEAD) {
 		if ($target == self::TARGET_HEAD) {
 			$target = self::HEAD_SCRIPT_KEY;
@@ -177,7 +177,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addAsyncJs($relativeUrl, string $moduleNamespace = null, $prepend = false) {
+	public function addAsyncJs($relativeUrl, ?string $moduleNamespace = null, $prepend = false) {
 		if ($moduleNamespace === null) {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
@@ -213,8 +213,8 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addJs($relativeUrl, string $moduleNamespace = null, bool $defer = false, bool $prepend = false,
-			array $attrs = null, $target = self::TARGET_HEAD) {
+	public function addJs($relativeUrl, ?string $moduleNamespace = null, bool $defer = false, bool $prepend = false,
+			?array $attrs = null, $target = self::TARGET_HEAD) {
 		if (null === $moduleNamespace) {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
@@ -234,7 +234,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addJsUrl(string|Url $src, bool $defer = false, bool $prepend = false, array $attrs = null,
+	public function addJsUrl(string|Url $src, bool $defer = false, bool $prepend = false, ?array $attrs = null,
 			$target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
 		
@@ -272,7 +272,7 @@ class HtmlBuilderMeta {
 	 * @throws \InvalidArgumentException
 	 * @return string
 	 */
-	private function buildKey(array $attrs, string $uniqueAttrName = null) {
+	private function buildKey(array $attrs, ?string $uniqueAttrName = null) {
 		if ($uniqueAttrName === null) {
 			return 'type:attrs:' . serialize($attrs);
 		}
@@ -307,7 +307,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addMeta(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+	public function addMeta(array $attrs, ?string $uniqueAttrName = null, bool $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_META_KEY, $this->buildKey($attrs, $uniqueAttrName),
 				new HtmlElement('meta', $attrs), $prepend);
 		
@@ -321,7 +321,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addLink(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+	public function addLink(array $attrs, ?string $uniqueAttrName = null, bool $prepend = false) {
 		$this->htmlProperties->add(self::HEAD_LINK_KEY, $this->buildKey($attrs, $uniqueAttrName),
 				new HtmlElement('link', $attrs), $prepend);
 		
@@ -370,7 +370,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addJsCode(string $code, bool $defer = false, $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
+	public function addJsCode(string $code, bool $defer = false, $prepend = false, ?array $attrs = null, $target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, array(self::TARGET_HEAD, self::TARGET_BODY_START, self::TARGET_BODY_END));
 		
 		if ($target == self::TARGET_HEAD) {
@@ -402,7 +402,7 @@ class HtmlBuilderMeta {
 	 * 
 	 * @return HtmlBuilderMeta
 	 */
-	public function addCssCode(string $code, bool $prepend = false, array $attrs = null, $target = self::TARGET_HEAD) {
+	public function addCssCode(string $code, bool $prepend = false, ?array $attrs = null, $target = self::TARGET_HEAD) {
 		ArgUtils::valEnum($target, self::getTargets());
 		
 		if ($target == self::TARGET_HEAD) {
@@ -503,7 +503,7 @@ class HtmlBuilderMeta {
 				->fragment($fragment)->ssl($ssl)->subsystem($subsystem));
 	}
 	
-	public function getAssetUrl($urlExt, string $moduleNamespace = null, bool $absolute = false) {
+	public function getAssetUrl($urlExt, ?string $moduleNamespace = null, bool $absolute = false) {
 		if ($moduleNamespace === null) {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
@@ -548,7 +548,7 @@ class HtmlBuilderMeta {
 				->extR($pathExt, $query, $fragment);
 	}
 	
-	public function buildLinkLabel($url, string $label = null) {
+	public function buildLinkLabel($url, ?string $label = null) {
 		if (null !== $label) return $label;
 		
 		$url = Url::create($url);
@@ -565,7 +565,7 @@ class HtmlBuilderMeta {
 	 * @param HtmlView $view
 	 * @return string
 	 */
-	public static function replace(string $textHtml, array $replacements = null, HtmlView $view = null) {
+	public static function replace(string $textHtml, ?array $replacements = null, ?HtmlView $view = null) {
 		if (empty($replacements)) return $textHtml;
 		
 		$buildContext = $view !== null ? $view->getContentsBuildContext() : new SimpleBuildContext();
@@ -594,7 +594,7 @@ class HeadBuilderMeta extends BodyBuilderMeta {
 	 * @param string $uniqueAttrName
 	 * @param bool $prepend
 	 */
-	public function addMeta(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+	public function addMeta(array $attrs, ?string $uniqueAttrName = null, bool $prepend = false) {
 		$this->meta->addMeta($attrs, $uniqueAttrName, $prepend);
 	}
 	
@@ -603,7 +603,7 @@ class HeadBuilderMeta extends BodyBuilderMeta {
 	 * @param string $uniqueAttrName
 	 * @param bool $prepend
 	 */
-	public function addLink(array $attrs, string $uniqueAttrName = null, bool $prepend = false) {
+	public function addLink(array $attrs, ?string $uniqueAttrName = null, bool $prepend = false) {
 		$this->meta->addLink($attrs, $uniqueAttrName, $prepend);
 	}
 }
@@ -629,15 +629,15 @@ class BodyBuilderMeta {
 	 * @param bool $prepend
 	 * @param array $attrs
 	 */
-	public function addCss($relativeUrl, string $media = null, string $moduleNamespace = null, bool $prepend = false, array $attrs = null) {
+	public function addCss($relativeUrl, ?string $media = null, ?string $moduleNamespace = null, bool $prepend = false, ?array $attrs = null) {
 		$this->meta->addCss($relativeUrl, $media, $moduleNamespace, $prepend, $attrs, $this->target);
 	}
 	
-	public function addCssUrl($href, string $media = null, bool $prepend = false, array $attrs = null) {
+	public function addCssUrl($href, ?string $media = null, bool $prepend = false, ?array $attrs = null) {
 		$this->meta->addCssUrl($href, $media, $prepend, $attrs, $this->target);
 	}
 	
-	public function addCssCode($code, $prepend = false, array $attrs = null) {
+	public function addCssCode($code, $prepend = false, ?array $attrs = null) {
 		$this->meta->addCssCode($code, $prepend, $attrs, $this->target);
 	}
 	
@@ -649,16 +649,16 @@ class BodyBuilderMeta {
 		$this->meta->addAsyncJsUrl($src, $prepend, $this->target);
 	}
 	
-	public function addJs($relativeUrl, string $moduleNamespace = null, bool $defer = false, bool $prepend = false,
-			array $attrs = null) {
+	public function addJs($relativeUrl, ?string $moduleNamespace = null, bool $defer = false, bool $prepend = false,
+			?array $attrs = null) {
 		$this->meta->addJs($relativeUrl, $moduleNamespace, $defer, $prepend, $attrs, $this->target);
 	}
 	
-	public function addJsUrl($src, bool $defer = false, bool $prepend = false, array $attrs = null) {
+	public function addJsUrl($src, bool $defer = false, bool $prepend = false, ?array $attrs = null) {
 		$this->meta->addJsUrl($src, $defer, $prepend, $attrs, $this->target);
 	}
 	
-	public function addJsCode($code, bool $defer = false, $prepend = false, array $attrs = null) {
+	public function addJsCode($code, bool $defer = false, $prepend = false, ?array $attrs = null) {
 		$this->meta->addJsCode($code, $defer, $prepend, $attrs, $this->target);
 	}
 	

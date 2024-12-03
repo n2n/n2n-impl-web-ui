@@ -34,7 +34,7 @@ class JsonResponse extends BufferedPayload {
 	/**
 	 * @param array $data
 	 */
-	public function __construct(array $data = null)  {
+	public function __construct(?array $data = null)  {
 		$this->jsonString = StringUtils::jsonEncode($data);
 	}
 	

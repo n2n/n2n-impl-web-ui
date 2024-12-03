@@ -31,7 +31,7 @@ class JhtmlResponse {
 	 * @param array $additionalAttrs
 	 * @return \n2n\web\http\payload\Payload
 	 */
-	public static function redirect(string $httpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+	public static function redirect(string $httpLocation, ?JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
 		return JhtmlRedirectPayload::redirect($httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	
@@ -41,7 +41,7 @@ class JhtmlResponse {
 	 * @param array $additionalAttrs
 	 * @return \n2n\web\http\payload\Payload
 	 */
-	public static function redirectBack(string $fallbackHttpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+	public static function redirectBack(string $fallbackHttpLocation, ?JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
 		return JhtmlRedirectPayload::back($fallbackHttpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	
@@ -51,7 +51,7 @@ class JhtmlResponse {
 	 * @param array $additionalAttrs
 	 * @return \n2n\web\http\payload\Payload
 	 */
-	public static function redirectToReferer(string $httpLocation, JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
+	public static function redirectToReferer(string $httpLocation, ?JhtmlExec $jhtmlExec = null, array $additionalAttrs = array()) {
 		return JhtmlRedirectPayload::referer($httpLocation, $jhtmlExec, $additionalAttrs);
 	}
 	

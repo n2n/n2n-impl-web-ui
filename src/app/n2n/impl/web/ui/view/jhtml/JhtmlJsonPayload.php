@@ -65,7 +65,7 @@ class JhtmlJsonPayload extends BufferedPayload {
 	 * @param string $httpLocation
 	 * @param JhtmlExec $jhtmlExec
 	 */
-	public function applyRedirect(string $directive, string $httpLocation, JhtmlExec $jhtmlExec = null) {
+	public function applyRedirect(string $directive, string $httpLocation, ?JhtmlExec $jhtmlExec = null) {
 		$this->data[self::ATTR_DIRECTIVE_KEY] = $directive;
 		$this->data[self::ATTR_LOCATION_KEY] = $httpLocation;
 		if ($jhtmlExec !== null) {

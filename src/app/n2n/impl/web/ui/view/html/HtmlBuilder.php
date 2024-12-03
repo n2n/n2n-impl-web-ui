@@ -64,7 +64,7 @@ class HtmlBuilder {
 	/**
 	 * @param array $attrs
 	 */
-	public function headStart(array $attrs = null) {
+	public function headStart(?array $attrs = null) {
 		$this->view->out('<head' . HtmlElement::buildAttrsHtml($attrs) . '>' . "\r\n");
 	}
 
@@ -112,7 +112,7 @@ class HtmlBuilder {
 	/**
 	 * @param array $attrs
 	 */
-	public function bodyStart(array $attrs = null) {
+	public function bodyStart(?array $attrs = null) {
 		$this->view->out('<body' . HtmlElement::buildAttrsHtml($attrs) . '>' . "\r\n");
 		$this->bodyStartContents();
 	}
@@ -185,7 +185,7 @@ class HtmlBuilder {
 	 * @param array $attrs
 	 * @param string $strict
 	 */
-	public function escP($contents, array $attrs = null, bool $strict = false) {
+	public function escP($contents, ?array $attrs = null, bool $strict = false) {
 		$this->view->out($this->getEscP($contents, $attrs, $strict));
 	}
 	/**
@@ -193,7 +193,7 @@ class HtmlBuilder {
 	 * @param string $strict
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function getEscP($contents, array $attrs = null, bool $strict = false): UiComponent {
+	public function getEscP($contents, ?array $attrs = null, bool $strict = false): UiComponent {
 	    $attrsHtml = HtmlElement::buildAttrsHtml($attrs);
 		$html = HtmlUtils::escape($contents, function ($html) use ($strict, $attrsHtml) {
 			$html = str_replace("\n\n", '</p><p' . $attrsHtml . '>', str_replace("\r", '', $html));
@@ -230,8 +230,8 @@ class HtmlBuilder {
 	 * @param mixed $label
 	 * @param array $attrs
 	 */
-	public function link($murl, $label = null, array $attrs = null, string $alternateTagName = null, 
-			array $alternateAttrs = null, bool $required = false) {
+	public function link($murl, $label = null, ?array $attrs = null, ?string $alternateTagName = null,
+			?array $alternateAttrs = null, bool $required = false) {
 		$this->view->out($this->getLink($murl, $label, $attrs, $alternateTagName, $alternateAttrs, $required));
 	}
 	
@@ -242,8 +242,8 @@ class HtmlBuilder {
 	 * @throws \n2n\util\uri\UnavailableUrlException
 	 * @return \n2n\impl\web\ui\view\html\Link
 	 */
-	public function getLink($murl, $label = null, array $attrs = null, string $alternateTagName = null, 
-			array $alternateAttrs = null, bool $required = false) {
+	public function getLink($murl, $label = null, ?array $attrs = null, ?string $alternateTagName = null,
+			?array $alternateAttrs = null, bool $required = false) {
 		if ($label === null) {
 			$suggestedLabel = null;
 			$murl = $this->view->buildUrlStr($murl, $required, $suggestedLabel);
@@ -266,8 +266,8 @@ class HtmlBuilder {
 		}
 	}
 	
-	public function linkStart($murl, array $attrs = null, string $alternateTagName = null, 
-			array $alternateAttrs = null, bool $required = false) {
+	public function linkStart($murl, ?array $attrs = null, ?string $alternateTagName = null,
+			?array $alternateAttrs = null, bool $required = false) {
 		$this->view->out($this->getLinkStart($murl, $attrs, $alternateTagName, $alternateAttrs, $required));
 	}
 	
@@ -282,8 +282,8 @@ class HtmlBuilder {
 		return $attrs;
 	}
 	
-	public function getLinkStart($murl, array $attrs = null, string $alternateTagName = null, 
-			array $alternateAttrs = null, bool $required = false) {
+	public function getLinkStart($murl, ?array $attrs = null, ?string $alternateTagName = null,
+			?array $alternateAttrs = null, bool $required = false) {
 		if ($this->linkStartedData !== null) {
 			throw new UiException('Link already started.');
 		}
@@ -355,7 +355,7 @@ class HtmlBuilder {
 	 * @param string $ssl
 	 * @param string $subsystem
 	 */
-	public function linkToContext($pathExt, $label, array $attrs = null, $query = null, 
+	public function linkToContext($pathExt, $label, ?array $attrs = null, $query = null,
 			$fragment = null, $ssl = null, $subsystem = null) {
 		$this->view->out($this->getLinkToContext($pathExt, $label, $attrs, $query, $fragment, $ssl, $subsystem));
 	}
@@ -370,40 +370,40 @@ class HtmlBuilder {
 	 * @param string $subsystem
 	 * @return \n2n\impl\web\ui\view\html\Link
 	 */
-	public function getLinkToContext($pathExt, $label, array $attrs = null, $query = null, 
+	public function getLinkToContext($pathExt, $label, ?array $attrs = null, $query = null,
 			$fragment = null, $ssl = null, $subsystem = null) {
 		return new Link($this->meta->getContextUrl($pathExt, $query, $fragment, $ssl, $subsystem), 
 				$label, $attrs);
 	}
 
-	public function linkToController($pathExt, $label, array $attrs = null, $query = null, 
+	public function linkToController($pathExt, $label, ?array $attrs = null, $query = null,
 			$fragment = null, $contextKey = null, $ssl = null, $subsystem = null) {
 		$this->view->out($this->getLinkToController($pathExt, $label, $attrs, $query, $fragment, 
 				$contextKey, $ssl, $subsystem));
 	}
 	
-	public function getLinkToController($pathExt, $label, array $attrs = null, $query = null, $fragment = null, 
+	public function getLinkToController($pathExt, $label, ?array $attrs = null, $query = null, $fragment = null,
 			$contextKey = null, $ssl = null, $subsystem = null) {
 		return new Link($this->meta->getControllerUrl($pathExt, $query, $fragment, $contextKey, $ssl, $subsystem), 
 				$label, $attrs);
 	}
 
-	public function linkToPath($pathExt, $label, array $attrs = null, $query = null, $fragment = null, 
+	public function linkToPath($pathExt, $label, ?array $attrs = null, $query = null, $fragment = null,
 			$ssl = null, $subsystem = null) {
 		$this->view->out($this->getLinkToPath($pathExt, $label, $attrs, $query, $fragment, $ssl, $subsystem));
 	}
 
-	public function getLinkToPath($pathExt = null, $label = null, array $attrs = null, $query = null, 
+	public function getLinkToPath($pathExt = null, $label = null, ?array $attrs = null, $query = null,
 			$fragment = null, $ssl = null, $subsystem = null) {
 		return new Link($this->meta->getPath($pathExt, $query, $fragment, $ssl, $subsystem), $label, $attrs);
 	}
 
-	public function linkToUrl($pathExt, $label, array $attrs = null, $query = null, $fragment = null, 
+	public function linkToUrl($pathExt, $label, ?array $attrs = null, $query = null, $fragment = null,
 			$ssl = null, $subsystem = null) {
 		$this->view->out($this->getLinkToUrl($pathExt, $label, $attrs, $query, $fragment, $ssl, $subsystem));
 	}
 
-	public function getLinkToUrl($pathExt = null, $label = null, array $attrs = null, $query = null, 
+	public function getLinkToUrl($pathExt = null, $label = null, ?array $attrs = null, $query = null,
 			$fragment = null, $ssl = null, $subsystem = null) {
 		return new Link($this->meta->getUrl($pathExt, $query, $fragment, $ssl, $subsystem), $label, $attrs);
 	}
@@ -414,7 +414,7 @@ class HtmlBuilder {
 	 * @param string|UiComponent $label
 	 * @param array $attrs
 	 */
-	public function linkEmail(string $email, $label = null, array $attrs = null) {
+	public function linkEmail(string $email, $label = null, ?array $attrs = null) {
 		$this->view->out($this->getLinkEmail($email, $label, $attrs));
 	}
 	
@@ -424,7 +424,7 @@ class HtmlBuilder {
 	 * @param array $attrs
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function getLinkEmail(string $email, $label = null, array $attrs = null) {
+	public function getLinkEmail(string $email, $label = null, ?array $attrs = null) {
 		$uriHtml = HtmlUtils::encodedEmailUrl($email);
 		HtmlUtils::validateCustomAttrs((array) $attrs, array('href'));
 		return new HtmlSnippet(
@@ -438,7 +438,7 @@ class HtmlBuilder {
 	 * @param string|UiComponent $label
 	 * @param array $attrs
 	 */
-	public function linkTel(string $tel, $label = null, array $attrs = null) {
+	public function linkTel(string $tel, $label = null, ?array $attrs = null) {
 		$this->view->out($this->getLinkTel($tel, $label, $attrs));
 	}
 	
@@ -448,7 +448,7 @@ class HtmlBuilder {
 	 * @param array $attrs
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function getLinkTel(string $tel, $label = null, array $attrs = null) {
+	public function getLinkTel(string $tel, $label = null, ?array $attrs = null) {
 		HtmlUtils::validateCustomAttrs((array) $attrs, array('href'));
 
 		return new HtmlSnippet(
@@ -471,8 +471,8 @@ class HtmlBuilder {
 	 * @param array $infoAttrs
 	 * @param array $successAttrs
 	 */
-	public function messageList(string $groupName = null, int $severity = null, array $attrs = null, array $errorAttrs = null, 
-			array $warnAttrs = null, array $infoAttrs = null, array $successAttrs = null) {
+	public function messageList(?string $groupName = null, ?int $severity = null, ?array $attrs = null, ?array $errorAttrs = null,
+			?array $warnAttrs = null, ?array $infoAttrs = null, ?array $successAttrs = null) {
 		$this->view->out($this->getMessageList($groupName, $severity, $attrs, $errorAttrs, 
 				$warnAttrs, $infoAttrs, $successAttrs));
 	}
@@ -487,8 +487,8 @@ class HtmlBuilder {
 	 * @param array $successAttrs
 	 * @return \n2n\impl\web\ui\view\html\MessageList
 	 */
-	public function getMessageList(string $groupName = null, int $severity = null, array $attrs = null, array $errorAttrs = null, 
-			array $warnAttrs = null, array $infoAttrs = null, array $successAttrs = null) {
+	public function getMessageList(?string $groupName = null, ?int $severity = null, ?array $attrs = null, ?array $errorAttrs = null,
+			?array $warnAttrs = null, ?array $infoAttrs = null, ?array $successAttrs = null) {
 		
 		return new MessageList($this->view->getDynamicTextCollection(), 
 				$this->meta->getMessages($groupName, $severity), $attrs, 
@@ -506,7 +506,7 @@ class HtmlBuilder {
 	 * @param array $replacements
 	 * @param string|\n2n\core\module\Module $module
 	 */
-	public function text(string $code, array $args = null, int $num = null, array $replacements = null, 
+	public function text(string $code, ?array $args = null, ?int $num = null, ?array $replacements = null,
 			$module = null) {
 		$this->l10nText($code, $args, $num, $replacements, $module);
 	}
@@ -519,7 +519,7 @@ class HtmlBuilder {
 	 * @param string|\n2n\core\module\Module $module
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function getText(string $code, array $args = null, int $num = null, array $replacements = null, 
+	public function getText(string $code, ?array $args = null, ?int $num = null, ?array $replacements = null,
 			$module = null) {
 		return $this->getL10nText($code, $args, $num, $replacements, $module);
 	}
@@ -532,7 +532,7 @@ class HtmlBuilder {
 	 * @param string|\n2n\core\module\Module $module
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function getL10nText(string $key, array $args = null, int $num = null, array $replacements = null, $module = null) {
+	public function getL10nText(string $key, ?array $args = null, ?int $num = null, ?array $replacements = null, $module = null) {
 		$textRaw = $this->getEsc($this->view->getL10nText($key, $args, $num, null, $module));
 		if (empty($replacements)) return $textRaw;
 		
@@ -554,7 +554,7 @@ class HtmlBuilder {
 	 * @param string|\n2n\core\module\Module $module
 	 * @return \n2n\web\ui\Raw
 	 */
-	public function l10nText(string $key, array $args = null, int $num = null, array $replacements = null, $module = null) {
+	public function l10nText(string $key, ?array $args = null, ?int $num = null, ?array $replacements = null, $module = null) {
 		$this->view->out($this->getL10nText($key, $args, $num, $replacements, $module));
 	}
 	
@@ -582,35 +582,35 @@ class HtmlBuilder {
 		$this->view->out($this->getL10nCurrency($value, $currency));
 	}
 	
-	public function getL10nDate($value, $dateStyle = null, \DateTimeZone $timeZone = null) {
+	public function getL10nDate($value, $dateStyle = null, ?\DateTimeZone $timeZone = null) {
 		return $this->getEsc($this->view->getL10nDate($value, $dateStyle, $timeZone));
 	}
 	
-	public function l10nDate($value, $dateStyle = null, \DateTimeZone $timeZone = null) {
+	public function l10nDate($value, $dateStyle = null, ?\DateTimeZone $timeZone = null) {
 		return $this->view->out($this->getL10nDate($value, $dateStyle, $timeZone));
 	}
 	
-	public function getL10nTime($value, $timeStyle = null, \DateTimeZone $timeZone = null) {
+	public function getL10nTime($value, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
 		return $this->getEsc($this->view->getL10nTime($value, $timeStyle, $timeZone));
 	}
 	
-	public function l10nTime($value, $timeStyle = null, \DateTimeZone $timeZone = null) {
+	public function l10nTime($value, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
 		return $this->view->out($this->getL10nTime($value, $timeStyle, $timeZone));
 	}
 	
-	public function getL10nDateTime($value, $dateStyle = null, $timeStyle = null, \DateTimeZone $timeZone = null) {
+	public function getL10nDateTime($value, $dateStyle = null, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
 		return $this->getEsc($this->view->getL10nDateTime($value, $dateStyle, $timeStyle, $timeZone));
 	}
 	
-	public function l10nDateTime(\DateTime $value = null, $dateStyle = null, $timeStyle = null, \DateTimeZone $timeZone = null) {
+	public function l10nDateTime(?\DateTime $value = null, $dateStyle = null, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
 		$this->view->out($this->getL10nDateTime($value, $dateStyle, $timeStyle, $timeZone));
 	}
 	
-	public function getL10nDateTimeFormat(\DateTime $dateTime = null, $icuPattern, \DateTimeZone $timeZone = null) {
+	public function getL10nDateTimeFormat(?\DateTime $dateTime = null, $icuPattern, ?\DateTimeZone $timeZone = null) {
 		return $this->getEsc($this->view->getL10nDateTimeFormat($dateTime, $icuPattern, $timeZone));
 	}
 	
-	public function l10nDateTimeFormat(\DateTime $dateTime = null, $icuPattern, \DateTimeZone $timeZone = null) {
+	public function l10nDateTimeFormat(?\DateTime $dateTime = null, $icuPattern, ?\DateTimeZone $timeZone = null) {
 		$this->view->out($this->getL10nDateTimeFormat($dateTime, $icuPattern, $timeZone));
 	}
 	
@@ -618,14 +618,14 @@ class HtmlBuilder {
 	 * IMAGE UTILS
 	 */
 	
-	public function image(File $file = null, $imgComposer = null, array $attrs = null, 
+	public function image(?File $file = null, $imgComposer = null, ?array $attrs = null,
 			bool $attrWidth = true, bool $attrHeight = true) {
 		$this->view->out($this->getImage($file, $imgComposer, $attrs, $attrWidth, $attrHeight));
 	}
 	
 	
 	
-	public function getImage(File $file = null, $imgComposer = null, array $attrs = null, 
+	public function getImage(?File $file = null, $imgComposer = null, ?array $attrs = null,
 			bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		ArgUtils::valType($imgComposer, array(ImgComposer::class, ThumbStrategy::class), true);
 		
@@ -647,7 +647,7 @@ class HtmlBuilder {
 		return $this->getImg($file, $imgComposer, $attrs, $addWidthAttr, $addHeightAttr);
 	}
 	
-	public function getImg(File $file = null, $imgComposer = null, array $attrs = null, 
+	public function getImg(?File $file = null, $imgComposer = null, ?array $attrs = null,
 			bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		ArgUtils::valType($imgComposer, array(ImgComposer::class, ThumbStrategy::class), true);
 		
@@ -664,7 +664,7 @@ class HtmlBuilder {
 		return UiComponentFactory::createImgFromThSt($file, $imgComposer, $attrs, $addWidthAttr, $addHeightAttr);
 	}
 	
-	public function getPicture(File $file = null, ImgComposer $imgComposer = null, array $attrs = null) {
+	public function getPicture(?File $file = null, ?ImgComposer $imgComposer = null, ?array $attrs = null) {
 		if ($imgComposer === null) {
 			return UiComponentFactory::createPicture($imgComposer, $attrs);
 		}
@@ -674,11 +674,11 @@ class HtmlBuilder {
 	}
 	
 	
-	public function imageAsset($pathExt, $alt, array $attrs = null, string $moduleNamespace = null) {
+	public function imageAsset($pathExt, $alt, ?array $attrs = null, ?string $moduleNamespace = null) {
 		$this->view->out($this->getImageAsset($pathExt, $alt, $attrs, $moduleNamespace));
 	}
 	
-	public function getImageAsset($pathExt, $alt, array $attrs = null, string $moduleNamespace = null) {
+	public function getImageAsset($pathExt, $alt, ?array $attrs = null, ?string $moduleNamespace = null) {
 		if ($moduleNamespace === null) {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
@@ -695,7 +695,7 @@ class HtmlBuilder {
 	 * @param bool $addWidthAttr
 	 * @param bool $addHeightAttr
 	 */
-	public function imageMimgAsset($pathExt, $imgComposer = null, array $attrs = null, string $moduleNamespace = null,
+	public function imageMimgAsset($pathExt, $imgComposer = null, ?array $attrs = null, ?string $moduleNamespace = null,
 			bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		$this->out($this->getImageMimgAsset($pathExt, $imgComposer, $attrs, $moduleNamespace, $addWidthAttr, $addHeightAttr));
 	}
@@ -709,7 +709,7 @@ class HtmlBuilder {
 	 * @param bool $addHeightAttr
 	 * @return \n2n\impl\web\ui\view\html\HtmlElement
 	 */
-	public function getImageMimgAsset($pathExt, $imgComposer = null, array $attrs = null, string $moduleNamespace = null,
+	public function getImageMimgAsset($pathExt, $imgComposer = null, ?array $attrs = null, ?string $moduleNamespace = null,
 			bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		$assetFileManager = $this->view->lookup(AssetFileManager::class);
 		CastUtils::assertTrue($assetFileManager instanceof AssetFileManager);

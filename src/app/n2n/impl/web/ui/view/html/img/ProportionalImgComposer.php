@@ -44,7 +44,7 @@ class ProportionalImgComposer implements ImgComposer {
 	 * @param string $autoCropMode
 	 * @param bool $scaleUpAllowed
 	 */
-	public function __construct(int $width, int $height, string $autoCropMode = null, bool $scaleUpAllowed = true) {
+	public function __construct(int $width, int $height, ?string $autoCropMode = null, bool $scaleUpAllowed = true) {
 		$this->maxWidth = $this->minWidth = $this->width = $width;
 		$this->height = $height;
 		$this->autoCropMode = $autoCropMode;
@@ -127,7 +127,7 @@ class ProportionalImgComposer implements ImgComposer {
 	 * {@inheritDoc}
 	 * @see \n2n\impl\web\ui\view\html\img\ImgComposer::createImgSet()
 	 */
-	public function createImgSet(File $file = null, N2nContext $n2nContext): ImgSet {
+	public function createImgSet(?File $file = null, N2nContext $n2nContext): ImgSet {
 		if ($file === null || !$file->isValid()) {
 			return $this->createPlaceholderImgSet();
 		}
@@ -239,7 +239,7 @@ class ProportionalImgComposer implements ImgComposer {
 	 * @param ImageFile $orgImageFile
 	 * @return NULL|\n2n\io\managed\img\ImageFile
 	 */
-	private function buildVariation(ImageFile $imageFile, int $width, ImageFile $orgImageFile = null) {
+	private function buildVariation(ImageFile $imageFile, int $width, ?ImageFile $orgImageFile = null) {
 		$strategy = $this->createStrategy($width);
 		if ($strategy->matches($imageFile->getImageSource())) {
 			return null;

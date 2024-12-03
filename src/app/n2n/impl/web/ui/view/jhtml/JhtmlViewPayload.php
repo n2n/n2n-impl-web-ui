@@ -72,7 +72,7 @@ class JhtmlViewPayload extends BufferedPayload {
 		return 'Jhtml view payload';
 	}
 	
-// 	public static function creataFromHtmlView(HtmlView $view, array $additionalData = null) {
+// 	public static function creataFromHtmlView(HtmlView $view, ?array $additionalData = null) {
 // 		if (null !== $additionalData) {
 // 			$data = $additionalData;
 // 		}

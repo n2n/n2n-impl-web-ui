@@ -298,7 +298,7 @@ class HtmlProperties {
 		return $this->form;
 	}
 	
-	public function setForm(Form $form = null) {
+	public function setForm(?Form $form = null) {
 		$this->form = $form;
 	}
 	

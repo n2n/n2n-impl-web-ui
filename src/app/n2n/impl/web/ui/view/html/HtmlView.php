@@ -93,7 +93,7 @@ class HtmlView extends View {
 	}
 
 // 	protected function createImportView(string $viewNameExpression, $params = null,
-// 			ViewCacheControl $viewCacheControl = null, Module $module = null) {
+// 			ViewCacheControl $viewCacheControl = null, ?Module $module = null) {
 // 		$view = parent::createImportView($viewNameExpression, $params, $viewCacheControl, $module);
 // 		if ($view instanceof HtmlView) {
 // 			$view->setHtmlProperties($this->htmlProperties);
@@ -101,8 +101,8 @@ class HtmlView extends View {
 // 		return $view;
 // 	}
 
-	public function getImport($viewNameExpression, array $params = null,
-			ViewCacheControl $viewCacheControl = null, Module $module = null) {
+	public function getImport($viewNameExpression, ?array $params = null,
+			?ViewCacheControl $viewCacheControl = null, ?Module $module = null) {
 		$view = parent::getImport($viewNameExpression, $params, $viewCacheControl, $module);
 
 		if (!($view instanceof HtmlView) || $view->imported) {

@@ -51,7 +51,7 @@ class HtmlUtils {
 	 * @throws AttributeNameIsReservedException
 	 * @return array
 	 */
-	public static function mergeAttrs(array $attrs, array $customAttrs = null, bool $overwrite = false) {
+	public static function mergeAttrs(array $attrs, ?array $customAttrs = null, bool $overwrite = false) {
 		if ($customAttrs === null) return $attrs;
 		
 		foreach ($customAttrs as $name => $value) {
@@ -103,7 +103,7 @@ class HtmlUtils {
 	 * @throws \InvalidArgumentException
 	 * @return string
 	 */
-	public static function escape($contents, \Closure $pcf = null) {
+	public static function escape($contents, ?\Closure $pcf = null) {
 		$html = null;
 		if ($contents instanceof UiComponent) {
 			$html = self::hsc($contents->build(new SimpleBuildContext()));

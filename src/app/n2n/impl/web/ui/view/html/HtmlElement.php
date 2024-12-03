@@ -31,7 +31,7 @@ class HtmlElement implements UiComponent {
 	private $attrs; 
 	private $contents = array();
 	
-	public function __construct(string $tagName, array $attrs = null, $content = null) {
+	public function __construct(string $tagName, ?array $attrs = null, $content = null) {
 		$this->tagName = $tagName;
 		$this->attrs = (array) $attrs;
 		
@@ -128,7 +128,7 @@ class HtmlElement implements UiComponent {
 		return $this->build(new SimpleBuildContext());
 	}
 	
-	public static function buildAttrsHtml(array $attrs = null) {
+	public static function buildAttrsHtml(?array $attrs = null) {
 		$html = '';
 		foreach ((array) $attrs as $name => $value) {
 			if ($value === null) continue;

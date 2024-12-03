@@ -31,8 +31,8 @@ class MessageList implements UiComponent {
 	private $messages = array();
 	private $html = '';
 	
-	public function __construct(DynamicTextCollection $dtc, array $messages, array $attrs = null, array $errorAttrs = null, 
-			array $warnAttrs = null, array $infoAttrs = null) {
+	public function __construct(DynamicTextCollection $dtc, array $messages, ?array $attrs = null, ?array $errorAttrs = null,
+			?array $warnAttrs = null, ?array $infoAttrs = null) {
 		$this->messages = $messages;
 		if (empty($messages)) return;
 	

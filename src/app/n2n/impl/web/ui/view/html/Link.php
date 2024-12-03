@@ -22,7 +22,7 @@
 namespace n2n\impl\web\ui\view\html;
 
 class Link extends HtmlElement {
-	public function __construct($href, $label, array $attrs = null) {
+	public function __construct($href, $label, ?array $attrs = null) {
 		if ($label === null) $label = '';
 		parent::__construct('a', HtmlUtils::mergeAttrs(array('href' => $href), (array) $attrs), $label);
 	}

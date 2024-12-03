@@ -26,7 +26,7 @@ use n2n\core\N2N;
 use n2n\impl\web\dispatch\ui\Form;
 
 class HiddenCommand extends HtmlElement {
-	public function __construct(Form $form, $dispatchMethod, array $attrs = null) {
+	public function __construct(Form $form, $dispatchMethod, ?array $attrs = null) {
 		$elemAttrs = array('type' => 'hidden', 'value' => 1);
 				
 		if (isset($dispatchMethod)) {

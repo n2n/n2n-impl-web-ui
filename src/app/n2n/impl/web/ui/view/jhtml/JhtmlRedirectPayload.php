@@ -34,7 +34,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	private $payload = null;
 	
 	
-	public function __construct(string $directive, string $httpLocation, JhtmlExec $jhtmlExec = null,
+	public function __construct(string $directive, string $httpLocation, ?JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array())  {
 		$this->directive = $directive;
 		$this->httpLocation = $httpLocation;
@@ -80,7 +80,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	 * @param array $additionalAttrs
 	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
 	 */
-	public static function back(string $httpLocation, JhtmlExec $jhtmlExec = null,
+	public static function back(string $httpLocation, ?JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array()) {
 		return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT_BACK, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
@@ -91,7 +91,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	 * @param array $additionalAttrs
 	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
 	 */
-	public static function referer(string $httpLocation, JhtmlExec $jhtmlExec = null,
+	public static function referer(string $httpLocation, ?JhtmlExec $jhtmlExec = null,
 	    	array $additionalAttrs = array()) {
 	    return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT_TO_REFERER, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
@@ -102,7 +102,7 @@ class JhtmlRedirectPayload extends BufferedPayload {
 	 * @param array $additionalAttrs
 	 * @return \n2n\impl\web\ui\view\jhtml\JhtmlRedirectPayload
 	 */
-	public static function redirect(string $httpLocation, JhtmlExec $jhtmlExec = null,
+	public static function redirect(string $httpLocation, ?JhtmlExec $jhtmlExec = null,
 			array $additionalAttrs = array()) {
 		return new JhtmlRedirectPayload(JhtmlJsonPayload::DIRECTIVE_REDIRECT, $httpLocation, $jhtmlExec, $additionalAttrs);
 	}
