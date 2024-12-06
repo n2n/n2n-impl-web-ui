@@ -606,11 +606,11 @@ class HtmlBuilder {
 		$this->view->out($this->getL10nDateTime($value, $dateStyle, $timeStyle, $timeZone));
 	}
 	
-	public function getL10nDateTimeFormat(?\DateTime $dateTime = null, $icuPattern, ?\DateTimeZone $timeZone = null) {
+	public function getL10nDateTimeFormat(?\DateTime $dateTime, string $icuPattern, ?\DateTimeZone $timeZone = null) {
 		return $this->getEsc($this->view->getL10nDateTimeFormat($dateTime, $icuPattern, $timeZone));
 	}
 	
-	public function l10nDateTimeFormat(?\DateTime $dateTime = null, $icuPattern, ?\DateTimeZone $timeZone = null) {
+	public function l10nDateTimeFormat(?\DateTime $dateTime, string $icuPattern, ?\DateTimeZone $timeZone = null) {
 		$this->view->out($this->getL10nDateTimeFormat($dateTime, $icuPattern, $timeZone));
 	}
 	
