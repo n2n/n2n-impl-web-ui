@@ -29,5 +29,5 @@ interface ImgComposer {
 	/**
 	 * @return ImgSet
 	 */
-	public function createImgSet(?File $file = null, N2nContext $n2nContext): ImgSet;
+	public function createImgSet(?File $file, N2nContext $n2nContext): ImgSet;
 }
