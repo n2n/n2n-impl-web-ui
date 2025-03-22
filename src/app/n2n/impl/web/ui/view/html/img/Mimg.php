@@ -32,7 +32,7 @@ class Mimg {
 	 * @param bool $scaleUpAllowed
 	 * @return ProportionalImgComposer
 	 */
-	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImgComposer {
+	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ?ImageMimeType $mimeType = null): ImgComposer {
 		return new ProportionalImgComposer($width, $height, null, $scaleUpAllowed, $mimeType);
 	}
 	
@@ -42,7 +42,7 @@ class Mimg {
 	 * @param bool $scaleUpAllowed
 	 * @return ProportionalImgComposer
 	 */
-	public static function crop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImgComposer {
+	public static function crop(int $width, int $height, bool $scaleUpAllowed = true, ?ImageMimeType $mimeType = null): ImgComposer {
 		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_CENTER,
 				$scaleUpAllowed, $mimeType);
 	}
