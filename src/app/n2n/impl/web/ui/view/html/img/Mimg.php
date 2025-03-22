@@ -30,9 +30,9 @@ class Mimg {
 	 * @param int $width
 	 * @param int $height
 	 * @param bool $scaleUpAllowed
-	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
+	 * @return ProportionalImgComposer
 	 */
-	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImageResource {
+	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImgComposer {
 		return new ProportionalImgComposer($width, $height, null, $scaleUpAllowed, $mimeType);
 	}
 	
@@ -40,9 +40,9 @@ class Mimg {
 	 * @param int $width
 	 * @param int $height
 	 * @param bool $scaleUpAllowed
-	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
+	 * @return ProportionalImgComposer
 	 */
-	public static function crop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImageResource {
+	public static function crop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImgComposer {
 		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_CENTER,
 				$scaleUpAllowed, $mimeType);
 	}
@@ -51,7 +51,7 @@ class Mimg {
 	 * @param int $width
 	 * @param int $height
 	 * @param bool $scaleUpAllowed
-	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
+	 * @return ProportionalImgComposer
 	 */
 	public static function cropTop(int $width, int $height, bool $scaleUpAllowed = true) {
 		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_TOP, $scaleUpAllowed);
