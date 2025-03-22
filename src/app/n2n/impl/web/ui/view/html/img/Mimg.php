@@ -22,6 +22,7 @@
 namespace n2n\impl\web\ui\view\html\img;
 
 use n2n\io\img\ImageResource;
+use n2n\io\managed\img\ImageMimeType;
 
 class Mimg {
 	
@@ -31,8 +32,8 @@ class Mimg {
 	 * @param bool $scaleUpAllowed
 	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
 	 */
-	public static function prop(int $width, int $height, bool $scaleUpAllowed = true) {
-		return new ProportionalImgComposer($width, $height, null, $scaleUpAllowed);	
+	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImageResource {
+		return new ProportionalImgComposer($width, $height, null, $scaleUpAllowed, $mimeType);
 	}
 	
 	/**
@@ -41,8 +42,9 @@ class Mimg {
 	 * @param bool $scaleUpAllowed
 	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
 	 */
-	public static function crop(int $width, int $height, bool $scaleUpAllowed = true) {
-		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_CENTER, $scaleUpAllowed);
+	public static function crop(int $width, int $height, bool $scaleUpAllowed = true, ImageMimeType $mimeType = null): ImageResource {
+		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_CENTER,
+				$scaleUpAllowed, $mimeType);
 	}
 	
 	/**

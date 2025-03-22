@@ -25,6 +25,7 @@ use n2n\io\managed\File;
 use n2n\core\container\N2nContext;
 use n2n\io\managed\img\ImageFile;
 use n2n\io\managed\img\impl\ProportionalThumbStrategy;
+use n2n\io\managed\img\ImageMimeType;
 
 class ProportionalImgComposer implements ImgComposer {
 	protected $width;
@@ -44,7 +45,8 @@ class ProportionalImgComposer implements ImgComposer {
 	 * @param string $autoCropMode
 	 * @param bool $scaleUpAllowed
 	 */
-	public function __construct(int $width, int $height, ?string $autoCropMode = null, bool $scaleUpAllowed = true) {
+	public function __construct(int $width, int $height, ?string $autoCropMode = null, bool $scaleUpAllowed = true,
+			private ?ImageMimeType $imageMimeType = null) {
 		$this->maxWidth = $this->minWidth = $this->width = $width;
 		$this->height = $height;
 		$this->autoCropMode = $autoCropMode;
@@ -221,7 +223,8 @@ class ProportionalImgComposer implements ImgComposer {
 	private function createStrategy($width) {
 		$height = $this->calcHeight($width);
 
-		return new ProportionalThumbStrategy($width, $height, $this->autoCropMode, $this->scaleUpAllowed);
+		return new ProportionalThumbStrategy($width, $height, $this->autoCropMode, $this->scaleUpAllowed, null,
+				$this->imageMimeType);
 	}
 
 	/**
@@ -249,8 +252,6 @@ class ProportionalImgComposer implements ImgComposer {
 		if ($orgImageFile !== null) {
 			$orgImageSource = $orgImageFile->getImageSource();
 		}
-
-		$strategy->getImageDimension();
 		
 		return $imageFile->getOrCreateVariation($strategy, $orgImageSource);
 	}
@@ -268,7 +269,8 @@ class ProportionalImgComposer implements ImgComposer {
 	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
 	 */
 	public function copy() {
-		$pic = new ProportionalImgComposer($this->width, $this->height, $this->autoCropMode, $this->scaleUpAllowed);
+		$pic = new ProportionalImgComposer($this->width, $this->height, $this->autoCropMode, $this->scaleUpAllowed,
+				$this->imageMimeType);
 		$pic->fixedWidths = $this->fixedWidths;
 		$pic->maxWidth = $this->maxWidth;
 		$pic->minWidth = $this->minWidth;
