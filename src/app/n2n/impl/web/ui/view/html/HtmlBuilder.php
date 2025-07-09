@@ -234,16 +234,18 @@ class HtmlBuilder {
 			?array $alternateAttrs = null, bool $required = false) {
 		$this->view->out($this->getLink($murl, $label, $attrs, $alternateTagName, $alternateAttrs, $required));
 	}
-	
+
 	/**
 	 * @param string $murl
 	 * @param mixed $label
-	 * @param array $attrs
-	 * @throws \n2n\util\uri\UnavailableUrlException
-	 * @return \n2n\impl\web\ui\view\html\Link
+	 * @param array|null $attrs
+	 * @param string|null $alternateTagName
+	 * @param array|null $alternateAttrs
+	 * @param bool $required
+	 * @return UiComponent
 	 */
 	public function getLink($murl, $label = null, ?array $attrs = null, ?string $alternateTagName = null,
-			?array $alternateAttrs = null, bool $required = false) {
+			?array $alternateAttrs = null, bool $required = false): UiComponent {
 		if ($label === null) {
 			$suggestedLabel = null;
 			$murl = $this->view->buildUrlStr($murl, $required, $suggestedLabel);
@@ -368,7 +370,7 @@ class HtmlBuilder {
 	 * @param string $fragment
 	 * @param bool $ssl
 	 * @param string $subsystem
-	 * @return \n2n\impl\web\ui\view\html\Link
+	 * @return Link
 	 */
 	public function getLinkToContext($pathExt, $label, ?array $attrs = null, $query = null,
 			$fragment = null, $ssl = null, $subsystem = null) {
@@ -417,12 +419,12 @@ class HtmlBuilder {
 	public function linkEmail(string $email, $label = null, ?array $attrs = null) {
 		$this->view->out($this->getLinkEmail($email, $label, $attrs));
 	}
-	
-	/** 
+
+	/**
 	 * @param string $email
-	 * @param string|UiComponent $label
-	 * @param array $attrs
-	 * @return \n2n\web\ui\Raw
+	 * @param null $label
+	 * @param array|null $attrs
+	 * @return UiComponent
 	 */
 	public function getLinkEmail(string $email, $label = null, ?array $attrs = null) {
 		$uriHtml = HtmlUtils::encodedEmailUrl($email);
@@ -587,7 +589,7 @@ class HtmlBuilder {
 	}
 	
 	public function l10nDate($value, $dateStyle = null, ?\DateTimeZone $timeZone = null) {
-		return $this->view->out($this->getL10nDate($value, $dateStyle, $timeZone));
+		$this->view->out($this->getL10nDate($value, $dateStyle, $timeZone));
 	}
 	
 	public function getL10nTime($value, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
@@ -595,7 +597,7 @@ class HtmlBuilder {
 	}
 	
 	public function l10nTime($value, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
-		return $this->view->out($this->getL10nTime($value, $timeStyle, $timeZone));
+		$this->view->out($this->getL10nTime($value, $timeStyle, $timeZone));
 	}
 	
 	public function getL10nDateTime($value, $dateStyle = null, $timeStyle = null, ?\DateTimeZone $timeZone = null) {
@@ -635,12 +637,7 @@ class HtmlBuilder {
 			if (!$imgSet->isPictureRequired()) {
 				return UiComponentFactory::createImg($imgSet, $attrs, $addWidthAttr, $addHeightAttr);
 			} else {
-
 				$imgAttrs = [];
-
-				$imgAttrs['src'] = $imgSet->getDefaultSrcAttr();
-				$imgAttrs['width'] = $imgSet->getDefaultWidthAttr();
-				$imgAttrs['height'] = $imgSet->getDefaultHeightAttr();
 
 				if (isset($attrs['alt'])) {
 					$imgAttrs['alt'] = $attrs['alt'];
