@@ -78,10 +78,6 @@ class UiComponentFactory {
 					$imageSourceSet->getAttrs())));
 		}
 
-		$imgAttrs['src'] = $imgSet->getDefaultSrcAttr();
-		$imgAttrs['width'] = $imgSet->getDefaultWidthAttr();
-		$imgAttrs['height'] = $imgSet->getDefaultHeightAttr();
-
 		$htmlElement->appendLn(new HtmlElement('img', $imgAttrs));
 
 		return $htmlElement;

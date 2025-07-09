@@ -638,6 +638,10 @@ class HtmlBuilder {
 
 				$imgAttrs = [];
 
+				$imgAttrs['src'] = $imgSet->getDefaultSrcAttr();
+				$imgAttrs['width'] = $imgSet->getDefaultWidthAttr();
+				$imgAttrs['height'] = $imgSet->getDefaultHeightAttr();
+
 				if (isset($attrs['alt'])) {
 					$imgAttrs['alt'] = $attrs['alt'];
 					unset($attrs['alt']);
