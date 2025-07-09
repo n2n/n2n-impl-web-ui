@@ -62,27 +62,28 @@ class UiComponentFactory {
 		
 		return new HtmlElement('img', $attrs);
 	}
-	
-	
-	public static function createPicture(ImgSet $imgSet, ?array $attrs = null, $defaultAlt = null) {
+
+
+	public static function createPicture(ImgSet $imgSet, ?array $attrs = null, ?array $imgAttrs = null) {
 		$htmlElement = new HtmlElement('picture', $attrs);
-		
+
 		foreach ($imgSet->getImageSourceSets() as $imageSourceSet) {
 			$htmlElement->appendLn(new HtmlElement('source', HtmlUtils::mergeAttrs(
 					[
-						'media' => $imageSourceSet->getMediaAttr(), 
-						'srcset' => $imageSourceSet->getSrcsetAttr(),
-						'width' => $imageSourceSet->getWidthAttr(),
-						'height' => $imageSourceSet->getHeightAttr()
-					], 
+							'media' => $imageSourceSet->getMediaAttr(),
+							'srcset' => $imageSourceSet->getSrcsetAttr(),
+							'width' => $imageSourceSet->getWidthAttr(),
+							'height' => $imageSourceSet->getHeightAttr()
+					],
 					$imageSourceSet->getAttrs())));
 		}
-		
-		$htmlElement->appendLn(new HtmlElement('img', array('src' => $imgSet->getDefaultSrcAttr(), 
-				'alt' => ($defaultAlt !== null ? $defaultAlt : $imgSet->getDefaultAltAttr()),
-				'width' => $imgSet->getDefaultWidthAttr(),
-				'height' => $imgSet->getDefaultHeightAttr())));
-		
+
+		$imgAttrs['src'] = $imgSet->getDefaultSrcAttr();
+		$imgAttrs['width'] = $imgSet->getDefaultWidthAttr();
+		$imgAttrs['height'] = $imgSet->getDefaultHeightAttr();
+
+		$htmlElement->appendLn(new HtmlElement('img', $imgAttrs));
+
 		return $htmlElement;
 	}
 	

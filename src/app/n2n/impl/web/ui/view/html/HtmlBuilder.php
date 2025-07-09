@@ -622,28 +622,36 @@ class HtmlBuilder {
 			bool $attrWidth = true, bool $attrHeight = true) {
 		$this->view->out($this->getImage($file, $imgComposer, $attrs, $attrWidth, $attrHeight));
 	}
-	
-	
-	
+
+
+
 	public function getImage(?File $file = null, $imgComposer = null, ?array $attrs = null,
 			bool $addWidthAttr = true, bool $addHeightAttr = true) {
 		ArgUtils::valType($imgComposer, array(ImgComposer::class, ThumbStrategy::class), true);
-		
+
 		if ($imgComposer instanceof ImgComposer) {
 			$imgSet = $imgComposer->createImgSet($file, $this->view->getN2nContext());
-			
+
 			if (!$imgSet->isPictureRequired()) {
 				return UiComponentFactory::createImg($imgSet, $attrs, $addWidthAttr, $addHeightAttr);
 			} else {
-				$alt = null;
+
+				$imgAttrs = [];
+
 				if (isset($attrs['alt'])) {
-					$alt = $attrs['alt'];
+					$imgAttrs['alt'] = $attrs['alt'];
 					unset($attrs['alt']);
 				}
-				return UiComponentFactory::createPicture($imgSet, $attrs, $alt);
+
+				if (isset($attrs['loading'])) {
+					$imgAttrs['loading'] = $attrs['loading'];
+					unset($attrs['loading']);
+				}
+
+				return UiComponentFactory::createPicture($imgSet, $attrs, $imgAttrs);
 			}
 		}
-		
+
 		return $this->getImg($file, $imgComposer, $attrs, $addWidthAttr, $addHeightAttr);
 	}
 	
