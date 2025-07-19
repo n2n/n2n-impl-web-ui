@@ -621,14 +621,14 @@ class HtmlBuilder {
 	 */
 
 	public function image(?File $file = null, $imgComposer = null, ?array $attrs = null,
-			bool $attrWidth = true, bool $attrHeight = true, array $imgAttrs = null) {
+			bool $attrWidth = true, bool $attrHeight = true, ?array $imgAttrs = null) {
 		$this->view->out($this->getImage($file, $imgComposer, $attrs, $attrWidth, $attrHeight, $imgAttrs));
 	}
 
 
 
 	public function getImage(?File $file = null, $imgComposer = null, ?array $attrs = null,
-			bool $addWidthAttr = true, bool $addHeightAttr = true, array $imgAttrs = null) {
+			bool $addWidthAttr = true, bool $addHeightAttr = true, ?array $imgAttrs = null) {
 		ArgUtils::valType($imgComposer, array(ImgComposer::class, ThumbStrategy::class), true);
 
 		if ($imgComposer instanceof ImgComposer) {
