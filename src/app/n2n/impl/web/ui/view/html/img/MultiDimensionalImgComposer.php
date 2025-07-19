@@ -14,7 +14,9 @@ class MultiDimensionalImgComposer implements ImgComposer {
 	 * @param ImgComposer[] $imgComposers
 	 */
 	public function __construct(private array $imgComposers) {
+		ArgUtils::assertTrue(!empty($imgComposers), 'Empty ImgComposer array passed.');
 		ArgUtils::valArray($imgComposers, ImgComposer::class);
+
 	}
 
 	/**
