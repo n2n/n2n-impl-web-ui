@@ -273,7 +273,7 @@ class ProportionalImgComposer implements ImgComposer {
 			return null;
 		}
 
-		$mediaMinWith = min(...array_keys($this->sizesBpWidthMap));
+		$mediaMinWith = min(array_keys($this->sizesBpWidthMap));
 		if ($mediaMinWith === 0) {
 			return null;
 		}
