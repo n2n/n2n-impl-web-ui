@@ -36,8 +36,9 @@ class ProportionalImgComposer implements ImgComposer {
 	protected $fixedWidths;
 	protected $maxWidth;
 	protected $minWidth;
-	
-	protected $sizesAttr;
+
+	protected ?string $sizesAttr = null;
+	protected array $sizesBpWidthMap = [];
 
 	/**
 	 * @param int $width
@@ -93,7 +94,7 @@ class ProportionalImgComposer implements ImgComposer {
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -112,7 +113,7 @@ class ProportionalImgComposer implements ImgComposer {
 		krsort($widths, SORT_NUMERIC);
 		return $widths;
 	}
-		
+
 	/**
 	 * @return \n2n\impl\web\ui\view\html\img\ImgSet
 	 */
@@ -120,11 +121,11 @@ class ProportionalImgComposer implements ImgComposer {
 		$widths = $this->getWidths();
 		$largestWidth = reset($widths);
 		$largestHeight = $this->calcHeight($largestWidth);
-		
-		return new ImgSet(UiComponentFactory::createInvalidImgSrc($largestWidth, $largestHeight), 
+
+		return new ImgSet(UiComponentFactory::createInvalidImgSrc($largestWidth, $largestHeight),
 				UiComponentFactory::INVALID_IMG_DEFAULT_ALT, $largestWidth, $largestHeight, array());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see \n2n\impl\web\ui\view\html\img\ImgComposer::createImgSet()
@@ -135,7 +136,7 @@ class ProportionalImgComposer implements ImgComposer {
 		}
 
 		$orgImageFile = new ImageFile($file);
-	
+
 		$thumbFile = null;
 		$imageFiles = array();
 		foreach ($this->getWidths() as $width) {
@@ -143,38 +144,40 @@ class ProportionalImgComposer implements ImgComposer {
 				$imageFiles[$width] = $thumbFile = $this->createThumb($orgImageFile, $width);
 				continue;
 			}
-	
+
 			if (null !== ($imageFile = $this->buildVariation($thumbFile, $width, $orgImageFile))) {
 				$imageFiles[$width] = $imageFile;
 			}
 		}
-	
+
 // 		$lastSize = null;
 // 		$lastWidth = null;
 // 		foreach ($imageFiles as $width => $imageFile) {
 // 			if ($width > $this->maxWidth || $width < $this->minWidth) continue;
-	
+
 // 			// 			$size = $imageFile->getFile()->getFileSource()->getSize();
 // 			// 			if (!$this->isSizeGabTooLarge($lastWidth, $lastWidth = $size)) continue;
-	
+
 // 			// 			if ($lastSize > $size) {
-	
+
 // 			// 			}
 // 		}
-	
+
 		$imgSrcs = array();
 		foreach ($imageFiles as $width => $imageFile) {
 			$imgSrcs[$width . 'w'] = UiComponentFactory::createImgSrc($imageFile);
 		}
-		
+
 		$defaultImageFile = reset($imageFiles);
-		
+
 		$imageSourceSets = array();
-		if (count($imgSrcs) > 1 || $this->sizesAttr !== null) {
-			$imageSourceSets = array(new ImageSourceSet(array_reverse($imgSrcs, true), null, ['sizes' => $this->sizesAttr], 
+		$sizesAttr = $this->getSizesAttr();
+		$mediaAttr = $this->getMediaAttr();
+		if (count($imgSrcs) > 1 || $sizesAttr !== null || $mediaAttr !== null) {
+			$imageSourceSets = array(new ImageSourceSet(array_reverse($imgSrcs, true), $mediaAttr, ['sizes' => $sizesAttr],
 					$defaultImageFile->getWidth(), $defaultImageFile->getHeight()));
 		}
-		
+
 		return new ImgSet(reset($imgSrcs), '', $defaultImageFile->getWidth(),
 				$defaultImageFile->getHeight(), $imageSourceSets);
 	}
@@ -207,7 +210,7 @@ class ProportionalImgComposer implements ImgComposer {
 
 		return null;
 	}
-	
+
 	/**
 	 * @param int $width
 	 * @return number
@@ -247,15 +250,15 @@ class ProportionalImgComposer implements ImgComposer {
 		if ($strategy->matches($imageFile->getImageSource())) {
 			return null;
 		}
-		
+
 		$orgImageSource = null;
 		if ($orgImageFile !== null) {
 			$orgImageSource = $orgImageFile->getImageSource();
 		}
-		
+
 		return $imageFile->getOrCreateVariation($strategy, $orgImageSource);
 	}
-	
+
 	/**
 	 * @param string $sizesAttr
 	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
@@ -264,7 +267,47 @@ class ProportionalImgComposer implements ImgComposer {
 		$this->sizesAttr = $sizesAttr;
 		return $this;
 	}
-	
+
+	private function getMediaAttr(): ?string {
+		if (empty($this->sizesBpWidthMap)) {
+			return null;
+		}
+
+		$mediaMinWith = min(...array_keys($this->sizesBpWidthMap));
+		if ($mediaMinWith === 0) {
+			return null;
+		}
+
+		return '(min-width: ' . $mediaMinWith . 'px)';
+	}
+
+
+	private function getSizesAttr(): ?string {
+		if ($this->sizesAttr === null && empty($this->sizesBpWidthMap)) {
+			return null;
+		}
+
+		$sizesAttr = $this->sizesAttr;
+		foreach ($this->sizesBpWidthMap as $bpWidth => $width) {
+			if ($bpWidth === 0) {
+				$sizesAttr .= ' ' . $width. 'px';
+			} else {
+				$sizesAttr .= ' (min-width: ' . $bpWidth . 'px) ' . $width. 'px';
+			}
+		}
+		return trim($sizesAttr);
+	}
+
+	function mediaBaseSize(int $width): static {
+		$this->mediaBpSize(0, $width);
+		return $this;
+	}
+
+	function mediaBpSize(int $breakpointWidth, int $width): static {
+		$this->sizesBpWidthMap[$breakpointWidth] = $width;
+		return $this;
+	}
+
 	/**
 	 * @return \n2n\impl\web\ui\view\html\img\ProportionalImgComposer
 	 */
@@ -274,8 +317,9 @@ class ProportionalImgComposer implements ImgComposer {
 		$pic->fixedWidths = $this->fixedWidths;
 		$pic->maxWidth = $this->maxWidth;
 		$pic->minWidth = $this->minWidth;
-	
+
 		$pic->sizesAttr = $this->sizesAttr;
+		$pic->sizesBpWidthMap = $this->sizesBpWidthMap;
 		return $pic;
 	}
 }

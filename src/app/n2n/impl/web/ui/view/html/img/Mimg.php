@@ -25,7 +25,7 @@ use n2n\io\img\ImageResource;
 use n2n\io\managed\img\ImageMimeType;
 
 class Mimg {
-	
+
 	/**
 	 * @param int $width
 	 * @param int $height
@@ -35,7 +35,7 @@ class Mimg {
 	public static function prop(int $width, int $height, bool $scaleUpAllowed = true, ?ImageMimeType $mimeType = null): ImgComposer {
 		return new ProportionalImgComposer($width, $height, null, $scaleUpAllowed, $mimeType);
 	}
-	
+
 	/**
 	 * @param int $width
 	 * @param int $height
@@ -46,7 +46,7 @@ class Mimg {
 		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_CENTER,
 				$scaleUpAllowed, $mimeType);
 	}
-	
+
 	/**
 	 * @param int $width
 	 * @param int $height
@@ -56,4 +56,9 @@ class Mimg {
 	public static function cropTop(int $width, int $height, bool $scaleUpAllowed = true) {
 		return new ProportionalImgComposer($width, $height, ImageResource::AUTO_CROP_MODE_TOP, $scaleUpAllowed);
 	}
+
+	static function multi(ImgComposer ...$imgComposers): MultiDimensionalImgComposer {
+		return new MultiDimensionalImgComposer($imgComposers);
+	}
+
 }
