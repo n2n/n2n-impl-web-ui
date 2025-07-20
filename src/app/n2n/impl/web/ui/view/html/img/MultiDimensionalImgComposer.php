@@ -26,7 +26,7 @@ class MultiDimensionalImgComposer implements ImgComposer {
 	public function createImgSet(?File $file, N2nContext $n2nContext): ImgSet {
 		$imgSets = array();
 
-		foreach ($this->imgComposers as $bpWidth => $bpImageComposer) {
+		foreach (array_reverse($this->imgComposers) as $bpImageComposer) {
 			$imgSets[] = $bpImageComposer->createImgSet($file, $n2nContext);
 		}
 
@@ -51,5 +51,5 @@ class MultiDimensionalImgComposer implements ImgComposer {
 			$imgSet->setDefaultHeightAttr($imgSet2->getDefaultHeightAttr());
 		}
 	}
-	
+
 }
