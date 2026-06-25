@@ -21,7 +21,6 @@
  */
 namespace n2n\impl\web\ui\view\html;
 
-use n2n\util\type\attrs\Attributes;
 use n2n\web\ui\UiComponent;
 use n2n\util\io\ob\OutputBuffer;
 use n2n\web\ui\ViewStuffFailedException;
@@ -29,7 +28,7 @@ use n2n\impl\web\dispatch\ui\Form;
 use n2n\web\ui\BuildContext;
 use n2n\web\ui\SimpleBuildContext;
 use n2n\web\http\ServerPushDirective;
-use n2n\util\type\attrs\DataSet;
+use n2n\util\attr\DataSet;
 use n2n\web\http\csp\PolicyDirective;
 use n2n\web\http\csp\PolicySource;
 use n2n\web\http\csp\ContentSecurityPolicy;
@@ -154,10 +153,7 @@ class HtmlProperties {
 		return ($this->prependedAttributes->hasKey($name, $key) || $this->dataSet->hasKey($name, $key))
 				|| ($this->contentHtmlProperties !== null && $this->contentHtmlProperties->hasKey($name, $key));
 	}
-	
-	/**
-	 * @return \n2n\util\type\attrs\Attributes[]
-	 */
+
 	public function getAttributesCollection() {
 		$collection = array($this->prependedAttributes, $this->dataSet);
 		if ($this->contentHtmlProperties !== null) {
