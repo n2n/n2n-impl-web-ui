@@ -182,7 +182,7 @@ class HtmlBuilderMeta {
 			$moduleNamespace = $this->view->getModuleNamespace();
 		}
 		
-		$this->addAsyncJsUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl), (boolean) $prepend);
+		$this->addAsyncJsUrl($this->view->getHttpContext()->getAssetsUrl($moduleNamespace)->ext($relativeUrl), (bool) $prepend);
 		
 		return $this;
 	}
